@@ -1,0 +1,6 @@
+{
+  "appTitle": "dart_mesh",
+  "@appTitle": {
+    "description": "The title of the application"
+  }
+}
