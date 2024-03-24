@@ -27,7 +27,7 @@ class PublicNetworkIdentity implements NetworkIdentity {
       return null;
     }
 
-    final data = serviceData[Guid(MeshProxyService.uuid)];
+    final data = serviceData[Guid(MeshProxyService().uuid)];
     if (data == null || data.length != 9 || data[0] != 0x00) {
       return null;
     }

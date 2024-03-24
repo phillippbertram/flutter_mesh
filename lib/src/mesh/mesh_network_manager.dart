@@ -2,6 +2,7 @@ import 'package:async/async.dart';
 import 'package:dart_mesh/src/mesh/mesh.dart';
 
 import 'layers/network_manager.dart';
+import 'provisioning/provisioning_manager.dart';
 
 // STATUS: IN PROGRESS
 
@@ -114,5 +115,33 @@ class MeshNetworkManager with BearerDataDelegate {
     }
 
     // TODO: _networkManager.handle(incomingPdu: data, ofType: type);
+  }
+}
+
+extension MeshNetworkManagerProvisioning on MeshNetworkManager {
+  /// This method returns the ``ProvisioningManager`` that can be used
+  /// to provision the given device.
+  ///
+  /// - parameter unprovisionedDevice: The device to be added to mesh network.
+  /// - parameter bearer: The Provisioning Bearer to be used for sending
+  ///                     provisioning PDUs.
+  /// - returns: The Provisioning manager that should be used to continue
+  ///            provisioning process after identification.
+  /// - throws: This method throws when the mesh network has not been created,
+  ///           or a Node or a Provisioner with the same UUID already exist in the network.
+  Result<ProvisioningManager> provision({
+    required UnprovisionedDevice unprovisionedDevice,
+    required ProvisioningBearer bearer,
+  }) {
+    if (meshNetwork == null) {
+      return Result.error("Mesh network has not been created");
+    }
+
+    final manager = ProvisioningManager.forUnprovisionedDevice(
+      unprovisionedDevice: unprovisionedDevice,
+      bearer: bearer,
+      meshNetwork: meshNetwork!,
+    );
+    return Result.value(manager);
   }
 }

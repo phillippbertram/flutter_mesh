@@ -12,8 +12,8 @@ part 'device_scan_service.freezed.dart';
 class DiscoveredPeripheral with _$DiscoveredPeripheral {
   const factory DiscoveredPeripheral({
     required UnprovisionedDevice device,
+    required ProvisioningBearer bearer,
     required ScanResult scanResult,
-    required String id,
     required int rssi,
   }) = _DiscoveredPeripheral;
 }
@@ -67,7 +67,7 @@ class DeviceProvisioningScanService {
     await FlutterBluePlus.startScan(
       continuousUpdates: true,
       removeIfGone: const Duration(seconds: 5),
-      withServices: [Guid(MeshProvisioningService.uuid)],
+      withServices: [Guid(MeshProvisioningService().uuid)],
       timeout: stopAfter,
     );
 
@@ -109,7 +109,7 @@ class DeviceProvisioningScanService {
           return DiscoveredPeripheral(
             device: device,
             scanResult: result,
-            id: device.uuid.toString(),
+            bearer: PBGattBearer.fromPeripheral(basePeripheral: result.device),
             rssi: result.rssi,
           );
         })

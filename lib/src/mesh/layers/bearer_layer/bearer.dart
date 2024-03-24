@@ -1,6 +1,11 @@
 import 'package:async/async.dart';
 import 'package:dart_mesh/src/mesh/types.dart';
 
+import '../../provisioning/provisioning_pdu.dart';
+
+export './gatt/gatt.dart';
+export 'bearer_delegate.dart';
+
 enum PduType {
   /// The message is a Network PDU.
   ///
@@ -62,7 +67,7 @@ abstract class Transmitter {
   /// - throws: This method throws an error if the PDU type
   ///           is not supported, or data could not be sent for
   ///           some other reason.
-  Result<void> sendData({required Data data, required PduType type});
+  Future<Result<void>> sendData({required Data data, required PduType type});
 }
 
 /// The Bearer object is responsible for sending and receiving the data
@@ -87,4 +92,31 @@ abstract class Bearer extends Transmitter {
 
   /// This method closes the Bearer.
   Future<Result<void>> close();
+}
+
+extension BearerSupportsX on Bearer {
+  /// Returns whether the bearer supports the given PDU type.
+  ///
+  /// - parameter type: The PDU type.
+  /// - returns: `True` if the bearer supports the given PDU type, `false` otherwise.
+  bool supports(PduType type) {
+    // TODO: original code uses "return supportedPduTypes.contains(PduTypes(rawValue: pduType.mask))"
+    return supportedPduTypes.contains(type);
+  }
+}
+
+mixin ProvisioningBearer on Bearer {
+  /// This method sends the given Provisioning Request over the bearer.
+  ///
+  /// Data longer than MTU will automatically be segmented if bearer
+  /// implements segmentation.
+  ///
+  /// - parameter request: The Provisioning request to be sent over
+  ///                      the Bearer.
+  /// - throws: This method throws an error if the PDU type
+  ///           is not supported, or data could not be sent for
+  ///           some other reason.
+  Future<Result<void>> sendProvisioningRequest(ProvisioningRequest request) {
+    return sendData(data: request.pdu.data, type: PduType.provisioningPdu);
+  }
 }

@@ -4,7 +4,7 @@ import 'package:dart_mesh/src/mesh/type_extensions/data_keys.dart';
 import 'package:dart_mesh/src/mesh/types.dart';
 
 // TODO: JSONSerialization + Equatable
-class NetworkKey implements Key {
+class NetworkKey implements MeshKey {
   NetworkKey._({
     required this.name,
     required this.index,

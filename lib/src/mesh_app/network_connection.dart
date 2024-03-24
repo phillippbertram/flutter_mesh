@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:dart_mesh/src/mesh/utils/utils.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:dart_mesh/src/mesh/mesh.dart';
 
@@ -95,7 +94,7 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
     //   we return all the advertisements that match any of the specified services *or* any
     //   of the specified names.
     await FlutterBluePlus.startScan(
-      withServices: [Guid(MeshProxyService.uuid)],
+      withServices: [Guid(MeshProxyService().uuid)],
       timeout: const Duration(seconds: 30),
     );
 
@@ -107,7 +106,8 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
   }
 
   @override
-  Result<void> sendData({required Data data, required PduType type}) {
+  Future<Result<void>> sendData(
+      {required Data data, required PduType type}) async {
     print('Sending ${data.length} of type $type');
     // TODO: implement sendData
     throw UnimplementedError();

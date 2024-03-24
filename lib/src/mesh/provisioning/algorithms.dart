@@ -1,0 +1,29 @@
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Algorithm.swift#L78
+
+class Algorithms {
+  final int rawValue;
+
+  const Algorithms._(this.rawValue);
+
+  // Algorithms
+  static const Algorithms BTM_ECDH_P256_CMAC_AES128_AES_CCM =
+      Algorithms._(1 << 0);
+  static const Algorithms BTM_ECDH_P256_HMAC_SHA256_AES_CCM =
+      Algorithms._(1 << 1);
+
+  // Combination logic using bitwise OR to combine multiple algorithms.
+  Algorithms operator |(Algorithms other) =>
+      Algorithms._(rawValue | other.rawValue);
+
+  // Checking if an algorithm is part of the set using bitwise AND.
+  bool contains(Algorithms other) =>
+      (rawValue & other.rawValue) == other.rawValue;
+
+  // Strongest algorithm logic based on the original Swift code
+  Algorithms get strongest {
+    if (contains(Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM)) {
+      return Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM;
+    }
+    return Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM;
+  }
+}

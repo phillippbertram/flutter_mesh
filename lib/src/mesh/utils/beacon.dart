@@ -33,7 +33,7 @@ extension AdvertisementDataX on AdvertisementData {
       return null;
     }
 
-    final guid = Guid(MeshProvisioningService.uuid);
+    final guid = Guid(MeshProvisioningService().uuid);
     final data = serviceData[guid];
     if (data == null) {
       return null;

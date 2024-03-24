@@ -1,15 +1,17 @@
 import 'package:dart_mesh/src/mesh/types.dart';
 
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Utils/MeshConstants.swift
+
 /// A base protocol for mesh service objects.
 abstract class MeshService {
   /// Service UUID.
-  static UUID get uuid => throw UnimplementedError();
+  UUID get uuid;
 
   /// Data In characteristic UUID.
-  static UUID get dataInUuid => throw UnimplementedError();
+  UUID get dataInUuid;
 
   /// Data Out characteristic UUID.
-  static UUID get dataOutUuid => throw UnimplementedError();
+  UUID get dataOutUuid;
 
   /// Returns whether the mesh service matches given Core Bluetooth service object.
   // TODO: static bool matches(service: CBService) -> Bool
@@ -19,28 +21,41 @@ abstract class MeshService {
 /// provisioned Nodes.
 ///
 /// The Mesh Proxy service is used to send mesh messages over GATT.
-class MeshProxyService extends MeshService {
-  static UUID get uuid => "1828";
-  static UUID get dataInUuid => "2ADD";
-  static UUID get dataOutUuid => "2ADE";
+class MeshProxyService implements MeshService {
+  static final MeshProxyService _instance = MeshProxyService._internal();
 
-  // TODO:
-  // public static func matches(_ service: CBService) -> Bool {
-  //     return service.isMeshProxyService
-  // }
+  factory MeshProxyService() {
+    return _instance;
+  }
 
-  MeshProxyService._();
+  MeshProxyService._internal();
+
+  @override
+  String get uuid => "1828";
+
+  @override
+  String get dataInUuid => "2ADD";
+
+  @override
+  String get dataOutUuid => "2ADE";
 }
 
 class MeshProvisioningService extends MeshService {
-  static UUID get uuid => "1827";
-  static UUID get dataInUuid => "2ADB";
-  static UUID get dataOutUuid => "2ADC";
+  static final MeshProvisioningService _instance =
+      MeshProvisioningService._internal();
 
-  // TODO:
-  // public static func matches(_ service: CBService) -> Bool {
-  //     return service.isMeshProxyService
-  // }
+  factory MeshProvisioningService() {
+    return _instance;
+  }
 
-  MeshProvisioningService._();
+  MeshProvisioningService._internal();
+
+  @override
+  String get uuid => "1827";
+
+  @override
+  String get dataInUuid => "2ADB";
+
+  @override
+  String get dataOutUuid => "2ADC";
 }

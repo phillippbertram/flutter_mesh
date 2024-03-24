@@ -3,8 +3,6 @@
 import 'package:dart_mesh/src/mesh/mesh.dart';
 import 'package:dart_mesh/src/mesh_app/network_connection.dart';
 
-import 'model_delegates/model_delegates.dart';
-
 // @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Example/Source/AppDelegate.swift
 class AppNetworkManager {
   AppNetworkManager._() {

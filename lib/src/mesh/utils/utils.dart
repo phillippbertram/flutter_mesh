@@ -1,5 +1,7 @@
 import 'package:uuid/uuid.dart';
 
+import '../types.dart';
+
 export 'beacon.dart';
 export 'mesh_constants.dart';
 
@@ -8,6 +10,12 @@ extension IntegerHex on int {
   ///
   /// The string is prefixed with `0x`.
   String toHex() => '0x${toRadixString(16).toUpperCase()}';
+}
+
+extension DataHex on Data {
+  String toHex() =>
+      map((byte) => byte.toRadixString(16).toUpperCase().padLeft(2, '0'))
+          .join();
 }
 
 extension StringHex on String {

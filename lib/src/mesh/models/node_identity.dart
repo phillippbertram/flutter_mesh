@@ -38,7 +38,7 @@ class PublicNodeIdentity implements NodeIdentity {
       return null;
     }
 
-    final data = serviceData[Guid(MeshProxyService.uuid)];
+    final data = serviceData[Guid(MeshProxyService().uuid)];
     if (data == null || data.length != 17 || data[0] != 0x01) {
       return null;
     }

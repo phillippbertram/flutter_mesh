@@ -12,7 +12,7 @@ part 'application_key.g.dart'; // For JSON serialization
 // TODO: not complete merged
 
 @freezed
-class ApplicationKey with _$ApplicationKey implements Key {
+class ApplicationKey with _$ApplicationKey implements MeshKey {
   // TODO:  WeakReference<MeshNetwork>? _meshNetwork;
 
   const factory ApplicationKey({

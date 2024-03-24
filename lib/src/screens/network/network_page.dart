@@ -1,4 +1,4 @@
-import 'package:dart_mesh/src/screens/network/provisioning/provisioning_page.dart';
+import 'package:dart_mesh/src/screens/network/provisioning/device_scanner_page.dart';
 import 'package:flutter/material.dart';
 
 class NetworkPage extends StatelessWidget {
@@ -17,7 +17,7 @@ class NetworkPage extends StatelessWidget {
                 MaterialPageRoute(
                   fullscreenDialog: true,
                   builder: (context) {
-                    return const ProvisioningPage();
+                    return const DeviceScannerPage();
                   },
                 ),
               );

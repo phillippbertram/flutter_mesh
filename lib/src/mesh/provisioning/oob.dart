@@ -7,6 +7,33 @@ import 'package:dart_mesh/src/mesh/mesh.dart';
 import 'package:dart_mesh/src/mesh/type_extensions/data.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+// TODO: use sealed class?
+// abstract class OobInformation {
+//   const OobInformation();
+
+//   void handle();
+// }
+
+// class ElectronicURI extends OobInformation {
+//   final String uri;
+//   const ElectronicURI(this.uri);
+
+//   @override
+//   void handle() {
+//     // Handle electronic URI
+//   }
+// }
+
+// class QrCode extends OobInformation {
+//   final String qrData;
+//   const QrCode(this.qrData);
+
+//   @override
+//   void handle() {
+//     // Handle QR code
+//   }
+// }
+
 class OobInformation {
   final Uint16 rawValue;
 
@@ -45,7 +72,7 @@ class OobInformation {
     }
 
     final data =
-        advertisementData.serviceData[Guid(MeshProvisioningService.uuid)];
+        advertisementData.serviceData[Guid(MeshProvisioningService().uuid)];
     if (data == null || !(data.length == 18 || data.length == 22)) {
       return null;
     }
