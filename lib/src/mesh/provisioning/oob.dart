@@ -82,3 +82,103 @@ class OobInformation {
     return OobInformation._(rawValue);
   }
 }
+
+/// The authentication method chosen for provisioning.
+sealed class AuthenticationMethod {}
+
+/// No OOB authentication.
+/// - warning: This method is considered not secure.
+class NoOob extends AuthenticationMethod {}
+
+/// Static OOB authentication.
+///
+/// User will be asked to provide 16 or 32 byte hexadecimal value.
+/// The value can be read from the device, QR code, website, etc.
+/// See ``UnprovisionedDevice/oobInformation`` for location.
+class StaticOob extends AuthenticationMethod {}
+
+/// Output OOB authentication.
+///
+/// The Provisionee will signal a random value using specified method.
+/// The value should be provided during provisioning using
+/// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
+///
+/// - parameters:
+///   - action: The chosen action.
+///   - size: Number of digits or letters that can be output
+///           (e.g., displayed or spoken). Size must be in range 1...8.
+class OutputOob extends AuthenticationMethod {
+  final OutputAction action;
+  final int size;
+
+  OutputOob(this.action, this.size);
+}
+
+/// Input OOB authentication.
+///
+/// User need to input a value displayed on the Provisioner's screen on the
+/// Unprovisioned Device. The value to display to the user will be given using
+/// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
+///
+/// When user completes entering the value ``ProvisioningDelegate/inputComplete()``
+/// will be called.
+///
+/// - parameters:
+///   - action: The chosen input action.
+///   - size: Number of digits or letters that can be entered.
+///           Size must be in range 1...8.
+class InputOob extends AuthenticationMethod {
+  final InputAction action;
+  final int size;
+
+  InputOob(this.action, this.size);
+}
+
+// Dart enum for OutputAction
+enum OutputAction {
+  blink,
+  beep,
+  vibrate,
+  outputNumeric,
+  outputAlphanumeric,
+}
+
+extension OutputActionExtension on OutputAction {
+  int get value {
+    switch (this) {
+      case OutputAction.blink:
+        return 0;
+      case OutputAction.beep:
+        return 1;
+      case OutputAction.vibrate:
+        return 2;
+      case OutputAction.outputNumeric:
+        return 3;
+      case OutputAction.outputAlphanumeric:
+        return 4;
+    }
+  }
+}
+
+// Dart enum for InputAction
+enum InputAction {
+  push,
+  twist,
+  inputNumeric,
+  inputAlphanumeric,
+}
+
+extension InputActionExtension on InputAction {
+  int get value {
+    switch (this) {
+      case InputAction.push:
+        return 0;
+      case InputAction.twist:
+        return 1;
+      case InputAction.inputNumeric:
+        return 2;
+      case InputAction.inputAlphanumeric:
+        return 3;
+    }
+  }
+}

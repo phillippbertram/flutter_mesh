@@ -19,4 +19,9 @@ extension DataAccessX on Data {
       endian ?? Endian.little, // TODO: or Endian.big?
     );
   }
+
+  /// drops the first `n` bytes from the data.
+  Data dropFirst([int n = 1]) {
+    return sublist(n);
+  }
 }

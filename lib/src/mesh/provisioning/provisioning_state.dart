@@ -7,12 +7,15 @@ part 'provisioning_state.freezed.dart';
 
 @freezed
 sealed class ProvisioningState with _$ProvisioningState {
-  const factory ProvisioningState.ready() = _Ready;
+  const factory ProvisioningState.ready() = ProvisioningStateReady;
   const factory ProvisioningState.requestingCapabilities() =
-      _RequestingCapabilities;
+      ProvisioningStateRequestingCapabilities;
   const factory ProvisioningState.capabilitiesReceived(
-      ProvisioningCapabilities capabilities) = _CapabilitiesReceived;
-  const factory ProvisioningState.provisioning() = _Provisioning;
-  const factory ProvisioningState.complete() = _Complete;
-  const factory ProvisioningState.failed(Object? error) = _Failed;
+          ProvisioningCapabilities capabilities) =
+      ProvisioningStateCapabilitiesReceived;
+  const factory ProvisioningState.provisioning() =
+      ProvisioningStateProvisioning;
+  const factory ProvisioningState.complete() = ProvisioningStateComplete;
+  const factory ProvisioningState.failed(Object? error) =
+      ProvisioningStateFailed;
 }

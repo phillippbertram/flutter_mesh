@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:dart_mesh/src/mesh/mesh.dart';
+import 'package:rxdart/rxdart.dart';
 
 // TODO: make this part of the library?
 // TODO: @see SpecificMeshNetworkViaArbitraryProxyNodeStrategy
@@ -45,9 +46,13 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
         PduType.proxyConfiguration,
       ];
 
-  @override
   // TODO: implement isOpen
-  bool get isOpen => throw UnimplementedError();
+  @override
+  bool get isOpen => _isOpenSubject.value;
+
+  @override
+  Stream<bool> get isOpenStream => _isOpenSubject.stream;
+  final _isOpenSubject = BehaviorSubject.seeded(false);
 
   @override
   Future<Result<void>> close() async {

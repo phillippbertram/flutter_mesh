@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:dart_mesh/src/mesh/types.dart';
 import 'package:dart_mesh/src/mesh/utils/utils.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../bearer.dart';
 import 'proxy_protocol_handler.dart';
@@ -39,14 +40,18 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
       "BaseGattBearer: Disconnecting from base peripheral: ${basePeripheral.advName}",
     );
     await basePeripheral.disconnect();
-    _isOpen = false;
+    _isOpenSubject.add(false);
     return Result.value(null);
   }
 
   @override
   // TODO: implement isOpen
-  bool get isOpen => _isOpen;
-  bool _isOpen = false;
+  bool get isOpen => _isOpenSubject.value;
+
+  @override
+  Stream<bool> get isOpenStream => _isOpenSubject.stream;
+
+  final _isOpenSubject = BehaviorSubject.seeded(false);
 
   @override
   Future<Result<void>> open() async {
@@ -70,12 +75,10 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
         default:
           break;
       }
-      _isOpen = state == BluetoothConnectionState.connected;
     });
 
     await basePeripheral.connect();
 
-    _isOpen = true;
     return Result.value(null);
   }
 
@@ -120,7 +123,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
 
   void _handleDidConnectToPeripheral() {
     print("BaseGattBearer: Connected to peripheral: ${basePeripheral.advName}");
-    _isOpen = true;
+    _isOpenSubject.add(true);
     _discoverServices();
   }
 
@@ -128,7 +131,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
     print(
         "BaseGattBearer: Disconnected from peripheral: ${basePeripheral.advName}");
 
-    _isOpen = false;
+    _isOpenSubject.add(false);
     _dataInCharacteristic = null;
     _dataOutCharacteristic = null;
   }

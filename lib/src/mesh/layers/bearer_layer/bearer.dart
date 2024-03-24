@@ -77,6 +77,8 @@ abstract class Bearer extends Transmitter {
   /// Bearer state changes.
   // TODO: var delegate: BearerDelegate? { get set }
 
+  Stream<bool> get isOpenStream;
+
   /// The data delegate will receive callbacks whenever a message is
   /// received from the Bearer.
   // TODO: var dataDelegate: BearerDataDelegate? { get set }

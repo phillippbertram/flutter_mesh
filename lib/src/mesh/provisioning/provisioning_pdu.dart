@@ -66,17 +66,7 @@ class ProvisioningPduType {
   static const failed = 9;
 }
 
-sealed class ProvisioningRequest {
-  const ProvisioningRequest();
-
-  ProvisioningPdu get pdu {
-    if (this is Invite) {
-      return ProvisioningPdu.fromPduType(ProvisioningPduType.invite);
-    }
-
-    throw UnimplementedError();
-  }
-}
+sealed class ProvisioningRequest {}
 
 // public enum ProvisioningRequest {
 //     /// A Provisioner sends a Provisioning Invite PDU to indicate to the intended
@@ -100,14 +90,14 @@ sealed class ProvisioningRequest {
 //     case data(_ encryptedDataWithMic: Data)
 // }
 
-class Invite extends ProvisioningRequest {
-  const Invite({required this.attentionTimer});
+class ProvisioningRequestInvite extends ProvisioningRequest {
+  ProvisioningRequestInvite({required this.attentionTimer});
 
-  final int attentionTimer;
+  final Uint8 attentionTimer;
 }
 
-// class Start extends ProvisioningRequest {
-//   const Start({
+// class ProvisioningRequestStart extends ProvisioningRequest {
+//   const ProvisioningRequestStart({
 //     required this.algorithm,
 //     required this.publicKey,
 //     required this.authenticationMethod,
@@ -119,8 +109,9 @@ class Invite extends ProvisioningRequest {
 // }
 
 extension ProvisioningRequestX on ProvisioningRequest {
-  ProvisioningPdu get pduType {
-    if (this is Invite) {
+  ProvisioningPdu get pdu {
+    // TODO:
+    if (this is ProvisioningRequestInvite) {
       return ProvisioningPdu.fromPduType(ProvisioningPduType.invite);
     }
 

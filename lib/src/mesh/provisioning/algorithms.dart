@@ -1,5 +1,22 @@
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Algorithm.swift#L78
 
+enum Algorithm {
+  // Algorithms
+  BTM_ECDH_P256_CMAC_AES128_AES_CCM,
+  BTM_ECDH_P256_HMAC_SHA256_AES_CCM,
+}
+
+extension AlgorithmValue on Algorithm {
+  int get length {
+    switch (this) {
+      case Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM:
+        return 128;
+      case Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM:
+        return 256;
+    }
+  }
+}
+
 class Algorithms {
   final int rawValue;
 

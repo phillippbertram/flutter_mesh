@@ -1,5 +1,6 @@
 import 'package:dart_mesh/src/mesh/mesh.dart';
 import 'package:dart_mesh/src/screens/network/provisioning/device_scan_service.dart';
+import 'package:dart_mesh/src/screens/network/provisioning/provisioning_page.dart';
 import 'package:flutter/material.dart';
 
 class DeviceScannerPage extends StatefulWidget {
@@ -99,46 +100,18 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
               device: device,
               onTap: () {
                 _deviceScanService.stopScan();
-                _provisionDevice(device);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProvisioningPage(device: device),
+                  ),
+                );
               },
             );
           },
         );
       },
     );
-  }
-
-  Widget _buildProvisioningDialog(DiscoveredPeripheral device) {
-    return AlertDialog(
-      title: const Text('Provision Device'),
-      content: const Text('Provisioning device...'),
-      actions: [
-        ElevatedButton(
-            onPressed: () {
-              open(bearer: device.bearer);
-            },
-            child: const Text('Provision')),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
-        ),
-      ],
-    );
-  }
-
-  void _provisionDevice(DiscoveredPeripheral device) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return _buildProvisioningDialog(device);
-      },
-    );
-  }
-
-  void open({required ProvisioningBearer bearer}) async {
-    await bearer.open();
   }
 }
 
@@ -163,7 +136,10 @@ class DiscoveredDeviceTile extends StatelessWidget {
             title: "Localname",
             value: device.scanResult.advertisementData.advName,
           ),
-          _buildDataRow(title: "UUID", value: device.device.uuid.toString()),
+          _buildDataRow(
+            title: "UUID",
+            value: device.device.uuid.toString(),
+          ),
           _buildDataRow(
             title: 'OOB',
             value: device.device.oobInformation.rawValue.toHex(),
