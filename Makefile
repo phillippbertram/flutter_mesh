@@ -6,7 +6,7 @@ generate:
 
 generate/delete:
 	@echo "Deleting generated files..."
-	dart run build_runner build  --delete-conflicting-outputs
+	dart run build_runner build --delete-conflicting-outputs
 
 generate/watch:
 	@echo "Watching for changes..."
