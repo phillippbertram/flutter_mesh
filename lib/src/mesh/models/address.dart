@@ -10,17 +10,17 @@ part 'address.g.dart';
 class Address with _$Address {
   // Using int to represent UInt16 values from Swift, since Dart does not have an UInt16.
   // Static constants for address ranges.
-  static const int unassignedAddress = 0x0000;
-  static const int minUnicastAddress = 0x0001;
-  static const int maxUnicastAddress = 0x7FFF;
-  static const int minVirtualAddress = 0x8000;
-  static const int maxVirtualAddress = 0xBFFF;
-  static const int minGroupAddress = 0xC000;
-  static const int maxGroupAddress = 0xFEFF;
-  static const int allProxies = 0xFFFC;
-  static const int allFriends = 0xFFFD;
-  static const int allRelays = 0xFFFE;
-  static const int allNodes = 0xFFFF;
+  static const Address unassignedAddress = Address(0x0000);
+  static const Address minUnicastAddress = Address(0x0001);
+  static const Address maxUnicastAddress = Address(0x7FFF);
+  static const Address minVirtualAddress = Address(0x8000);
+  static const Address maxVirtualAddress = Address(0xBFFF);
+  static const Address minGroupAddress = Address(0xC000);
+  static const Address maxGroupAddress = Address(0xFEFF);
+  static const Address allProxies = Address(0xFFFC);
+  static const Address allFriends = Address(0xFFFD);
+  static const Address allRelays = Address(0xFFFE);
+  static const Address allNodes = Address(0xFFFF);
 
   const factory Address(int value) = _Address;
 
@@ -35,7 +35,7 @@ class Address with _$Address {
   bool get isValidAddress => value < 0xFF00 || value > 0xFFFB;
 
   // Checks if the address is unassigned.
-  bool get isUnassigned => value == Address.unassignedAddress;
+  bool get isUnassigned => value == Address.unassignedAddress.value;
 
   // Checks if the address is a unicast address.
   bool get isUnicast => (value & 0x8000) == 0x0000 && !isUnassigned;

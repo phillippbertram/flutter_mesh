@@ -1,5 +1,9 @@
+import 'package:dart_mesh/src/mesh/types.dart';
+
+typedef KeyIndex = Uint16;
+
 abstract class Key {
   String get name;
-  int get index;
-  List<int> get key;
+  Uint16 get index;
+  Data get key;
 }

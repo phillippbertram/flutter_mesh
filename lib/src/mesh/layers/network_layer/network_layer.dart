@@ -1,1 +1,3 @@
-class NetworkLayer {}
+class NetworkLayer {
+  const NetworkLayer();
+}

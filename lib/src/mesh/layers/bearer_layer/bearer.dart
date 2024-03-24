@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:dart_mesh/src/mesh/types.dart';
 
 enum PduType {
@@ -30,6 +31,26 @@ enum PduType {
   final Uint8 value;
 }
 
+// TODO:
+/// A set of supported PDU types by the bearer object.
+// public struct PduTypes: OptionSet {
+//     public let rawValue: UInt8
+
+//     /// Set, if the bearer supports Network PDUs.
+//     public static let networkPdu         = PduTypes(rawValue: 1 << 0)
+//     /// Set, if the bearer supports Mesh Beacons.
+//     public static let meshBeacon         = PduTypes(rawValue: 1 << 1)
+//     /// Set, if the bearer supports proxy filter configuration.
+//     public static let proxyConfiguration = PduTypes(rawValue: 1 << 2)
+//     /// Set, if the bearer supports Provisioning PDUs.
+//     public static let provisioningPdu    = PduTypes(rawValue: 1 << 3)
+
+//     public init(rawValue: UInt8) {
+//         self.rawValue = rawValue
+//     }
+
+// }
+
 abstract class Transmitter {
   /// This method sends the given data over the bearer.
   ///
@@ -41,5 +62,29 @@ abstract class Transmitter {
   /// - throws: This method throws an error if the PDU type
   ///           is not supported, or data could not be sent for
   ///           some other reason.
-  sendData({required Data data, required PduType type});
+  Result<void> sendData({required Data data, required PduType type});
+}
+
+/// The Bearer object is responsible for sending and receiving the data
+/// to the mesh network.
+abstract class Bearer extends Transmitter {
+  /// The Bearer delegate object will receive callbacks whenever the
+  /// Bearer state changes.
+  // TODO: var delegate: BearerDelegate? { get set }
+
+  /// The data delegate will receive callbacks whenever a message is
+  /// received from the Bearer.
+  // TODO: var dataDelegate: BearerDataDelegate? { get set }
+
+  /// Returns the PDU types supported by this bearer.
+  List<PduType> get supportedPduTypes;
+
+  /// This property returns `true` if the Bearer is open, otherwise `false`.
+  bool get isOpen;
+
+  /// This method opens the Bearer.
+  Future<Result<void>> open();
+
+  /// This method closes the Bearer.
+  Future<Result<void>> close();
 }

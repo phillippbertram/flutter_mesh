@@ -1,15 +1,15 @@
 import 'package:dart_mesh/src/mesh/models/mesh_network.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'mesh_data.freezed.dart';
-part 'mesh_data.g.dart';
+// STATUS: TODO
 
-@freezed
-class MeshData with _$MeshData {
-  const factory MeshData({
-    MeshNetwork? meshNetwork,
-  }) = _MeshData;
+//TODO: Serialization + Equatable
 
-  factory MeshData.fromJson(Map<String, dynamic> json) =>
-      _$MeshDataFromJson(json);
+/// The Mesh Network configuration saved internally.
+/// It contains the Mesh Network and additional data that
+/// are not in the JSON schema, but are used by in the app.
+class MeshData {
+  MeshData({required this.meshNetwork});
+
+  final MeshNetwork? meshNetwork;
 }

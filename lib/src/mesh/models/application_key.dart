@@ -2,6 +2,7 @@
 
 import 'package:dart_mesh/src/mesh/models/mesh_network.dart';
 import 'package:dart_mesh/src/mesh/models/network_key.dart';
+import 'package:dart_mesh/src/mesh/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'key.dart'; // Import the Key interface
 
@@ -18,10 +19,10 @@ class ApplicationKey with _$ApplicationKey implements Key {
     required String name,
 
     // TODO: internal set
-    required int index,
+    required Uint16 index,
 
     // TODO: internal set
-    required List<int> key,
+    required Data key,
 
     // TODO: internal set + updateMesh Timestamp
     @JsonKey(name: 'boundNetKey') required int? boundNetworkKeyIndex,

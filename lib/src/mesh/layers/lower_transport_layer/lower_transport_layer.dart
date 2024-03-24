@@ -1,1 +1,3 @@
-class LowerTransportLayer {}
+class LowerTransportLayer {
+  const LowerTransportLayer();
+}

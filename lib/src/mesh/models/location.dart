@@ -4,10 +4,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 enum Location {
   auxiliary(0x0108),
   back(0x0101),
-  backup(0x0107);
+  backup(0x0107),
+  first(0x0001),
+  second(0x0002);
 
   const Location(this.value);
-
   final int value;
 }
 

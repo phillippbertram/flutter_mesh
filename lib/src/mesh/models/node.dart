@@ -1,14 +1,21 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+// TODO: JSON Serialization + Equatable
 
-part 'node.freezed.dart';
-part 'node.g.dart';
+class Node {
+  const Node._({
+    required this.uuid,
+    required this.name,
+  });
 
-@freezed
-class Node with _$Node {
-  const factory Node({
+  factory Node.create({
     required String uuid,
     required String name,
-  }) = _Node;
+  }) {
+    return Node._(
+      uuid: uuid,
+      name: name,
+    );
+  }
 
-  factory Node.fromJson(Map<String, dynamic> json) => _$NodeFromJson(json);
+  final String uuid;
+  final String name;
 }

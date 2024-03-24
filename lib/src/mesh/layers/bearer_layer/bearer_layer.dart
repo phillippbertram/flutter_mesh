@@ -5,3 +5,5 @@
 // @see https://www.bluetooth.com/learn-about-bluetooth/feature-enhancements/mesh/mesh-glossary/
 
 export 'bearer.dart';
+export 'bearer_delegate.dart';
+export 'gatt/gatt.dart';
