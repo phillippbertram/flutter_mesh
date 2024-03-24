@@ -2,6 +2,7 @@
 
 import 'package:async/async.dart';
 import 'package:dart_mesh/src/mesh/mesh.dart';
+import 'package:dart_mesh/src/mesh/provisioning/provisioning_capabilities.dart';
 import 'package:dart_mesh/src/mesh/provisioning/provisioning_state.dart';
 import 'package:dart_mesh/src/mesh/type_extensions/data.dart';
 import 'package:rxdart/rxdart.dart';
@@ -145,8 +146,25 @@ class ProvisioningManager {
     required Algorithm algorithm,
     required PublicKey publicKey,
     required AuthenticationMethod authenticationMethod,
-  }) {
+  }) async {
+    print(
+        "Start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod");
     // TODO:
+
+    _stateSubject.add(
+      const ProvisioningState.capabilitiesReceived(
+        ProvisioningCapabilities(
+          numberOfElements: 2,
+          algorithms: Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
+          outputOobSize: 1,
+          inputOobSize: 1,
+        ),
+      ),
+    );
+    await Future.delayed(const Duration(seconds: 1));
+    _stateSubject.add(const ProvisioningState.provisioning());
+    await Future.delayed(const Duration(seconds: 1));
+    _stateSubject.add(const ProvisioningState.complete());
   }
 
   // MARK: - Sending

@@ -1,6 +1,5 @@
 import 'package:async/src/result/result.dart';
 import 'package:dart_mesh/src/mesh/mesh.dart';
-import 'package:dart_mesh/src/mesh/mesh_messages/mesh_message.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Example/Source/Mesh%20Network/GenericOnOffClientDelegate.swift
 

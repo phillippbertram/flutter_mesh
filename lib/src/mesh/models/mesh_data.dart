@@ -1,5 +1,4 @@
 import 'package:dart_mesh/src/mesh/models/mesh_network.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 // STATUS: TODO
 

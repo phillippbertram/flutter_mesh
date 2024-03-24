@@ -27,6 +27,6 @@ extension StringHex on String {
 
 // ================
 // TODO: create own UUID type?
-final _uuid = Uuid();
+const _uuid = Uuid();
 String generateUuid() => _uuid.v4().replaceAll("-", "");
 // ================

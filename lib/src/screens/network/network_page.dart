@@ -2,7 +2,7 @@ import 'package:dart_mesh/src/screens/network/provisioning/device_scanner_page.d
 import 'package:flutter/material.dart';
 
 class NetworkPage extends StatelessWidget {
-  const NetworkPage({Key? key}) : super(key: key);
+  const NetworkPage({super.key});
 
   @override
   Widget build(BuildContext context) {

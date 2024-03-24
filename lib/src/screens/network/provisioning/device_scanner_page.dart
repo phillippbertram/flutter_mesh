@@ -176,9 +176,9 @@ class DiscoveredDeviceTile extends StatelessWidget {
 
 class RssiIndicator extends StatelessWidget {
   const RssiIndicator({
-    Key? key,
+    super.key,
     required this.rssi,
-  }) : super(key: key);
+  });
 
   final num rssi;
 

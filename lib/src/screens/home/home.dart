@@ -9,8 +9,8 @@ import '../settings/settings_page.dart';
 
 class HomePage extends HookWidget {
   const HomePage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/';
 

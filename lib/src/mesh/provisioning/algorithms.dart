@@ -11,6 +11,8 @@ extension AlgorithmValue on Algorithm {
     switch (this) {
       case Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM:
         return 128;
+
+      // TODO: this is Mesh1.1?
       case Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM:
         return 256;
     }

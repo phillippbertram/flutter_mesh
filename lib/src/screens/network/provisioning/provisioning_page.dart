@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:dart_mesh/src/mesh/mesh.dart';
+import 'package:dart_mesh/src/mesh/provisioning/algorithms.dart';
 import 'package:dart_mesh/src/mesh/provisioning/provisioning_manager.dart';
+import 'package:dart_mesh/src/mesh/provisioning/public_key.dart';
 import 'package:dart_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -65,6 +67,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
         // nothing to do
       }, requestingCapabilities: () {
         print('Requesting Capabilities');
+        _startProvisioning(); // TODO: remove this here
       }, capabilitiesReceived: (capabilities) {
         print('Capabilities Received: $capabilities');
       }, provisioning: () {
@@ -78,9 +81,9 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     widget.device.bearer.close();
-    await _subscriptions.clear();
+    _subscriptions.clear();
     super.dispose();
   }
 
@@ -142,7 +145,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
 
         const Text("Device Capabilities"),
         const ListTile(
-          title: Text('Elements Cound'),
+          title: Text('Elements Count'),
         ),
         const ListTile(
           title: Text('Supported Algorithms'),
@@ -174,5 +177,10 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     // // TODO: do stuff
 
     // _provisioningManager.provision();
+    _provisioningManager.startProvisioning(
+      algorithm: Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
+      publicKey: NoOobPublicKey(),
+      authenticationMethod: NoOob(),
+    );
   }
 }

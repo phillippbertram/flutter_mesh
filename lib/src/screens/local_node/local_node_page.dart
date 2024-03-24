@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LocalNodePage extends StatelessWidget {
-  const LocalNodePage({Key? key}) : super(key: key);
+  const LocalNodePage({super.key});
 
   @override
   Widget build(BuildContext context) {

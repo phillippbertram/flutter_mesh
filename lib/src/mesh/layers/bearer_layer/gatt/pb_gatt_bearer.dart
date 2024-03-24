@@ -1,7 +1,6 @@
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Bearer/GATT/PBGattBearer.swift
 
 import 'package:dart_mesh/src/mesh/mesh.dart';
-import 'package:dart_mesh/src/mesh/utils/utils.dart';
 
 import 'base_pb_gatt_proxy_bearer.dart';
 
