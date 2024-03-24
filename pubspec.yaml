@@ -16,7 +16,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  flutter_hooks: ^0.20.0
+  flutter_hooks: ^0.21.0
 
   # mesh deps
   flutter_blue_plus: ^1.31.16
