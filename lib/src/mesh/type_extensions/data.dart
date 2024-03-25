@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../types.dart';
@@ -20,8 +21,26 @@ extension DataAccessX on Data {
     );
   }
 
+  Uint8 readUint8({int offset = 0}) {
+    return this[offset];
+  }
+
+  Data addUint8(Uint8 value) {
+    return Data.from([...this, value]);
+  }
+
+  Data addUint16(Uint16 value, {Endian endian = Endian.little}) {
+    final byteData = ByteData(2);
+    byteData.setUint16(0, value, endian);
+    return Data.from([...this, ...byteData.buffer.asUint8List()]);
+  }
+
   /// drops the first `n` bytes from the data.
   Data dropFirst([int n = 1]) {
     return sublist(n);
+  }
+
+  Data suffix({required int from}) {
+    return sublist(from);
   }
 }

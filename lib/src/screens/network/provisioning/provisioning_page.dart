@@ -66,10 +66,10 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     _provisioningManager.stateStream.listen((state) {
       switch (state) {
         case ProvisioningStateReady():
-          print('Ready');
+          print('ProvisioningPage: Ready');
           break;
         case ProvisioningStateRequestingCapabilities():
-          print('Requesting Capabilities');
+          print('ProvisioningPage: Requesting Capabilities');
           break;
         case ProvisioningStateCapabilitiesReceived(
             capabilities: final capabilities

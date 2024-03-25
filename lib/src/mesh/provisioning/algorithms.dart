@@ -45,4 +45,16 @@ class Algorithms {
     }
     return Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM;
   }
+
+  @override
+  String toString() {
+    final algorithms = <String>[];
+    if (contains(Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM)) {
+      algorithms.add('BTM_ECDH_P256_CMAC_AES128_AES_CCM');
+    }
+    if (contains(Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM)) {
+      algorithms.add('BTM_ECDH_P256_HMAC_SHA256_AES_CCM');
+    }
+    return "Algorithms: ${algorithms.join(' | ')}";
+  }
 }

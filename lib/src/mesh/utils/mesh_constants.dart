@@ -1,3 +1,4 @@
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Utils/MeshConstants.swift
@@ -14,7 +15,7 @@ abstract class MeshService {
   UUID get dataOutUuid;
 
   /// Returns whether the mesh service matches given Core Bluetooth service object.
-  // TODO: static bool matches(service: CBService) -> Bool
+  bool matches(BluetoothService service);
 }
 
 /// A structore defining Mesh Proxy service, which shall be present on
@@ -38,6 +39,11 @@ class MeshProxyService implements MeshService {
 
   @override
   String get dataOutUuid => "2ADE";
+
+  @override
+  bool matches(BluetoothService service) {
+    return service.isMeshProxyService;
+  }
 }
 
 class MeshProvisioningService extends MeshService {
@@ -58,4 +64,19 @@ class MeshProvisioningService extends MeshService {
 
   @override
   String get dataOutUuid => "2ADC";
+
+  @override
+  bool matches(BluetoothService service) {
+    return service.isMeshProvisioningService;
+  }
+}
+
+extension BluetoothServiceExtension on BluetoothService {
+  bool get isMeshProxyService {
+    return uuid == Guid(MeshProxyService().uuid);
+  }
+
+  bool get isMeshProvisioningService {
+    return uuid == Guid(MeshProvisioningService().uuid);
+  }
 }

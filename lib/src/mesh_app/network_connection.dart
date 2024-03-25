@@ -34,7 +34,10 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
   bool _isScanning = false;
   bool get isScanning => _isScanning;
 
+  @override
+  BearerDataDelegate? get dataDelegate => _dataDelegate?.target;
   WeakReference<BearerDataDelegate>? _dataDelegate;
+  @override
   void setDataDelegate(BearerDataDelegate delegate) {
     _dataDelegate = WeakReference(delegate);
   }

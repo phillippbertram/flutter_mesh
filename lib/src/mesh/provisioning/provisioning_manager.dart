@@ -27,7 +27,7 @@ import 'public_key.dart';
 /// during provisioning process corresponding delegate callbacks will be invoked.
 ///
 /// The provisioning is completed when ``ProvisioningState/complete`` state is returned.
-class ProvisioningManager {
+class ProvisioningManager implements BearerDataDelegate {
   ProvisioningManager._({
     required this.unprovisionedDevice,
     required this.bearer,
@@ -56,6 +56,18 @@ class ProvisioningManager {
       BehaviorSubject<ProvisioningState>.seeded(const ProvisioningStateReady());
 
   ProvisioningData? _provisioningData;
+
+  /// The original Bearer delegate. It will be notified on bearer state updates.
+  // TODO: WeakReference<BearerDelegate>? _bearerDelegate;
+  WeakReference<BearerDataDelegate>? _bearerDataDelegate;
+
+  // MARK: - Public properties
+
+  /// The provisioning capabilities of the device. This information
+  /// is retrieved from the remote device during identification process.
+  ProvisioningCapabilities? get provisioningCapabilities =>
+      _provisioningCapabilities;
+  ProvisioningCapabilities? _provisioningCapabilities;
 
   /// The Unicast Address that will be assigned to the device.
   /// After device capabilities are received, the address is automatically set to
@@ -101,9 +113,11 @@ class ProvisioningManager {
     // Assign bearer delegate to self. If one was already set, events
     // will be forwarded. Don't modify Bearer delegate from now on.
     // bearerDelegate = bearer.delegate
-    // bearerDataDelegate = bearer.dataDelegate
     // bearer.delegate = self
-    // bearer.dataDelegate = self
+    if (bearer.dataDelegate != null) {
+      _bearerDataDelegate = WeakReference(bearer.dataDelegate!);
+    }
+    bearer.setDataDelegate(this);
 
     // Initialize provisioning data.
     _provisioningData = ProvisioningData();
@@ -111,7 +125,7 @@ class ProvisioningManager {
     final invite = ProvisioningRequestInvite(
       attentionTimer: attentionTimer.inSeconds,
     );
-    print("Sending $invite");
+    print("ProvisioningManager: Sending $invite}");
     _stateSubject.add(const ProvisioningStateRequestingCapabilities());
 
     return _sendProvisioningRequest(invite, accumulatedData: _provisioningData);
@@ -150,21 +164,6 @@ class ProvisioningManager {
     print(
         "ProvisioningManager: start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod");
     // TODO:
-
-    _stateSubject.add(
-      const ProvisioningStateCapabilitiesReceived(
-        ProvisioningCapabilities(
-          numberOfElements: 2,
-          algorithms: Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
-          outputOobSize: 1,
-          inputOobSize: 1,
-        ),
-      ),
-    );
-    await Future.delayed(const Duration(seconds: 1));
-    _stateSubject.add(const ProvisioningStateProvisioning());
-    await Future.delayed(const Duration(seconds: 1));
-    _stateSubject.add(const ProvisioningStateComplete());
   }
 
   // MARK: - Sending
@@ -184,13 +183,13 @@ class ProvisioningManager {
       return bearer.sendProvisioningRequest(request);
     }
 
-    // The first byte is the type. We only accumulate payload.
-    final reqPdu = request.pdu;
-    final pdu = reqPdu.data.dropFirst();
-    accumulatedData.accumulate(pdu);
+    final pdu = request.pdu;
+
+    // The first byte is the type. We only accumulate payload
+    accumulatedData.accumulate(pdu.data.dropFirst());
 
     // send the request.
-    return bearer.sendData(data: pdu, type: PduType.provisioningPdu);
+    return bearer.sendData(data: pdu.data, type: PduType.provisioningPdu);
   }
 
   // MARK: - misc
@@ -202,5 +201,122 @@ class ProvisioningManager {
     // provisioningData = nil
 
     _stateSubject.add(const ProvisioningStateReady());
+  }
+
+  // MARK: - BearerDataDelegate
+
+  @override
+  void bearerDidDeliverData(Data data, PduType type) {
+    print(
+      "ProvisioningManager: bearerDidDeliverData. Data length: ${data.length}, type: ${type.value}",
+    );
+    _bearerDataDelegate?.target?.bearerDidDeliverData(data, type);
+
+    // TODO: implement bearerDidDeliverData
+
+    final responseRes = ProvisioningResponse.fromPdu(ProvisioningPdu(data));
+    final response = responseRes.asValue?.value;
+    if (response == null) {
+      print(
+          "ProvisioningManager: Invalid response: ${responseRes.asError!.error}");
+      return;
+    }
+
+    print(
+      "ProvisioningManager: handling received response: $response in state $state",
+    );
+
+    switch ((state, response)) {
+      // Provisioning Capabilities have been received.
+      case (
+          ProvisioningStateRequestingCapabilities _,
+          ProvisioningResponseCapabilities response
+        ):
+        _provisioningCapabilities = response.capabilities;
+        _provisioningData?.accumulate(data.dropFirst());
+
+        // Calculate the Unicast Address automatically based on the
+        // elements count.
+        // TODO:
+        print(
+            "ProvisioningManager: IMPLEMENTATION MISSING - Response Capabilities: $response");
+        // if unicastAddress == nil, let provisioner = meshNetwork.localProvisioner {
+        //     let count = capabilities.numberOfElements
+        //     unicastAddress = meshNetwork.nextAvailableUnicastAddress(for: count, elementsUsing: provisioner)
+        //     suggestedUnicastAddress = unicastAddress
+        // }
+        // state = .capabilitiesReceived(capabilities)
+        // if unicastAddress == nil {
+        //     state = .failed(ProvisioningError.noAddressAvailable)
+        // }
+
+        _stateSubject
+            .add(ProvisioningStateCapabilitiesReceived(response.capabilities));
+
+        break;
+
+      // Device Public Key has been received.
+      case (
+          ProvisioningStateRequestingCapabilities _,
+          ProvisioningResponsePublicKey response
+        ):
+        // TODO:
+        print(
+            "ProvisioningManager: IMPLEMENTATION MISSING - Response PublicKey: $response");
+
+        break;
+
+      // The user has performed the Input Action on the device.
+      case (
+          ProvisioningStateProvisioning _,
+          ProvisioningResponseInputComplete response
+        ):
+        // TODO:
+        print(
+            "ProvisioningManager: IMPLEMENTATION MISSING - Response InputComplete: $response");
+
+        break;
+
+      // The Provisioning Confirmation value has been received.
+      case (
+          ProvisioningStateProvisioning _,
+          ProvisioningResponseConfirmation response
+        ):
+        // TODO:
+        print(
+            "ProvisioningManager: IMPLEMENTATION MISSING - Response Confirmation: $response");
+
+        break;
+
+      // The device Random value has been received. We may now authenticate the device.
+      case (
+          ProvisioningStateProvisioning _,
+          ProvisioningResponseRandom response
+        ):
+        // TODO:
+        print(
+            "ProvisioningManager: IMPLEMENTATION MISSING - Response Random: $response");
+
+        break;
+
+      // The provisioning process is complete.
+      case (
+          ProvisioningStateProvisioning _,
+          ProvisioningResponseComplete response
+        ):
+        // TODO:
+        print(
+            "ProvisioningManager: IMPLEMENTATION MISSING - Provisioning complete: $response");
+
+      // The provisioned device sent an error.
+      case (_, ProvisioningResponseFailed response):
+        print("ProvisioningManager: Provisioning failed: ${response.error}");
+        _stateSubject.add(ProvisioningStateFailed(response.error));
+
+      default:
+        print(
+            "ProvisioningManager: Unexpected response: $response for state $state");
+        _stateSubject.add(const ProvisioningStateFailed("Invalid state"));
+    }
   }
 }

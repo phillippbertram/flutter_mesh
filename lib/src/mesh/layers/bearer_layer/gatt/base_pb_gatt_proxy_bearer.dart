@@ -22,6 +22,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
 
   final _protocolHandler = ProxyProtocolHandler();
 
+  // hold stream subscriptions that need to be cancelled when done
   final _subscriptions = CompositeSubscription();
 
   // MARK: - Bearer
@@ -35,10 +36,18 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
       ];
 
   @override
+  BearerDataDelegate? get dataDelegate => _dataDelegate?.target;
+  WeakReference<BearerDataDelegate>? _dataDelegate;
+  @override
+  void setDataDelegate(BearerDataDelegate delegate) {
+    _dataDelegate = WeakReference(delegate);
+  }
+
+  @override
   Future<Result<void>> close() async {
     // TODO: Make checks for bluetooth support and adapter state
     print(
-      "BaseGattBearer: Disconnecting from base peripheral: ${basePeripheral.advName}",
+      "BaseGattBearer: Disconnecting from base peripheral: ${basePeripheral.remoteId}",
     );
     await basePeripheral.disconnect();
     _isOpenSubject.add(false);
@@ -83,6 +92,10 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
       }
     }).addTo(_subscriptions);
 
+    // cleanup: cancel subscriptions when disconnected
+    // TODO:
+    // basePeripheral.cancelWhenDisconnected(_subscriptions);
+
     await basePeripheral.connect();
 
     return Result.value(null);
@@ -93,15 +106,20 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
     required Data data,
     required PduType type,
   }) async {
+    print("BaseGattBearer: send data: ${data.length} bytes, type: $type");
+
     if (!isOpen) {
+      print("BaseGattBearer: Bearer is not open");
       return Result.error("Bearer is not open");
     }
 
     if (!supportedPduTypes.contains(type)) {
+      print("BaseGattBearer: Unsupported PDU type: $type");
       return Result.error("Unsupported PDU type: $type");
     }
 
     if (_dataInCharacteristic == null) {
+      print("BaseGattBearer: Data In characteristic is not available");
       return Result.error("Data In characteristic is not available");
     }
 
@@ -113,12 +131,15 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
         messageType: type,
         mtu: mtu,
       );
+      print(
+          "BaseGattBearer: Segmented into ${packets.length} packets with mtu: $mtu");
 
       for (final packet in packets) {
-        print("BaseGattBearer: Sending packet: ${packet.toHex()}");
+        print("BaseGattBearer: send -> 0x${packet.toHex()}");
         await _dataInCharacteristic!.write(packet, withoutResponse: true);
       }
     } catch (e) {
+      print("BaseGattBearer: Failed to send data: $e");
       return Result.error("Failed to send data: $e");
     }
 
@@ -145,10 +166,14 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
     _isOpenSubject.add(false);
     _dataInCharacteristic = null;
     _dataOutCharacteristic = null;
+
+    // TODO: notify bearer delegate
   }
 
   Future<void> _discoverServices() async {
-    final services = await basePeripheral.discoverServices();
+    print("BaseGattBearer: Discovering services for peripheral");
+    var services = await basePeripheral.discoverServices();
+    services = services.where((s) => service.matches(s)).toList();
 
     _dataInCharacteristic = services
         .expand((s) => s.characteristics)
@@ -169,9 +194,21 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
       return;
     }
 
-    // enable notifications
+    // enable notifications & subscribe
     print(
         "BaseGattBearer: Enabling notifications for Data Out characteristic: ${_dataOutCharacteristic?.uuid}");
-    await _dataOutCharacteristic?.setNotifyValue(true);
+
+    _dataOutCharacteristic!.onValueReceived.listen((value) {
+      print("BaseGattBearer: received <- 0x${value.toHex()}");
+      final message = _protocolHandler.reassemble(value);
+      if (message == null) {
+        print("BaseGattBearer: Failed to reassemble message");
+        return;
+      }
+      print('BaseGattBearer: Reassembled message type: ${message.messageType}');
+      dataDelegate?.bearerDidDeliverData(message.data, message.messageType);
+    }).addTo(_subscriptions);
+
+    await _dataOutCharacteristic!.setNotifyValue(true);
   }
 }

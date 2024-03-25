@@ -2,6 +2,7 @@ import 'package:async/async.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 
 import '../../provisioning/provisioning_pdu.dart';
+import 'bearer_delegate.dart';
 
 export './gatt/gatt.dart';
 export 'bearer_delegate.dart';
@@ -34,6 +35,27 @@ enum PduType {
   const PduType(this.value);
 
   final Uint8 value;
+
+  static PduType? fromData(Data data) {
+    if (data.isEmpty) {
+      return null;
+    }
+
+    // final rawValue = data[0] & 0b00111111;
+    final rawValue = data[0] & 0x3F;
+    switch (rawValue) {
+      case 0:
+        return PduType.networkPdu;
+      case 1:
+        return PduType.meshBeacon;
+      case 2:
+        return PduType.proxyConfiguration;
+      case 3:
+        return PduType.provisioningPdu;
+      default:
+        return null;
+    }
+  }
 }
 
 // TODO:
@@ -81,7 +103,10 @@ abstract class Bearer extends Transmitter {
 
   /// The data delegate will receive callbacks whenever a message is
   /// received from the Bearer.
-  // TODO: var dataDelegate: BearerDataDelegate? { get set }
+  BearerDataDelegate? get dataDelegate;
+  void setDataDelegate(BearerDataDelegate delegate);
+
+  // Stream<({Data data, PduType type})> get bearerDidDeliverDataStream;
 
   /// Returns the PDU types supported by this bearer.
   List<PduType> get supportedPduTypes;

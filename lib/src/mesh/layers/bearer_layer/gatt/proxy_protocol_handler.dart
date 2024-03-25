@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_mesh/src/mesh/types.dart';
 import 'dart:math' as math;
 
@@ -7,12 +9,12 @@ import '../bearer.dart';
 
 //  Segmentation and Reassembly (SAR)
 // @see https://www.bluetooth.com/mesh-feature-enhancements-summary/
-abstract class SAR {
+sealed class SAR {
   final Uint8 value;
 
   const SAR._(this.value);
 
-  factory SAR.fromData(List<int> data) {
+  static SAR? fromData(List<int> data) {
     final int sarValue = data[0] >> 6;
     switch (sarValue) {
       case 0:
@@ -24,7 +26,7 @@ abstract class SAR {
       case 3:
         return LastSegment();
       default:
-        throw ArgumentError('Invalid SAR value');
+        return null;
     }
   }
 }
@@ -46,6 +48,9 @@ class LastSegment extends SAR {
 }
 
 class ProxyProtocolHandler {
+  Data? _buffer;
+  PduType? _bufferType;
+
   List<Data> segment({
     required Data data,
     required PduType messageType,
@@ -81,5 +86,72 @@ class ProxyProtocolHandler {
     }
 
     return packets;
+  }
+
+  /// This method consumes the given data. If the data were segmented,
+  /// they are buffered until the last segment is received.
+  /// This method returns the message and its type when the last segment
+  /// (or the only one) has been received, otherwise it returns `nil`.
+  ///
+  /// The packets must be delivered in order. If a new message is
+  /// received while the previous one is still reassembled, the old
+  /// one will be disregarded. Invalid messages are disregarded.
+  ///
+  /// - parameter data: The data received.
+  /// - returns: The message and its type, or `nil`, if more data
+  ///            are expected.
+  ({Data data, PduType messageType})? reassemble(Data data) {
+    if (data.isEmpty) {
+      return null;
+    }
+
+    final sar = SAR.fromData(data);
+    if (sar == null) {
+      return null;
+    }
+
+    final messageType = PduType.fromData(data);
+    if (messageType == null) {
+      return null;
+    }
+
+    // Ensure, that only complete message or the first segment may be
+    // processed if the buffer is empty.
+    if (_buffer == null && (sar is! CompleteMessage && sar is! FirstSegment)) {
+      return null;
+    }
+
+    // If the new packet is a continuation/lastSegment, it should have the
+    // same message type as the current buffer.
+    if (_buffer != null &&
+        _bufferType != messageType &&
+        (sar is! CompleteMessage && sar is! FirstSegment)) {
+      return null;
+    }
+
+    // If a new message was received while the old one was
+    // processed, disregard the old one.
+    if (_buffer != null && (sar is CompleteMessage || sar is FirstSegment)) {
+      _buffer = null;
+      _bufferType = null;
+    }
+
+    // Save the message type and append newly received data.
+    _bufferType = messageType;
+    if (sar is CompleteMessage || sar is LastSegment) {
+      _buffer = Data.empty(growable: true);
+    }
+    _buffer!.addAll(data.sublist(1));
+
+    // If the complete message was received, return it.
+    if (sar is CompleteMessage || sar is LastSegment) {
+      final tmp = _buffer!;
+      _buffer = null;
+      _bufferType = null;
+      return (data: tmp, messageType: messageType);
+    }
+
+    // just return null
+    return null;
   }
 }

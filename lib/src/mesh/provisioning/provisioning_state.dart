@@ -2,6 +2,8 @@ import 'provisioning_capabilities.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningState.swift
 
+// TODO: use freezed for boilerplate code
+
 sealed class ProvisioningState {
   const ProvisioningState();
 }
