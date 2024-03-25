@@ -1,4 +1,4 @@
-import 'package:dart_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Utils/MeshConstants.swift
 

@@ -1,8 +1,8 @@
 // application_key.dart
 
-import 'package:dart_mesh/src/mesh/models/mesh_network.dart';
-import 'package:dart_mesh/src/mesh/models/network_key.dart';
-import 'package:dart_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/models/mesh_network.dart';
+import 'package:flutter_mesh/src/mesh/models/network_key.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'key.dart'; // Import the Key interface
 

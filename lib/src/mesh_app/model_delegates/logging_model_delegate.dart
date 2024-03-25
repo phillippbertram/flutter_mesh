@@ -1,5 +1,5 @@
 import 'package:async/async.dart';
-import 'package:dart_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
 
 class LoggingDelegate implements ModelDelegate {
   LoggingDelegate(this.messageTypes);

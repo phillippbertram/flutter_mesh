@@ -1,7 +1,7 @@
 // from AppDelegate.swift example
 
-import 'package:dart_mesh/src/mesh/mesh.dart';
-import 'package:dart_mesh/src/mesh_app/network_connection.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh_app/network_connection.dart';
 
 // @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Example/Source/AppDelegate.swift
 class AppNetworkManager {

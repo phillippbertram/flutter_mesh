@@ -1,10 +1,10 @@
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
 
 import 'package:async/async.dart';
-import 'package:dart_mesh/src/mesh/mesh.dart';
-import 'package:dart_mesh/src/mesh/provisioning/provisioning_capabilities.dart';
-import 'package:dart_mesh/src/mesh/provisioning/provisioning_state.dart';
-import 'package:dart_mesh/src/mesh/type_extensions/data.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/provisioning_capabilities.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/provisioning_state.dart';
+import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'algorithms.dart';

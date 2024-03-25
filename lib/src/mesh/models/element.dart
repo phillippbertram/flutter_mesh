@@ -1,4 +1,4 @@
-import 'package:dart_mesh/src/mesh/models/node.dart';
+import 'package:flutter_mesh/src/mesh/models/node.dart';
 import 'model.dart'; // Assuming you have a Model class defined somewhere
 import 'location.dart'; // Assuming you have a Location enum or class defined
 

@@ -1,4 +1,4 @@
-import 'package:dart_mesh/src/mesh/models/scene_number.dart';
+import 'package:flutter_mesh/src/mesh/models/scene_number.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'scene_range.freezed.dart';

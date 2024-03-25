@@ -1,7 +1,7 @@
 // Abstract class equivalent to the NetworkIdentity protocol in Swift.
-import 'package:dart_mesh/src/mesh/models/network_key.dart';
-import 'package:dart_mesh/src/mesh/types.dart';
-import 'package:dart_mesh/src/mesh/utils/mesh_constants.dart';
+import 'package:flutter_mesh/src/mesh/models/network_key.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/utils/mesh_constants.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 abstract class NetworkIdentity {

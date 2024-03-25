@@ -1,4 +1,4 @@
-import 'package:dart_mesh/src/mesh/models/mesh_network.dart';
+import 'package:flutter_mesh/src/mesh/models/mesh_network.dart';
 
 // STATUS: TODO
 

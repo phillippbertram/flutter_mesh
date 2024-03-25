@@ -1,4 +1,4 @@
-# dart_mesh
+# flutter_mesh
 
 A new Flutter project.
 

@@ -1,4 +1,4 @@
-import 'package:dart_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
 
 typedef KeyIndex = Uint16;
 

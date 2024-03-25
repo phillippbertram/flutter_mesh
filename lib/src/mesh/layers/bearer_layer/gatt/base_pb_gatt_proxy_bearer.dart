@@ -1,7 +1,7 @@
 import 'package:async/async.dart';
 import 'package:collection/collection.dart';
-import 'package:dart_mesh/src/mesh/types.dart';
-import 'package:dart_mesh/src/mesh/utils/utils.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/utils/utils.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:rxdart/rxdart.dart';
 

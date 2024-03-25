@@ -1,5 +1,5 @@
-import 'package:dart_mesh/src/mesh/models/network_identify.dart';
-import 'package:dart_mesh/src/mesh/models/node_identity.dart';
+import 'package:flutter_mesh/src/mesh/models/network_identify.dart';
+import 'package:flutter_mesh/src/mesh/models/node_identity.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../provisioning/oob.dart';

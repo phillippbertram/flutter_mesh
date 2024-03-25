@@ -1,5 +1,5 @@
-import 'package:dart_mesh/src/mesh/types.dart';
-import 'package:dart_mesh/src/mesh/utils/utils.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/utils/utils.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'scene_number.freezed.dart';

@@ -1,5 +1,5 @@
 import 'package:async/async.dart';
-import 'package:dart_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
 
 import '../../provisioning/provisioning_pdu.dart';
 

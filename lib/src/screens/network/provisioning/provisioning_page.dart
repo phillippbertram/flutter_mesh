@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:dart_mesh/src/mesh/mesh.dart';
-import 'package:dart_mesh/src/mesh/provisioning/algorithms.dart';
-import 'package:dart_mesh/src/mesh/provisioning/provisioning_manager.dart';
-import 'package:dart_mesh/src/mesh/provisioning/provisioning_state.dart';
-import 'package:dart_mesh/src/mesh/provisioning/public_key.dart';
-import 'package:dart_mesh/src/mesh_app/app_network_manager.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/algorithms.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/provisioning_manager.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/provisioning_state.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/public_key.dart';
+import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 

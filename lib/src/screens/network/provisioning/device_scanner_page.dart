@@ -1,6 +1,6 @@
-import 'package:dart_mesh/src/mesh/mesh.dart';
-import 'package:dart_mesh/src/screens/network/provisioning/device_scan_service.dart';
-import 'package:dart_mesh/src/screens/network/provisioning/provisioning_page.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/screens/network/provisioning/device_scan_service.dart';
+import 'package:flutter_mesh/src/screens/network/provisioning/provisioning_page.dart';
 import 'package:flutter/material.dart';
 
 class DeviceScannerPage extends StatefulWidget {

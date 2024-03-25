@@ -1,7 +1,7 @@
-import 'package:dart_mesh/src/mesh/models/key.dart';
-import 'package:dart_mesh/src/mesh/models/key_refresh_phase.dart';
-import 'package:dart_mesh/src/mesh/type_extensions/data_keys.dart';
-import 'package:dart_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/models/key.dart';
+import 'package:flutter_mesh/src/mesh/models/key_refresh_phase.dart';
+import 'package:flutter_mesh/src/mesh/type_extensions/data_keys.dart';
+import 'package:flutter_mesh/src/mesh/types.dart';
 
 // TODO: JSONSerialization + Equatable
 class NetworkKey implements MeshKey {

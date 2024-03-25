@@ -1,4 +1,4 @@
-import 'package:dart_mesh/src/screens/network/provisioning/device_scanner_page.dart';
+import 'package:flutter_mesh/src/screens/network/provisioning/device_scanner_page.dart';
 import 'package:flutter/material.dart';
 
 class NetworkPage extends StatelessWidget {
