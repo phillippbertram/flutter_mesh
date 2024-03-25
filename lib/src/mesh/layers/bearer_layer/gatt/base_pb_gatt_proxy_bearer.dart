@@ -1,6 +1,5 @@
 import 'package:async/async.dart';
 import 'package:collection/collection.dart';
-
 import 'package:dart_mesh/src/mesh/types.dart';
 import 'package:dart_mesh/src/mesh/utils/utils.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -22,6 +21,8 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   BluetoothCharacteristic? _dataOutCharacteristic;
 
   final _protocolHandler = ProxyProtocolHandler();
+
+  final _subscriptions = CompositeSubscription();
 
   // MARK: - Bearer
 
@@ -53,12 +54,17 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
 
   final _isOpenSubject = BehaviorSubject.seeded(false);
 
+  void dispose() {
+    close();
+    _subscriptions.dispose();
+  }
+
   @override
   Future<Result<void>> open() async {
     // TODO: Make checks for bluetooth support and adapter state
 
     print(
-      "BaseGattBearer: Connecting to base peripheral: ${basePeripheral.advName}",
+      "BaseGattBearer: Connecting to base peripheral: ${basePeripheral.remoteId}",
     );
 
     // TODO: hold subscription and cancel when done
@@ -75,7 +81,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
         default:
           break;
       }
-    });
+    }).addTo(_subscriptions);
 
     await basePeripheral.connect();
 
@@ -121,22 +127,27 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
 
   // MARK: Private BLE methods
 
-  void _handleDidConnectToPeripheral() {
-    print("BaseGattBearer: Connected to peripheral: ${basePeripheral.advName}");
+  void _handleDidConnectToPeripheral() async {
+    print(
+        "BaseGattBearer: Connected to peripheral: ${basePeripheral.remoteId}");
+
+    await _discoverServices();
+
+    // after services & characteristics are discovered, the bearer is ready to use
+    // TODO: maybe we should add another state `isReady`?
     _isOpenSubject.add(true);
-    _discoverServices();
   }
 
   void _handleDidDisconnectFromPeripheral() {
     print(
-        "BaseGattBearer: Disconnected from peripheral: ${basePeripheral.advName}");
+        "BaseGattBearer: Disconnected from peripheral: ${basePeripheral.remoteId}");
 
     _isOpenSubject.add(false);
     _dataInCharacteristic = null;
     _dataOutCharacteristic = null;
   }
 
-  void _discoverServices() async {
+  Future<void> _discoverServices() async {
     final services = await basePeripheral.discoverServices();
 
     _dataInCharacteristic = services

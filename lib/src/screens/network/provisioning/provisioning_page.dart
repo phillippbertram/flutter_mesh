@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dart_mesh/src/mesh/mesh.dart';
 import 'package:dart_mesh/src/mesh/provisioning/algorithms.dart';
 import 'package:dart_mesh/src/mesh/provisioning/provisioning_manager.dart';
+import 'package:dart_mesh/src/mesh/provisioning/provisioning_state.dart';
 import 'package:dart_mesh/src/mesh/provisioning/public_key.dart';
 import 'package:dart_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     _provisioningManager = res.asValue!.value;
     // TODO: provisioningManager.logger =
 
-    _subscriptions.add(bearer.isOpenStream.listen((isOpen) async {
+    bearer.isOpenStream.listen((isOpen) async {
       if (isOpen) {
         final res = await _provisioningManager.identify(
           attentionTimer: const Duration(minutes: 2), // same as in JungHome App
@@ -60,24 +61,48 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
           return;
         }
       }
-    }));
+    }).addTo(_subscriptions);
 
-    _subscriptions.add(_provisioningManager.stateStream.listen((state) {
-      state.when(ready: () {
-        // nothing to do
-      }, requestingCapabilities: () {
-        print('Requesting Capabilities');
-        _startProvisioning(); // TODO: remove this here
-      }, capabilitiesReceived: (capabilities) {
-        print('Capabilities Received: $capabilities');
-      }, provisioning: () {
-        print('Provisioning');
-      }, complete: () {
-        print('Provisioning Complete');
-      }, failed: (error) {
-        print('Provisioning Failed: $error');
-      });
-    }));
+    _provisioningManager.stateStream.listen((state) {
+      switch (state) {
+        case ProvisioningStateReady():
+          print('Ready');
+          break;
+        case ProvisioningStateRequestingCapabilities():
+          print('Requesting Capabilities');
+          break;
+        case ProvisioningStateCapabilitiesReceived(
+            capabilities: final capabilities
+          ):
+          print('Capabilities Received: $capabilities');
+          break;
+        case ProvisioningStateProvisioning():
+          print('Provisioning');
+          break;
+        case ProvisioningStateComplete():
+          print('Provisioning Complete');
+          break;
+        case ProvisioningStateFailed(error: final error):
+          print('Provisioning Failed: $error');
+          break;
+      }
+
+      // state.when(ready: () {
+      //   print('Ready');
+      //   // nothing to do
+      // }, requestingCapabilities: () {
+      //   print('Requesting Capabilities');
+      //   _startProvisioning(); // TODO: remove this here
+      // }, capabilitiesReceived: (capabilities) {
+      //   print('Capabilities Received: $capabilities');
+      // }, provisioning: () {
+      //   print('Provisioning');
+      // }, complete: () {
+      //   print('Provisioning Complete');
+      // }, failed: (error) {
+      //   print('Provisioning Failed: $error');
+      // });
+    }).addTo(_subscriptions);
   }
 
   @override
@@ -168,6 +193,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
   }
 
   void _startProvisioning() {
+    print('Provisioning Page Starting Provisioning');
     // TODO:
     // if (_provisioningManager.provisioningCapabilities == null) {
     //   print('Provisioning capabilities not received yet');

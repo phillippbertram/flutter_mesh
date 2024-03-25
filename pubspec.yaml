@@ -1,4 +1,4 @@
-name: dart_mesh
+name: flutter_mesh
 description: "A new Flutter project."
 
 # Prevent accidental publishing to pub.dev.

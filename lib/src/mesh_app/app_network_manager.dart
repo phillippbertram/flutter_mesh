@@ -29,6 +29,14 @@ class AppNetworkManager {
     // } catch {
 
     // }
+
+    final localProvisioner = Provisioner.create(
+      name: 'Local Provisioner',
+    );
+    meshNetworkManager.createNewMeshNetwork(
+      name: "Mesh Network",
+      provisioner: localProvisioner,
+    );
   }
 
 // TODO:

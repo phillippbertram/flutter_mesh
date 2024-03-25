@@ -52,7 +52,8 @@ class ProvisioningManager {
 
   ProvisioningState get state => _stateSubject.value;
   Stream<ProvisioningState> get stateStream => _stateSubject.stream;
-  final _stateSubject = BehaviorSubject.seeded(const ProvisioningState.ready());
+  final _stateSubject =
+      BehaviorSubject<ProvisioningState>.seeded(const ProvisioningStateReady());
 
   ProvisioningData? _provisioningData;
 
@@ -76,21 +77,20 @@ class ProvisioningManager {
   Future<Result<void>> identify({
     required Duration attentionTimer,
   }) async {
-    print("Identifying device with attention timer $attentionTimer");
+    print(
+        "ProvisioningManager: Identifying device with attention timer $attentionTimer");
 
     if (!bearer.supports(PduType.provisioningPdu)) {
       return Result.error("Bearer does not support Provisioning PDUs");
     }
 
     // Has the provisioning been restarted?
-    switch (state) {
-      case ProvisioningStateFailed():
-        _reset();
-        break;
-      case ProvisioningStateReady():
-        return Result.error("Provisioning manager is not in the right state");
-      default:
-        break;
+    if (state is ProvisioningStateFailed) {
+      _reset();
+    }
+
+    if (state is! ProvisioningStateReady) {
+      return Result.error("Not in ready state");
     }
 
     if (!bearer.isOpen) {
@@ -112,7 +112,7 @@ class ProvisioningManager {
       attentionTimer: attentionTimer.inSeconds,
     );
     print("Sending $invite");
-    _stateSubject.add(const ProvisioningState.requestingCapabilities());
+    _stateSubject.add(const ProvisioningStateRequestingCapabilities());
 
     return _sendProvisioningRequest(invite, accumulatedData: _provisioningData);
   }
@@ -148,11 +148,11 @@ class ProvisioningManager {
     required AuthenticationMethod authenticationMethod,
   }) async {
     print(
-        "Start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod");
+        "ProvisioningManager: start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod");
     // TODO:
 
     _stateSubject.add(
-      const ProvisioningState.capabilitiesReceived(
+      const ProvisioningStateCapabilitiesReceived(
         ProvisioningCapabilities(
           numberOfElements: 2,
           algorithms: Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
@@ -162,9 +162,9 @@ class ProvisioningManager {
       ),
     );
     await Future.delayed(const Duration(seconds: 1));
-    _stateSubject.add(const ProvisioningState.provisioning());
+    _stateSubject.add(const ProvisioningStateProvisioning());
     await Future.delayed(const Duration(seconds: 1));
-    _stateSubject.add(const ProvisioningState.complete());
+    _stateSubject.add(const ProvisioningStateComplete());
   }
 
   // MARK: - Sending
@@ -179,7 +179,7 @@ class ProvisioningManager {
   Future<Result<void>> _sendProvisioningRequest(
     ProvisioningRequest request, {
     ProvisioningData? accumulatedData,
-  }) {
+  }) async {
     if (accumulatedData == null) {
       return bearer.sendProvisioningRequest(request);
     }
@@ -201,6 +201,6 @@ class ProvisioningManager {
     // provisioningCapabilities = nil
     // provisioningData = nil
 
-    _stateSubject.add(const ProvisioningState.ready());
+    _stateSubject.add(const ProvisioningStateReady());
   }
 }
