@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -18,12 +19,12 @@ class DiscoveredPeripheral with _$DiscoveredPeripheral {
   }) = _DiscoveredPeripheral;
 }
 
+// TODO: make generic so that it can be used for proxy devices as well
 // Service to scan for unprovisioned devices
 class DeviceProvisioningScanService {
-  final _scanResultController =
-      StreamController<List<DiscoveredPeripheral>>.broadcast();
+  final _scanResultSubject = PublishSubject<List<DiscoveredPeripheral>>();
   Stream<List<DiscoveredPeripheral>> get scanResults =>
-      _scanResultController.stream;
+      _scanResultSubject.stream;
 
   final _isScanningSubject = BehaviorSubject.seeded(false);
   Stream<bool> get isScanningStream => _isScanningSubject.stream;
@@ -33,7 +34,8 @@ class DeviceProvisioningScanService {
   Future<bool> checkPermissions() async {
     final isSupported = await FlutterBluePlus.isSupported;
     final adapterState = FlutterBluePlus.adapterStateNow;
-    print("isSupported: $isSupported, adapterState: $adapterState");
+    logger.d(
+        "isSupported: $isSupported, adapterState: $adapterState, adapterName: ${await FlutterBluePlus.adapterName}");
     return isSupported && adapterState == BluetoothAdapterState.on;
   }
 
@@ -42,11 +44,18 @@ class DeviceProvisioningScanService {
   void startScan({
     Duration? stopAfter,
   }) async {
+    logger.t("Starting scanning for unprovisioned devices");
+
+    if (!await checkPermissions()) {
+      logger.w("Bluetooth not enabled or permission denied");
+      return;
+    }
+
     final scanSubscription = FlutterBluePlus.onScanResults.listen((results) {
       _handleResults(results);
     }, onError: (e) {
-      print("Error scanning: $e");
-      _scanResultController.addError(e);
+      logger.e("Error scanning: $e");
+      _scanResultSubject.addError(e);
     });
 
     // cleanup: cancel subscription when scanning stops
@@ -83,7 +92,7 @@ class DeviceProvisioningScanService {
 
   // Dispose resources
   void dispose() {
-    _scanResultController.close();
+    _scanResultSubject.close();
   }
 
   void _handleResults(List<ScanResult> results) {
@@ -116,6 +125,6 @@ class DeviceProvisioningScanService {
         .whereNotNull()
         .toList();
 
-    _scanResultController.add(discoveryPeripherals);
+    _scanResultSubject.add(discoveryPeripherals);
   }
 }

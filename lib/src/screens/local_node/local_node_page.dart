@@ -9,6 +9,9 @@ class LocalNodePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Local Node'),
       ),
+      body: const Center(
+        child: Text('Local Node'),
+      ),
     );
   }
 }

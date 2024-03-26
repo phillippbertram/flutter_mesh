@@ -9,6 +9,9 @@ class GroupsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Groups'),
       ),
+      body: const Center(
+        child: Text('Groups Page'),
+      ),
     );
   }
 }

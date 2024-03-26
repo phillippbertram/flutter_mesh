@@ -9,6 +9,9 @@ class ProxyPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Proxy'),
       ),
+      body: const Center(
+        child: Text('Proxy Page'),
+      ),
     );
   }
 }

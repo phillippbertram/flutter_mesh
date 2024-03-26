@@ -1,10 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
-import 'package:flutter_mesh/src/mesh/provisioning/algorithms.dart';
-import 'package:flutter_mesh/src/mesh/provisioning/provisioning_manager.dart';
-import 'package:flutter_mesh/src/mesh/provisioning/provisioning_state.dart';
-import 'package:flutter_mesh/src/mesh/provisioning/public_key.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -42,7 +39,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
       bearer: bearer,
     );
     if (res.isError) {
-      print('Error: ${res.asError!.error}');
+      logger.d('Error: ${res.asError!.error}');
       // TODO: showError
       return;
     }
@@ -56,7 +53,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
           attentionTimer: const Duration(minutes: 2), // same as in JungHome App
         );
         if (res.isError) {
-          print('Error: ${res.asError!.error}');
+          logger.d('Error: ${res.asError!.error}');
           _abort();
           return;
         }
@@ -66,41 +63,42 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     _provisioningManager.stateStream.listen((state) {
       switch (state) {
         case ProvisioningStateReady():
-          print('ProvisioningPage: Ready');
+          logger.d('ProvisioningPage: Ready');
           break;
         case ProvisioningStateRequestingCapabilities():
-          print('ProvisioningPage: Requesting Capabilities');
+          logger.d('ProvisioningPage: Requesting Capabilities');
           break;
         case ProvisioningStateCapabilitiesReceived(
             capabilities: final capabilities
           ):
-          print('Capabilities Received: $capabilities');
+          logger.d('ProvisioningPage: Capabilities Received: $capabilities');
+          _startProvisioning();
           break;
         case ProvisioningStateProvisioning():
-          print('Provisioning');
+          logger.d('ProvisioningPage: Provisioning');
           break;
         case ProvisioningStateComplete():
-          print('Provisioning Complete');
+          logger.d('ProvisioningPage: Provisioning Complete');
           break;
         case ProvisioningStateFailed(error: final error):
-          print('Provisioning Failed: $error');
+          logger.d('ProvisioningPage: Provisioning Failed: $error');
           break;
       }
 
       // state.when(ready: () {
-      //   print('Ready');
+      //   logger.d('Ready');
       //   // nothing to do
       // }, requestingCapabilities: () {
-      //   print('Requesting Capabilities');
+      //   logger.d('Requesting Capabilities');
       //   _startProvisioning(); // TODO: remove this here
       // }, capabilitiesReceived: (capabilities) {
-      //   print('Capabilities Received: $capabilities');
+      //   logger.d('Capabilities Received: $capabilities');
       // }, provisioning: () {
-      //   print('Provisioning');
+      //   logger.d('Provisioning');
       // }, complete: () {
-      //   print('Provisioning Complete');
+      //   logger.d('Provisioning Complete');
       // }, failed: (error) {
-      //   print('Provisioning Failed: $error');
+      //   logger.d('Provisioning Failed: $error');
       // });
     }).addTo(_subscriptions);
   }
@@ -130,6 +128,35 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     );
   }
 
+  Widget _buildProvisioningState() {
+    return StreamBuilder<ProvisioningState>(
+      stream: _provisioningManager.stateStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final state = snapshot.data!;
+          switch (state) {
+            case ProvisioningStateReady():
+              return const Text('Ready');
+            case ProvisioningStateRequestingCapabilities():
+              return const Text('Requesting Capabilities');
+            case ProvisioningStateCapabilitiesReceived(
+                capabilities: final capabilities
+              ):
+              return Text('Capabilities Received: $capabilities');
+            case ProvisioningStateProvisioning():
+              return const Text('Provisioning');
+            case ProvisioningStateComplete():
+              return const Text('Provisioning Complete');
+            case ProvisioningStateFailed(error: final error):
+              return Text('Provisioning Failed: $error');
+          }
+        }
+
+        return const SizedBox();
+      },
+    );
+  }
+
   Widget _buildBody() {
     return StreamBuilder<bool>(
       stream: widget.device.bearer.isOpenStream,
@@ -153,6 +180,8 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
   Widget _buildDeviceInfo() {
     return ListView(
       children: [
+        _buildProvisioningState(),
+
         ListTile(
           title: const Text('Name'),
           trailing: Text(widget.device.device.name ?? ''),
@@ -193,20 +222,19 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
   }
 
   void _startProvisioning() {
-    print('Provisioning Page Starting Provisioning');
-    // TODO:
-    // if (_provisioningManager.provisioningCapabilities == null) {
-    //   print('Provisioning capabilities not received yet');
-    //   return;
-    // }
+    logger.d('Provisioning Page Starting Provisioning');
+    final capabilities = _provisioningManager.provisioningCapabilities;
+    if (capabilities == null) {
+      logger.d('Provisioning capabilities not received yet');
+      return;
+    }
 
-    // // TODO: do stuff
+    // TODO: do stuff
 
-    // _provisioningManager.provision();
     _provisioningManager.startProvisioning(
-      algorithm: Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
-      publicKey: NoOobPublicKey(),
-      authenticationMethod: NoOob(),
+      algorithm: capabilities.algorithms.strongest,
+      publicKey: NoOobPublicKey(), // TODO: obtain dynamically
+      authenticationMethod: NoOob(), // TODO: obtain dynamically
     );
   }
 }
