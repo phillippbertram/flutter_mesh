@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -66,11 +67,11 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
 
   @override
   Future<Result<void>> open() async {
-    print("Scanning for mesh proxies");
+    logger.d("Scanning for mesh proxies");
     // first, check if bluetooth is supported by your hardware
     // Note: The platform is initialized on the first call to any FlutterBluePlus method.
     if (await FlutterBluePlus.isSupported == false) {
-      print("Bluetooth not supported by this device");
+      logger.d("Bluetooth not supported by this device");
       return Result.error("Bluetooth not supported by this device");
     }
 
@@ -84,7 +85,7 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
           _handleScanResults(results);
         }
       },
-      onError: (e) => print(e),
+      onError: (e) => logger.d(e),
     );
 
     // cleanup: cancel subscription when scanning stops
@@ -116,7 +117,7 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
   @override
   Future<Result<void>> sendData(
       {required Data data, required PduType type}) async {
-    print('Sending ${data.length} of type $type');
+    logger.d('Sending ${data.length} of type $type');
     // TODO: implement sendData
     throw UnimplementedError();
   }

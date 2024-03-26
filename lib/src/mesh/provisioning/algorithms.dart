@@ -39,11 +39,11 @@ class Algorithms {
       (rawValue & other.rawValue) == other.rawValue;
 
   // Strongest algorithm logic based on the original Swift code
-  Algorithms get strongest {
+  Algorithm get strongest {
     if (contains(Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM)) {
-      return Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM;
+      return Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM;
     }
-    return Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM;
+    return Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM;
   }
 
   @override

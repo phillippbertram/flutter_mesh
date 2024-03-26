@@ -50,12 +50,12 @@ class AppNetworkManager {
 //     provisioner: localProvisioner,
 //   );
 //   if (networkRes.isError) {
-//     print('Error: ${networkRes.asError!.error}');
+//     logger.d('Error: ${networkRes.asError!.error}');
 //   }
 
 //   final saveRes = meshNetworkManager.save();
 //   if (saveRes.isError) {
-//     print('Error: ${saveRes.asError!.error}');
+//     logger.d('Error: ${saveRes.asError!.error}');
 //   }
 
 //   meshNetworkDidChange()

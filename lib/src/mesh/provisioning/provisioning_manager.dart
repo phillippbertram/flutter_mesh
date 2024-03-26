@@ -1,6 +1,7 @@
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
 
 import 'package:async/async.dart';
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_capabilities.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_state.dart';
@@ -89,7 +90,7 @@ class ProvisioningManager implements BearerDataDelegate {
   Future<Result<void>> identify({
     required Duration attentionTimer,
   }) async {
-    print(
+    logger.d(
         "ProvisioningManager: Identifying device with attention timer $attentionTimer");
 
     if (!bearer.supports(PduType.provisioningPdu)) {
@@ -125,7 +126,7 @@ class ProvisioningManager implements BearerDataDelegate {
     final invite = ProvisioningRequestInvite(
       attentionTimer: attentionTimer.inSeconds,
     );
-    print("ProvisioningManager: Sending $invite}");
+    logger.d("ProvisioningManager: Sending $invite}");
     _stateSubject.add(const ProvisioningStateRequestingCapabilities());
 
     return _sendProvisioningRequest(invite, accumulatedData: _provisioningData);
@@ -161,8 +162,10 @@ class ProvisioningManager implements BearerDataDelegate {
     required PublicKey publicKey,
     required AuthenticationMethod authenticationMethod,
   }) async {
-    print(
-        "ProvisioningManager: start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod");
+    logger.d(
+      "ProvisioningManager: [MISSING IMPLEMENTATION] start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod",
+    );
+
     // TODO:
   }
 
@@ -207,7 +210,7 @@ class ProvisioningManager implements BearerDataDelegate {
 
   @override
   void bearerDidDeliverData(Data data, PduType type) {
-    print(
+    logger.d(
       "ProvisioningManager: bearerDidDeliverData. Data length: ${data.length}, type: ${type.value}",
     );
     _bearerDataDelegate?.target?.bearerDidDeliverData(data, type);
@@ -217,12 +220,12 @@ class ProvisioningManager implements BearerDataDelegate {
     final responseRes = ProvisioningResponse.fromPdu(ProvisioningPdu(data));
     final response = responseRes.asValue?.value;
     if (response == null) {
-      print(
+      logger.d(
           "ProvisioningManager: Invalid response: ${responseRes.asError!.error}");
       return;
     }
 
-    print(
+    logger.d(
       "ProvisioningManager: handling received response: $response in state $state",
     );
 
@@ -238,7 +241,7 @@ class ProvisioningManager implements BearerDataDelegate {
         // Calculate the Unicast Address automatically based on the
         // elements count.
         // TODO:
-        print(
+        logger.d(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response Capabilities: $response");
         // if unicastAddress == nil, let provisioner = meshNetwork.localProvisioner {
         //     let count = capabilities.numberOfElements
@@ -261,7 +264,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponsePublicKey response
         ):
         // TODO:
-        print(
+        logger.d(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response PublicKey: $response");
 
         break;
@@ -272,7 +275,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseInputComplete response
         ):
         // TODO:
-        print(
+        logger.d(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response InputComplete: $response");
 
         break;
@@ -283,7 +286,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseConfirmation response
         ):
         // TODO:
-        print(
+        logger.d(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response Confirmation: $response");
 
         break;
@@ -294,7 +297,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseRandom response
         ):
         // TODO:
-        print(
+        logger.d(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response Random: $response");
 
         break;
@@ -305,16 +308,16 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseComplete response
         ):
         // TODO:
-        print(
+        logger.d(
             "ProvisioningManager: IMPLEMENTATION MISSING - Provisioning complete: $response");
 
       // The provisioned device sent an error.
       case (_, ProvisioningResponseFailed response):
-        print("ProvisioningManager: Provisioning failed: ${response.error}");
+        logger.d("ProvisioningManager: Provisioning failed: ${response.error}");
         _stateSubject.add(ProvisioningStateFailed(response.error));
 
       default:
-        print(
+        logger.d(
             "ProvisioningManager: Unexpected response: $response for state $state");
         _stateSubject.add(const ProvisioningStateFailed("Invalid state"));
     }

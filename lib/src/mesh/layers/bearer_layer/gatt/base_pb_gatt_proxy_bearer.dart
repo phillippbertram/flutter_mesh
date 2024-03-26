@@ -1,5 +1,6 @@
 import 'package:async/async.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 import 'package:flutter_mesh/src/mesh/utils/utils.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -46,7 +47,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   @override
   Future<Result<void>> close() async {
     // TODO: Make checks for bluetooth support and adapter state
-    print(
+    logger.d(
       "BaseGattBearer: Disconnecting from base peripheral: ${basePeripheral.remoteId}",
     );
     await basePeripheral.disconnect();
@@ -72,13 +73,13 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   Future<Result<void>> open() async {
     // TODO: Make checks for bluetooth support and adapter state
 
-    print(
+    logger.d(
       "BaseGattBearer: Connecting to base peripheral: ${basePeripheral.remoteId}",
     );
 
     // TODO: hold subscription and cancel when done
     basePeripheral.connectionState.listen((state) {
-      print("BaseGattBearer: Connection state: $state");
+      logger.d("BaseGattBearer: Connection state: $state");
 
       switch (state) {
         case BluetoothConnectionState.connected:
@@ -106,20 +107,20 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
     required Data data,
     required PduType type,
   }) async {
-    print("BaseGattBearer: send data: ${data.length} bytes, type: $type");
+    logger.d("BaseGattBearer: send data: ${data.length} bytes, type: $type");
 
     if (!isOpen) {
-      print("BaseGattBearer: Bearer is not open");
+      logger.d("BaseGattBearer: Bearer is not open");
       return Result.error("Bearer is not open");
     }
 
     if (!supportedPduTypes.contains(type)) {
-      print("BaseGattBearer: Unsupported PDU type: $type");
+      logger.d("BaseGattBearer: Unsupported PDU type: $type");
       return Result.error("Unsupported PDU type: $type");
     }
 
     if (_dataInCharacteristic == null) {
-      print("BaseGattBearer: Data In characteristic is not available");
+      logger.d("BaseGattBearer: Data In characteristic is not available");
       return Result.error("Data In characteristic is not available");
     }
 
@@ -131,15 +132,15 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
         messageType: type,
         mtu: mtu,
       );
-      print(
+      logger.d(
           "BaseGattBearer: Segmented into ${packets.length} packets with mtu: $mtu");
 
       for (final packet in packets) {
-        print("BaseGattBearer: send -> 0x${packet.toHex()}");
+        logger.d("BaseGattBearer: send -> 0x${packet.toHex()}");
         await _dataInCharacteristic!.write(packet, withoutResponse: true);
       }
     } catch (e) {
-      print("BaseGattBearer: Failed to send data: $e");
+      logger.d("BaseGattBearer: Failed to send data: $e");
       return Result.error("Failed to send data: $e");
     }
 
@@ -149,7 +150,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   // MARK: Private BLE methods
 
   void _handleDidConnectToPeripheral() async {
-    print(
+    logger.d(
         "BaseGattBearer: Connected to peripheral: ${basePeripheral.remoteId}");
 
     await _discoverServices();
@@ -160,7 +161,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   }
 
   void _handleDidDisconnectFromPeripheral() {
-    print(
+    logger.d(
         "BaseGattBearer: Disconnected from peripheral: ${basePeripheral.remoteId}");
 
     _isOpenSubject.add(false);
@@ -171,7 +172,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   }
 
   Future<void> _discoverServices() async {
-    print("BaseGattBearer: Discovering services for peripheral");
+    logger.d("BaseGattBearer: Discovering services for peripheral");
     var services = await basePeripheral.discoverServices();
     services = services.where((s) => service.matches(s)).toList();
 
@@ -179,7 +180,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
         .expand((s) => s.characteristics)
         .firstWhereOrNull((c) => c.uuid == Guid(service.dataInUuid));
     if (_dataInCharacteristic == null) {
-      print("BaseGattBearer: Missing Data In characteristic");
+      logger.d("BaseGattBearer: Missing Data In characteristic");
       await close();
       return;
     }
@@ -189,23 +190,24 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
               (c) => c.uuid == Guid(service.dataOutUuid),
             );
     if (_dataOutCharacteristic == null) {
-      print("BaseGattBearer: Missing Data Out characteristic");
+      logger.d("BaseGattBearer: Missing Data Out characteristic");
       await close();
       return;
     }
 
     // enable notifications & subscribe
-    print(
+    logger.d(
         "BaseGattBearer: Enabling notifications for Data Out characteristic: ${_dataOutCharacteristic?.uuid}");
 
     _dataOutCharacteristic!.onValueReceived.listen((value) {
-      print("BaseGattBearer: received <- 0x${value.toHex()}");
+      logger.d("BaseGattBearer: received <- 0x${value.toHex()}");
       final message = _protocolHandler.reassemble(value);
       if (message == null) {
-        print("BaseGattBearer: Failed to reassemble message");
+        logger.d("BaseGattBearer: Failed to reassemble message");
         return;
       }
-      print('BaseGattBearer: Reassembled message type: ${message.messageType}');
+      logger.d(
+          'BaseGattBearer: Reassembled message type: ${message.messageType}');
       dataDelegate?.bearerDidDeliverData(message.data, message.messageType);
     }).addTo(_subscriptions);
 
