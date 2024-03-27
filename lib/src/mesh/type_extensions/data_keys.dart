@@ -2,13 +2,17 @@
 
 import 'dart:math';
 
+import 'package:flutter_mesh/src/logger/logger.dart';
+
 import '../types.dart';
+import '../utils/crypto.dart';
 
 final random = Random.secure();
 
 class DataUtils {
   // TODO: use crypto library?
   static Data random128BitKey() {
-    return Data.from(List.generate(16, (index) => random.nextInt(128)));
+    final d = Crypto.generateRandomBits(256);
+    return d.toList();
   }
 }

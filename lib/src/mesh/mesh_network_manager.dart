@@ -129,7 +129,7 @@ extension MeshNetworkManagerProvisioning on MeshNetworkManager {
   ///            provisioning process after identification.
   /// - throws: This method throws when the mesh network has not been created,
   ///           or a Node or a Provisioner with the same UUID already exist in the network.
-  Result<ProvisioningManager> provision({
+  Result<ProvisioningManager> provisionManager({
     required UnprovisionedDevice unprovisionedDevice,
     required ProvisioningBearer bearer,
   }) {

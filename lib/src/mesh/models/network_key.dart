@@ -27,7 +27,7 @@ class NetworkKey implements MeshKey {
     );
   }
 
-  factory NetworkKey.randomPrimary() {
+  factory NetworkKey.primaryRandom() {
     return NetworkKey(
       name: 'Primary NetworkKey',
       index: 0,
@@ -37,10 +37,13 @@ class NetworkKey implements MeshKey {
 
   @override
   final String name;
+
   @override
   final Uint16 index;
+
   @override
   final Data key;
+
   final KeyRefreshPhase phase;
   final DateTime timestamp;
 }

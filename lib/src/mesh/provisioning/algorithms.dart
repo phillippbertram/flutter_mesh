@@ -7,7 +7,7 @@ enum Algorithm {
 }
 
 extension AlgorithmValue on Algorithm {
-  int get length {
+  int get lengthInBits {
     switch (this) {
       case Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM:
         return 128;
@@ -19,6 +19,7 @@ extension AlgorithmValue on Algorithm {
   }
 }
 
+// TODO: freezed?
 class Algorithms {
   final int rawValue;
 
@@ -46,6 +47,17 @@ class Algorithms {
     return Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM;
   }
 
+  Set<Algorithm> get algorithms {
+    final algorithms = <Algorithm>{};
+    if (contains(Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM)) {
+      algorithms.add(Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM);
+    }
+    if (contains(Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM)) {
+      algorithms.add(Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM);
+    }
+    return algorithms;
+  }
+
   @override
   String toString() {
     final algorithms = <String>[];
@@ -56,5 +68,22 @@ class Algorithms {
       algorithms.add('BTM_ECDH_P256_HMAC_SHA256_AES_CCM');
     }
     return "Algorithms: ${algorithms.join(' | ')}";
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Algorithms &&
+          runtimeType == other.runtimeType &&
+          rawValue == other.rawValue;
+
+  @override
+  int get hashCode => rawValue;
+
+  static Set<Algorithms> get supportedAlgorithms {
+    return {
+      Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
+      Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM,
+    };
   }
 }

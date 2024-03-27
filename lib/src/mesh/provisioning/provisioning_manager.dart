@@ -3,6 +3,7 @@
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/provisioning.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_capabilities.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_state.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
@@ -40,11 +41,13 @@ class ProvisioningManager implements BearerDataDelegate {
     required ProvisioningBearer bearer,
     required MeshNetwork meshNetwork,
   }) {
-    return ProvisioningManager._(
+    final manager = ProvisioningManager._(
       unprovisionedDevice: unprovisionedDevice,
       bearer: bearer,
       meshNetwork: meshNetwork,
     );
+    manager.networkKey = meshNetwork.networkKeys.firstOrNull;
+    return manager;
   }
 
   final UnprovisionedDevice unprovisionedDevice;
@@ -56,6 +59,7 @@ class ProvisioningManager implements BearerDataDelegate {
   final _stateSubject =
       BehaviorSubject<ProvisioningState>.seeded(const ProvisioningStateReady());
 
+  AuthenticationMethod? _authenticationMethod;
   ProvisioningData? _provisioningData;
 
   /// The original Bearer delegate. It will be notified on bearer state updates.
@@ -73,7 +77,39 @@ class ProvisioningManager implements BearerDataDelegate {
   /// The Unicast Address that will be assigned to the device.
   /// After device capabilities are received, the address is automatically set to
   /// the first available unicast address from Provisioner's range.
-  // Address? unicastAddress;
+  Address? unicastAddress;
+
+  /// Automatically assigned Unicast Address. This is the first available
+  /// Unicast Address from the Provisioner's range with enough free following
+  /// addresses to be assigned to the device. This value is available after
+  /// the Provisioning Capabilities have been received and such address was found.
+  Address? get suggestedUnicastAddress => _suggestedUnicastAddress;
+  Address? _suggestedUnicastAddress;
+
+  /// The Network Key to be sent to the device during provisioning.
+  /// Setting this property is mandatory before calling
+  /// ``provision(usingAlgorithm:publicKey:authenticationMethod:)``.
+  NetworkKey? networkKey;
+
+  /// Returns whether the Unprovisioned Device can be provisioned using this
+  /// Provisioner Manager.
+  ///
+  /// If ``identify(andAttractFor:)`` has not been called, and the Provisioning
+  /// Capabilities are not known, this property returns `nil`.
+  ///
+  /// - returns: Whether the device can be provisioned by this manager, that is
+  ///            whether the manager supports at least one of the provisioning
+  ///            algorithms supported by the device.
+  bool? get isDeviceSupported {
+    if (_provisioningCapabilities == null) {
+      return null;
+    }
+    // TODO: test this
+    final supportedAlgorithms = Algorithms.supportedAlgorithms;
+    return supportedAlgorithms
+        .intersection(_provisioningCapabilities!.algorithms.algorithms)
+        .isEmpty;
+  }
 
   /// This method initializes the provisioning of the device.
   ///
@@ -157,16 +193,130 @@ class ProvisioningManager implements BearerDataDelegate {
   ///         ``Algorithm/BTM_ECDH_P256_HMAC_SHA256_AES_CCM``. It is recommended for
   ///         devices which support it.
   /// - throws: A ``ProvisioningError`` can be thrown in case of an error.
-  void startProvisioning({
+  Future<Result<void>> provision({
     required Algorithm algorithm,
     required PublicKey publicKey,
     required AuthenticationMethod authenticationMethod,
   }) async {
-    logger.d(
-      "ProvisioningManager: [MISSING IMPLEMENTATION] start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod",
+    logger.t(
+      "start provisioning with algorithm $algorithm, public key $publicKey, and authentication method $authenticationMethod",
     );
 
-    // TODO:
+    // are we in the right state?
+    if (state is! ProvisioningStateCapabilitiesReceived) {
+      logger.e("Not in capabilities received state");
+      return Result.error("Invalid state");
+    }
+    if (_provisioningCapabilities == null) {
+      logger.e("Provisioning capabilities not available");
+      return Result.error("Provisioning capabilities not available");
+    }
+
+    // can the unprovisioned device be provisioned?
+    if (isDeviceSupported == false) {
+      logger.e("Device not supported");
+      return Result.error("Device not supported");
+    }
+
+    // was the unicast address specified?
+    unicastAddress ??= _suggestedUnicastAddress;
+    if (unicastAddress == null) {
+      logger.d(
+          "Unicast address not specified, setting to suggested: ${suggestedUnicastAddress?.value.toHex()}");
+      return Result.error("Unicast address not specified");
+    }
+
+    // Ensure the Network Key is set.
+    if (networkKey == null) {
+      logger.e("Network Key not set");
+      return Result.error("Network Key not set");
+    }
+
+    // is the bearer open?
+    if (!bearer.isOpen) {
+      logger.e("Bearer is not open");
+      return Result.error("Bearer is closed");
+    }
+
+    // Try generating Private and Public Keys. This may fail if the given
+    // algorithm is not supported.
+    final keysKes = await _provisioningData!.generateKeys(algorithm: algorithm);
+    if (keysKes.isError) {
+      logger.e("Failed to generate keys: ${keysKes.asError!.error}");
+      return Result.error("Failed to generate keys: ${keysKes.asError!.error}");
+    }
+
+    // If the device's Public Key was obtained OOB, we are now ready to
+    // calculate the device's Shared Secret.
+    switch (publicKey) {
+      // The OOB Public Key is for sure different than the one randomly generated
+      // moment ago. Even if not, it truly has been randomly generated, so it's not
+      // an attack.
+      case OobPublicKey(key: final key):
+        final res =
+            _provisioningData!.provisionerDidObtainPublicKey(key, oob: true);
+        if (res.isError) {
+          logger.e("Failed to obtain OOB Public Key: ${res.asError!.error}");
+          _stateSubject.add(
+              const ProvisioningStateFailed("Failed to obtain OOB Public Key"));
+        }
+        break;
+
+      default:
+        break; // No OOB Public Key
+    }
+
+    // send provisioning start request
+    _stateSubject.add(const ProvisioningStateProvisioning());
+    _provisioningData!.prepare(
+      network: meshNetwork,
+      netKey: networkKey!,
+      unicastAddress: unicastAddress!,
+    );
+    final startRequest = ProvisioningRequest.start(
+      algorithm: algorithm,
+      publicKey: publicKey.method,
+      authenticationMethod: authenticationMethod,
+    );
+    logger.d("Sending $startRequest");
+    final reqStartRes = await _sendProvisioningRequest(startRequest,
+        accumulatedData: _provisioningData);
+    if (reqStartRes.isError) {
+      final errMess =
+          "Failed to send provisioning start request: ${reqStartRes.asError!.error}";
+      logger.e(errMess);
+      return Result.error(errMess);
+    }
+    _authenticationMethod = authenticationMethod;
+
+    // Send the Public Key of the Provisioner.
+    final provisionerPublicKey = ProvisioningRequest.publicKey(
+      key: _provisioningData!.provisionerPublicKey!,
+    );
+    logger.d("Sending $provisionerPublicKey");
+    final reqPubKeyRes = await _sendProvisioningRequest(
+      provisionerPublicKey,
+      accumulatedData: _provisioningData,
+    );
+    if (reqPubKeyRes.isError) {
+      logger.e(
+          "Failed to send Provisioner's Public Key: ${reqPubKeyRes.asError!.error}");
+      return Result.error(
+          "Failed to send Provisioner's Public Key: ${reqPubKeyRes.asError!.error}");
+    }
+
+    // If the device's Public Key was obtained OOB, we are now ready to
+    // authenticate.
+    switch (publicKey) {
+      case OobPublicKey(key: final key):
+        _provisioningData!.accumulate(key);
+        _obtainAuthValue();
+        break;
+      default: // No OOB Public Key
+        break;
+    }
+
+    return Result.value(null);
   }
 
   // MARK: - Sending
@@ -195,15 +345,25 @@ class ProvisioningManager implements BearerDataDelegate {
     return bearer.sendData(data: pdu.data, type: PduType.provisioningPdu);
   }
 
-  // MARK: - misc
+  // MARK: - MISC
 
   void _reset() {
-    // TODO:
-    // authenticationMethod = nil
-    // provisioningCapabilities = nil
-    // provisioningData = nil
-
+    _authenticationMethod = null;
+    _provisioningCapabilities = null;
+    _provisioningData = null;
     _stateSubject.add(const ProvisioningStateReady());
+  }
+
+  /// This method asks the user to provide a OOB value based on the
+  /// authentication method specified in the provisioning process.
+  ///
+  /// For ``AuthenticationMethod/noOob`` case, the value is automatically
+  /// set to 0s.
+  ///
+  /// This method will call `authValueReceived(:)` when the value
+  /// has been obtained.
+  void _obtainAuthValue() {
+    logger.e("IMPLEMENTATION MISSING - Obtain Auth Value");
   }
 
   // MARK: - BearerDataDelegate
@@ -235,26 +395,31 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningStateRequestingCapabilities _,
           ProvisioningResponseCapabilities response
         ):
+        logger.d("IMPLEMENTATION MISSING - Response Capabilities: $response");
         _provisioningCapabilities = response.capabilities;
         _provisioningData?.accumulate(data.dropFirst());
 
         // Calculate the Unicast Address automatically based on the
         // elements count.
-        // TODO:
-        logger.d(
-            "ProvisioningManager: IMPLEMENTATION MISSING - Response Capabilities: $response");
-        // if unicastAddress == nil, let provisioner = meshNetwork.localProvisioner {
-        //     let count = capabilities.numberOfElements
-        //     unicastAddress = meshNetwork.nextAvailableUnicastAddress(for: count, elementsUsing: provisioner)
-        //     suggestedUnicastAddress = unicastAddress
-        // }
-        // state = .capabilitiesReceived(capabilities)
-        // if unicastAddress == nil {
-        //     state = .failed(ProvisioningError.noAddressAvailable)
-        // }
+        final localProvisioner = meshNetwork.localProvisioner;
+        if (unicastAddress == null && localProvisioner != null) {
+          final count = response.capabilities.numberOfElements;
+          unicastAddress = meshNetwork.nextAvailableUnicastAddress(
+            elementsCount: count,
+            provisioner: localProvisioner,
+          );
+          _suggestedUnicastAddress = unicastAddress;
+        } else {
+          logger.w("Uni-cast address already set or local provisioner missing");
+        }
 
+        // TODO: set state ProvisioningStateCapabilitiesReceived in else case below?
         _stateSubject
             .add(ProvisioningStateCapabilitiesReceived(response.capabilities));
+        if (unicastAddress == null) {
+          _stateSubject
+              .add(const ProvisioningStateFailed("No address available"));
+        }
 
         break;
 
@@ -263,9 +428,26 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningStateRequestingCapabilities _,
           ProvisioningResponsePublicKey response
         ):
+        logger.d("IMPLEMENTATION MISSING - Response PublicKey: $response");
+
+        // Errata E16350 added an extra validation whether the received Public Key
+        // is different than Provisioner's one.
+        if (response.key == _provisioningData?.provisionerPublicKey) {
+          logger.e("Public Key mismatch");
+
+          // TODO: this is not done in original code
+          // _stateSubject.add(const ProvisioningStateFailed("Public Key mismatch"));
+          return;
+        }
+
+        _provisioningData?.accumulate(data.dropFirst());
+
+        _provisioningData?.provisionerDidObtainPublicKey(
+          response.key,
+          oob: false,
+        );
+
         // TODO:
-        logger.d(
-            "ProvisioningManager: IMPLEMENTATION MISSING - Response PublicKey: $response");
 
         break;
 
@@ -313,11 +495,11 @@ class ProvisioningManager implements BearerDataDelegate {
 
       // The provisioned device sent an error.
       case (_, ProvisioningResponseFailed response):
-        logger.d("ProvisioningManager: Provisioning failed: ${response.error}");
+        logger.e("ProvisioningManager: Provisioning failed: ${response.error}");
         _stateSubject.add(ProvisioningStateFailed(response.error));
 
       default:
-        logger.d(
+        logger.e(
             "ProvisioningManager: Unexpected response: $response for state $state");
         _stateSubject.add(const ProvisioningStateFailed("Invalid state"));
     }

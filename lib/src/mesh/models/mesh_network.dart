@@ -1,4 +1,5 @@
 import 'package:async/async.dart';
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_mesh/src/mesh/utils/utils.dart';
@@ -27,6 +28,7 @@ class MeshNetwork {
     required this.nodes,
     required this.networkKeys,
     required this.applicationKeys,
+    required this.provisioners,
   });
 
   factory MeshNetwork({
@@ -38,8 +40,9 @@ class MeshNetwork {
       meshName: meshName,
       timestamp: DateTime.now(),
       nodes: [],
-      networkKeys: [NetworkKey.randomPrimary()],
+      networkKeys: [NetworkKey.primaryRandom()],
       applicationKeys: [],
+      provisioners: [],
     );
   }
 
@@ -51,6 +54,8 @@ class MeshNetwork {
 
   final List<NetworkKey> networkKeys;
   final List<ApplicationKey> applicationKeys;
+
+  final List<Provisioner> provisioners;
 }
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/MeshNetwork%2BNodes.swift
@@ -94,7 +99,7 @@ extension MeshNetworkAddress on MeshNetwork {
   /// - returns: The next available Unicast Address that can be assigned to a node,
   ///            or `nil`, if there are no more available addresses in the allocated range.
   /// - seeAlso: ``nextAvailableUnicastAddress(startingFrom:for:elementsUsing:)``
-  Address? nextAvailableUnicastAddress({
+  Address? nextAvailableUnicastAddress_({
     Address startingFrom = Address.minUnicastAddress,
     required Provisioner provisioner,
   }) {
@@ -118,10 +123,12 @@ extension MeshNetworkAddress on MeshNetwork {
   ///                    The address will be taken from it's allocated range.
   /// - returns: The next available Unicast Address that can be assigned to a Node,
   ///            or `nil`, if there are no more available addresses in the allocated range.
-  Address? nextAvailableUnicastAddress2(
-      {Address offset = Address.minUnicastAddress,
-      required int elementsCount,
-      required Provisioner provisioner}) {
+  Address? nextAvailableUnicastAddress({
+    Address offset = Address.minUnicastAddress,
+    required int elementsCount,
+    required Provisioner provisioner,
+  }) {
+    logger.e("MISSING IMPLEMENTATION - nextAvailableUnicastAddress");
     // Assuming exclusions and usedAddresses are prepared outside this function for simplicity.
     // final exclusions = networkExclusions?.excludedAddresses(forIvIndex: ivIndex).sorted() ?? []
     // final usedAddresses = (exclusions + nodes
@@ -155,7 +162,8 @@ extension MeshNetworkAddress on MeshNetwork {
     //   }
     // }
 
-// TODO: Implement this
+    // TODO: Implement this
+    return Address(0x01);
     return null; // No address found.
   }
 }
@@ -173,9 +181,98 @@ extension MeshNetworkNodeExtensions on MeshNetwork {
 }
 
 extension MeshNetworkProvisioner on MeshNetwork {
+  /// Returns whether the Provisioner is in the mesh network.
+  ///
+  /// - parameter provisioner: The Provisioner to look for.
+  /// - returns: `True` if the Provisioner was found, `false` otherwise.
+  /// - since: 4.0.0
+  bool containsProvisioner(Provisioner provisioner) {
+    return containsProvisionerWithUuid(provisioner.uuid);
+  }
+
+  /// Returns whether the Provisioner with given UUID is in the
+  /// mesh network.
+  ///
+  /// - parameter uuid: The Provisioner's UUID to look for.
+  /// - returns: `True` if the Provisioner was found, `false` otherwise.
+  /// - since: 4.0.0
+  bool containsProvisionerWithUuid(UUID uuid) {
+    return provisioners.any((provisioner) => provisioner.uuid == uuid);
+  }
+
+  /// Returns the local Provisioner, or `nil` if the mesh network
+  /// does not have any.
+  ///
+  /// - seeAlso: ``setLocalProvisioner(_:)``
+  Provisioner? get localProvisioner {
+    return provisioners.firstOrNull;
+  }
+
   Result<void> addProvisioner(Provisioner provisioner) {
-    // TODO: Implement this
-    // return Result.error("Not implemented");
+    logger.e("MeshNetork: AddProvisioner Not implemented");
+
+    // TODO: Implement this!!
+    // Find the Unicast Address to be assigned.
+    // guard let address = nextAvailableUnicastAddress(for: provisioner) else {
+    //     throw MeshNetworkError.noAddressAvailable
+    // }
+    // try add(provisioner: provisioner, withAddress: address)
+
+    provisioners.add(provisioner);
+
     return Result.value(null);
+  }
+
+  /// Sets the given Provisioner as the one that will be used for
+  /// provisioning new Nodes.
+  ///
+  /// It will be moved to index 0 in the list of provisioners in the mesh network.
+  ///
+  /// The Provisioner will be added to the mesh network if it's not
+  /// there already. Adding the Provisioner may throw an error,
+  /// for example when the ranges overlap with ranges of another
+  /// Provisioner or there are no free Unicast Addresses to be assigned.
+  ///
+  /// - parameter provisioner: The Provisioner to be used for provisioning.
+  /// - throws: An error if adding the Provisioner failed.
+  Result<void> setLocalProvisioner(Provisioner provisioner) {
+    if (!containsProvisioner(provisioner)) {
+      return addProvisioner(provisioner);
+    }
+
+    moveProvisioner(provisioner: provisioner, toIndex: 0);
+    return Result.value(null);
+  }
+
+  /// Moves the given Provisioner to the new index.
+  ///
+  /// - important: The Provisioner at index 0 will be used as local Provisioner.
+  /// - parameters:
+  ///   - provisioner: The Provisioner to be moved.
+  ///   - toIndex:     The destination index of the Provisioner.
+  /// - seeAlso: ``setLocalProvisioner(_:)``
+  void moveProvisioner({
+    required Provisioner provisioner,
+    required int toIndex,
+  }) {
+    final fromIndex =
+        provisioners.indexWhere((p) => p.uuid == provisioner.uuid);
+    if (fromIndex == -1) {
+      return;
+    }
+
+    _moveProvisioner(fromIndex: fromIndex, toIndex: toIndex);
+  }
+
+  void _moveProvisioner({
+    required int fromIndex,
+    required int toIndex,
+  }) {
+    if (fromIndex == toIndex) {
+      return;
+    }
+
+    final provisioner = provisioners.removeAt(fromIndex);
+    provisioners.insert(toIndex, provisioner);
   }
 }
