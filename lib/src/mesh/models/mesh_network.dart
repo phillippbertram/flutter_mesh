@@ -1,16 +1,13 @@
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
-import 'package:flutter_mesh/src/mesh/types.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter_mesh/src/mesh/utils/utils.dart';
 
-import 'application_key.dart';
+import 'iv_index.dart';
 import 'node_identity.dart';
-import 'provisioner.dart';
-import 'address.dart';
 import 'network_identify.dart';
-import 'network_key.dart';
 import 'node.dart';
+import 'exclusion_list.dart';
 
 const _meshSchema = "http://json-schema.org/draft-04/schema#";
 const _meshVersion = "1.0.1";
@@ -56,6 +53,23 @@ class MeshNetwork {
   final List<ApplicationKey> applicationKeys;
 
   final List<Provisioner> provisioners;
+
+  /// An array containing Unicast Addresses that cannot be assigned to new Nodes.
+  final List<ExclusionList>? networkExclusions;
+
+  /// The IV Index of the mesh network.
+  IvIndex get ivIndex => _ivIndex;
+  IvIndex _ivIndex = IvIndex(index: 0, updateActive: false); // TODO: Implement
+  void setIvIndex(IvIndex ivIndex) {
+    _ivIndex = ivIndex;
+
+    // TODO:
+    // Clean up the network exclusions.
+    // networkExclusions?.cleanUp(forIvIndex: ivIndex)
+    // if networkExclusions?.isEmpty ?? false {
+    //     networkExclusions = nil
+    // }
+  }
 }
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/MeshNetwork%2BNodes.swift
@@ -87,26 +101,15 @@ extension MeshNetworkNodes on MeshNetwork {
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/MeshNetwork%2BAddress.swift
 extension MeshNetworkAddress on MeshNetwork {
-  /// Returns the next available Unicast Address from the Unicast Address range
-  /// assigned to the given Provisioner that can be assigned to a new Node with 1 Element.
-  ///
-  /// The returned address can be set as the Unicast Address of the Node.
-  ///
-  /// - parameters:
-  ///   - offset: The primary Unicast Address to be assigned.
-  ///   - provisioner:   The Provisioner that is creating the node.
-  ///                    The address will be taken from it's allocated range.
-  /// - returns: The next available Unicast Address that can be assigned to a node,
-  ///            or `nil`, if there are no more available addresses in the allocated range.
-  /// - seeAlso: ``nextAvailableUnicastAddress(startingFrom:for:elementsUsing:)``
-  Address? nextAvailableUnicastAddress_({
-    Address startingFrom = Address.minUnicastAddress,
-    required Provisioner provisioner,
-  }) {
-    // TODO: Implement this
-    return null;
-    // return nextAvailableUnicastAddress(startingFrom: startingFrom, elementsCount: 1,
-    //                                    provisioner: provisioner)
+  List<Address> get usedAddresses {
+    final exclusions =
+        networkExclusions?.excludedAddressesForIvIndex(ivIndex).sorted() ?? [];
+
+    final nodeAddresses = nodes
+        .expand((node) => node.elements)
+        .map((element) => element.unicastAddress);
+
+    return [...exclusions, ...nodeAddresses].sorted();
   }
 
   /// Returns the next available Unicast Address from the Unicast Address range
@@ -125,45 +128,44 @@ extension MeshNetworkAddress on MeshNetwork {
   ///            or `nil`, if there are no more available addresses in the allocated range.
   Address? nextAvailableUnicastAddress({
     Address offset = Address.minUnicastAddress,
-    required int elementsCount,
-    required Provisioner provisioner,
+    int elementsCount = 1,
+    Provisioner? provisioner,
   }) {
-    logger.e("MISSING IMPLEMENTATION - nextAvailableUnicastAddress");
-    // Assuming exclusions and usedAddresses are prepared outside this function for simplicity.
-    // final exclusions = networkExclusions?.excludedAddresses(forIvIndex: ivIndex).sorted() ?? []
-    // final usedAddresses = (exclusions + nodes
-    //           .flatMap { node in node.elements }
-    //           .map { element in element.unicastAddress })
-    //           .sorted()
+    provisioner ??= localProvisioner;
+    if (provisioner == null) {
+      logger.w("No provisioner found in the mesh network.");
+      return null;
+    }
 
-    // for (var range in provisioner.allocatedUnicastRange) {
-    //   var address = range.lowAddress;
+    final usedAddresses = this.usedAddresses;
 
-    //   if (range.contains(offset) && address < offset) {
-    //     address = offset;
-    //   }
+    for (final range in provisioner.allocatedUnicastRange) {
+      var address = range.low;
 
-    //   for (var usedAddress in allUsedAddresses) {
-    //     if (address > usedAddress) continue;
+      if (range.contains(offset) && address < offset) {
+        address = offset;
+      }
 
-    //     if (address + elementsCount - 1 < usedAddress) {
-    //       return address;
-    //     }
+      for (var usedAddress in usedAddresses) {
+        if (address > usedAddress) continue;
 
-    //     address = usedAddress + 1;
+        if (address + elementsCount - 1 < usedAddress) {
+          return address;
+        }
 
-    //     if (address + elementsCount - 1 > range.highAddress) {
-    //       break;
-    //     }
-    //   }
+        address = usedAddress + 1;
 
-    //   if (address + elementsCount - 1 <= range.highAddress) {
-    //     return address;
-    //   }
-    // }
+        if (address + elementsCount - 1 > range.high) {
+          break;
+        }
+      }
 
-    // TODO: Implement this
-    return const Address(0x01);
+      if (address + elementsCount - 1 <= range.high) {
+        return address;
+      }
+    }
+
+    logger.w("no address available.");
     return null; // No address found.
   }
 }

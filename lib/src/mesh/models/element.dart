@@ -1,4 +1,5 @@
 import 'package:flutter_mesh/src/mesh/models/node.dart';
+import 'address.dart';
 import 'model.dart'; // Assuming you have a Model class defined somewhere
 import 'location.dart'; // Assuming you have a Location enum or class defined
 
@@ -37,6 +38,7 @@ class Element {
   final int index;
   final Location location;
   final List<Model> models;
+  final Address unicastAddress;
 
   Node? get parentNode => _parentNode?.target;
   WeakReference<Node>? _parentNode;

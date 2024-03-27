@@ -7,7 +7,7 @@ part 'address.freezed.dart';
 part 'address.g.dart';
 
 @freezed
-class Address with _$Address {
+class Address with _$Address implements Comparable<Address> {
   // Using int to represent UInt16 values from Swift, since Dart does not have an UInt16.
   // Static constants for address ranges.
   static const Address unassignedAddress = Address(0x0000);
@@ -48,4 +48,33 @@ class Address with _$Address {
 
   // Checks if the address is a special group address.
   bool get isSpecialGroup => value >= 0xFF00;
+
+  @override
+  int compareTo(Address other) {
+    return value.compareTo(other.value);
+  }
+
+  // override < operator to compare two addresses.
+  bool operator <(Address other) {
+    return value < other.value;
+  }
+
+  // override > operator to compare two addresses.
+  bool operator >(Address other) {
+    return value > other.value;
+  }
+
+  bool operator <=(Address other) {
+    return value <= other.value;
+  }
+
+  // override + operator to add an integer to an address.
+  Address operator +(int other) {
+    return Address(value + other);
+  }
+
+  // override - operator to subtract an integer from an address.
+  Address operator -(int other) {
+    return Address(value - other);
+  }
 }

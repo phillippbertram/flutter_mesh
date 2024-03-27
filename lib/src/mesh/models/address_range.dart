@@ -4,6 +4,8 @@ import 'address.dart';
 part 'address_range.freezed.dart';
 part 'address_range.g.dart';
 
+// TODO: make comparable so that this can be sorted?
+
 @freezed
 class AddressRange with _$AddressRange {
   /// A range containing all valid Unicast Addresses.
@@ -27,4 +29,16 @@ class AddressRange with _$AddressRange {
 
   factory AddressRange.fromJson(Map<String, dynamic> json) =>
       _$AddressRangeFromJson(json);
+}
+
+extension AddressRangeX on AddressRange {
+  /// Checks if the given address is within the range.
+  bool contains(Address address) {
+    return address.value >= low.value && address.value <= high.value;
+  }
+
+  /// Checks if the given range is within the range.
+  bool containsRange(AddressRange range) {
+    return range.low.value >= low.value && range.high.value <= high.value;
+  }
 }

@@ -13,3 +13,4 @@ export 'provisioner.dart';
 export 'range_object.dart';
 export 'scene_number.dart';
 export 'scene_range.dart';
+export 'exclusion_list.dart';

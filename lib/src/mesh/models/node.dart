@@ -1,7 +1,9 @@
 // TODO: JSON Serialization + Equatable
 
+import 'element.dart';
+
 class Node {
-  const Node._({
+  Node._({
     required this.uuid,
     required this.name,
   });
@@ -18,4 +20,6 @@ class Node {
 
   final String uuid;
   final String name;
+
+  final List<Element> elements = []; // TODO:
 }
