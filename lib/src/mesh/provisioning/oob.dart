@@ -1,38 +1,16 @@
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Oob.swift#L36
 
 // TODO: sealed class?
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-// TODO: use sealed class?
-// abstract class OobInformation {
-//   const OobInformation();
+part 'oob.freezed.dart';
 
-//   void handle();
-// }
-
-// class ElectronicURI extends OobInformation {
-//   final String uri;
-//   const ElectronicURI(this.uri);
-
-//   @override
-//   void handle() {
-//     // Handle electronic URI
-//   }
-// }
-
-// class QrCode extends OobInformation {
-//   final String qrData;
-//   const QrCode(this.qrData);
-
-//   @override
-//   void handle() {
-//     // Handle QR code
-//   }
-// }
+// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Oob.swift
 
 class OobInformation {
   final Uint16 rawValue;
@@ -84,57 +62,58 @@ class OobInformation {
 }
 
 /// The authentication method chosen for provisioning.
-sealed class AuthenticationMethod {}
+@freezed
+sealed class AuthenticationMethod with _$AuthenticationMethod {
+  /// No OOB authentication.
+  /// - warning: This method is considered not secure.
+  const factory AuthenticationMethod.noOob() = NoOob;
 
-/// No OOB authentication.
-/// - warning: This method is considered not secure.
-class NoOob extends AuthenticationMethod {}
+  /// Static OOB authentication.
+  ///
+  /// User will be asked to provide 16 or 32 byte hexadecimal value.
+  /// The value can be read from the device, QR code, website, etc.
+  /// See ``UnprovisionedDevice/oobInformation`` for location.
+  const factory AuthenticationMethod.staticOob() = StaticOob;
 
-/// Static OOB authentication.
-///
-/// User will be asked to provide 16 or 32 byte hexadecimal value.
-/// The value can be read from the device, QR code, website, etc.
-/// See ``UnprovisionedDevice/oobInformation`` for location.
-class StaticOob extends AuthenticationMethod {}
+  /// Output OOB authentication.
+  ///
+  /// The Provisionee will signal a random value using specified method.
+  /// The value should be provided during provisioning using
+  /// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
+  ///
+  /// - parameters:
+  ///   - action: The chosen action.
+  ///   - size: Number of digits or letters that can be output
+  ///           (e.g., displayed or spoken). Size must be in range 1...8.
+  const factory AuthenticationMethod.outputOob({
+    required OutputAction action,
+    required int size,
+  }) = OutputOob;
 
-/// Output OOB authentication.
-///
-/// The Provisionee will signal a random value using specified method.
-/// The value should be provided during provisioning using
-/// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
-///
-/// - parameters:
-///   - action: The chosen action.
-///   - size: Number of digits or letters that can be output
-///           (e.g., displayed or spoken). Size must be in range 1...8.
-class OutputOob extends AuthenticationMethod {
-  final OutputAction action;
-  final int size;
-
-  OutputOob(this.action, this.size);
+  /// Input OOB authentication.
+  ///
+  /// User need to input a value displayed on the Provisioner's screen on the
+  /// Unprovisioned Device. The value to display to the user will be given using
+  /// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
+  ///
+  /// When user completes entering the value ``ProvisioningDelegate/inputComplete()``
+  /// will be called.
+  ///
+  /// - parameters:
+  ///   - action: The chosen input action.
+  ///   - size: Number of digits or letters that can be entered.
+  ///           Size must be in range 1...8.
+  const factory AuthenticationMethod.inputOob({
+    required InputAction action,
+    required int size,
+  }) = InputOob;
 }
 
-/// Input OOB authentication.
+/// Available output actions to be performed during provisioning.
 ///
-/// User need to input a value displayed on the Provisioner's screen on the
-/// Unprovisioned Device. The value to display to the user will be given using
+/// For example,if the Unprovisioned Device is a light, then it would blink random
+/// number of times. That number should be provided to
 /// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
-///
-/// When user completes entering the value ``ProvisioningDelegate/inputComplete()``
-/// will be called.
-///
-/// - parameters:
-///   - action: The chosen input action.
-///   - size: Number of digits or letters that can be entered.
-///           Size must be in range 1...8.
-class InputOob extends AuthenticationMethod {
-  final InputAction action;
-  final int size;
-
-  InputOob(this.action, this.size);
-}
-
-// Dart enum for OutputAction
 enum OutputAction {
   blink,
   beep,
@@ -144,7 +123,7 @@ enum OutputAction {
 }
 
 extension OutputActionExtension on OutputAction {
-  int get value {
+  Uint8 get value {
     switch (this) {
       case OutputAction.blink:
         return 0;
@@ -160,7 +139,11 @@ extension OutputActionExtension on OutputAction {
   }
 }
 
-// Dart enum for InputAction
+/// Available output actions to be performed during provisioning.
+///
+/// For example,if the Unprovisioned Device is a light, then it would blink random
+/// number of times. That number should be provided to
+/// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
 enum InputAction {
   push,
   twist,
@@ -169,7 +152,7 @@ enum InputAction {
 }
 
 extension InputActionExtension on InputAction {
-  int get value {
+  Uint8 get value {
     switch (this) {
       case InputAction.push:
         return 0;

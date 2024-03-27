@@ -218,7 +218,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
   Future<void> _abort() async {
     await widget.device.bearer.close();
 
-    // TODO: dismiss
+    // TODO: dismiss this view?
   }
 
   Future<void> _startProvisioning() async {
@@ -233,8 +233,9 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
 
     await _provisioningManager.provision(
       algorithm: capabilities.algorithms.strongest,
-      publicKey: NoOobPublicKey(), // TODO: obtain dynamically
-      authenticationMethod: NoOob(), // TODO: obtain dynamically
+      publicKey: const PublicKey.noOob(), // TODO: obtain dynamically
+      authenticationMethod:
+          const AuthenticationMethod.noOob(), // TODO: obtain dynamically
     );
   }
 }

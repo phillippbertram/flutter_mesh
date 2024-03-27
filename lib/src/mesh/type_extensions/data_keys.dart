@@ -2,7 +2,6 @@
 
 import 'dart:math';
 
-import 'package:flutter_mesh/src/logger/logger.dart';
 
 import '../types.dart';
 import '../utils/crypto.dart';

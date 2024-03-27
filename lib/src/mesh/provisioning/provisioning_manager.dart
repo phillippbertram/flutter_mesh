@@ -3,18 +3,17 @@
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
-import 'package:flutter_mesh/src/mesh/provisioning/provisioning.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_capabilities.dart';
-import 'package:flutter_mesh/src/mesh/provisioning/provisioning_state.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'algorithms.dart';
 import 'provisioning_data.dart';
-import 'public_key.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
 
+/// @see https://www.bluetooth.com/blog/provisioning-a-bluetooth-mesh-network-part-1/
+///
 /// The manager responsible for provisioning a new device into the mesh network.
 ///
 /// To create an instance of a `ProvisioningManager` use ``MeshNetworkManager/provision(unprovisionedDevice:over:)``.
@@ -258,7 +257,9 @@ class ProvisioningManager implements BearerDataDelegate {
         if (res.isError) {
           logger.e("Failed to obtain OOB Public Key: ${res.asError!.error}");
           _stateSubject.add(
-              const ProvisioningStateFailed("Failed to obtain OOB Public Key"));
+            const ProvisioningStateFailed(
+                error: "Failed to obtain OOB Public Key"),
+          );
         }
         break;
 
@@ -267,7 +268,7 @@ class ProvisioningManager implements BearerDataDelegate {
     }
 
     // send provisioning start request
-    _stateSubject.add(const ProvisioningStateProvisioning());
+    _stateSubject.add(const ProvisioningState.provisioning());
     _provisioningData!.prepare(
       network: meshNetwork,
       netKey: networkKey!,
@@ -414,11 +415,12 @@ class ProvisioningManager implements BearerDataDelegate {
         }
 
         // TODO: set state ProvisioningStateCapabilitiesReceived in else case below?
-        _stateSubject
-            .add(ProvisioningStateCapabilitiesReceived(response.capabilities));
+        _stateSubject.add(ProvisioningState.capabilitiesReceived(
+          capabilities: response.capabilities,
+        ));
         if (unicastAddress == null) {
-          _stateSubject
-              .add(const ProvisioningStateFailed("No address available"));
+          _stateSubject.add(
+              const ProvisioningState.failed(error: "No address available"));
         }
 
         break;
@@ -496,12 +498,13 @@ class ProvisioningManager implements BearerDataDelegate {
       // The provisioned device sent an error.
       case (_, ProvisioningResponseFailed response):
         logger.e("ProvisioningManager: Provisioning failed: ${response.error}");
-        _stateSubject.add(ProvisioningStateFailed(response.error));
+        _stateSubject.add(ProvisioningState.failed(error: response.error));
 
       default:
         logger.e(
             "ProvisioningManager: Unexpected response: $response for state $state");
-        _stateSubject.add(const ProvisioningStateFailed("Invalid state"));
+        _stateSubject
+            .add(const ProvisioningState.failed(error: "Invalid state"));
     }
   }
 }

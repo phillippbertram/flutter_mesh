@@ -1,4 +1,8 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import '../types.dart';
+
+part 'public_key.freezed.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/PublicKey.swift
 
@@ -15,7 +19,16 @@ enum PublicKeyMethod {
   oobPublicKey
 }
 
-sealed class PublicKey {
+@freezed
+sealed class PublicKey with _$PublicKey {
+  const factory PublicKey.noOob() = NoOobPublicKey;
+
+  const factory PublicKey.oobPublicKey({
+    required Data key,
+  }) = OobPublicKey;
+}
+
+extension PublicKeyX on PublicKey {
   PublicKeyMethod get method {
     if (this is NoOobPublicKey) {
       return PublicKeyMethod.noOobPublicKey;
@@ -25,12 +38,4 @@ sealed class PublicKey {
       throw Exception('Unknown PublicKey type');
     }
   }
-}
-
-class NoOobPublicKey extends PublicKey {}
-
-class OobPublicKey extends PublicKey {
-  OobPublicKey({required this.key});
-
-  final Data key;
 }

@@ -13,6 +13,8 @@ import 'public_key.dart';
 
 part 'provisioning_pdu.freezed.dart';
 
+// @see https://www.bluetooth.com/blog/provisioning-a-bluetooth-mesh-network-part-1/
+
 // Swift uses a typealias to define the Provisioning PDU type.
 // We use a class to represent the PDU type.
 class ProvisioningPdu {

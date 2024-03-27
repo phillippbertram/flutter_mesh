@@ -26,7 +26,7 @@ class ProvisioningCapabilities with _$ProvisioningCapabilities {
     final outputOobSize = data.readUint8(offset: 6);
     final inputOobSize = data.readUint8(offset: 9);
 
-    final algorithms = Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM; // TODO:
+    const algorithms = Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM; // TODO:
     // final algorithms = Algorithms.fromValue(data.readUint16(offset: 2));
 
     // final inputOobActions // TODO:

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:flutter_mesh/src/mesh/types.dart';
 import 'dart:math' as math;

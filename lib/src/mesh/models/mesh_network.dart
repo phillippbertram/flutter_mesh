@@ -163,7 +163,7 @@ extension MeshNetworkAddress on MeshNetwork {
     // }
 
     // TODO: Implement this
-    return Address(0x01);
+    return const Address(0x01);
     return null; // No address found.
   }
 }
