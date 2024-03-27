@@ -1,18 +1,24 @@
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
-import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:collection/collection.dart';
 
+import '../types.dart';
+import '../utils/utils.dart';
+import 'address_range.dart';
+import 'address.dart';
+import 'application_key.dart';
 import 'iv_index.dart';
+import 'network_key.dart';
 import 'node_identity.dart';
 import 'network_identify.dart';
 import 'node.dart';
 import 'exclusion_list.dart';
+import 'provisioner.dart';
 
-const _meshSchema = "http://json-schema.org/draft-04/schema#";
-const _meshVersion = "1.0.1";
-const _meshId =
-    "https://www.bluetooth.com/specifications/specs/mesh-cdb-1-0-1-schema.json#";
+// const _meshSchema = "http://json-schema.org/draft-04/schema#";
+// const _meshVersion = "1.0.1";
+// const _meshId =
+//     "https://www.bluetooth.com/specifications/specs/mesh-cdb-1-0-1-schema.json#";
 
 // TODO: JSONSerialization + Equatable
 
@@ -59,7 +65,7 @@ class MeshNetwork {
 
   /// The IV Index of the mesh network.
   IvIndex get ivIndex => _ivIndex;
-  IvIndex _ivIndex = IvIndex(index: 0, updateActive: false); // TODO: Implement
+  IvIndex _ivIndex = const IvIndex(index: 0, updateActive: false); // TODO: Implement
   void setIvIndex(IvIndex ivIndex) {
     _ivIndex = ivIndex;
 

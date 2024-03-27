@@ -5,7 +5,6 @@ import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/algorithms.dart';
 import 'package:flutter_mesh/src/mesh/utils/crypto.dart';
 
-import '../types.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningData.swift#L33
 
