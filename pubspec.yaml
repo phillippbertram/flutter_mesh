@@ -24,6 +24,9 @@ dependencies:
   uuid: ^4.3.3
   collection: ^1.18.0
   rxdart: ^0.27.7
+  pointycastle: ^3.7.4 # TODO: maybe not needed in favor of `cryptography`
+  cryptography: ^2.7.0
+  cryptography_flutter: ^2.3.2
 
   # app deps
   flutter_hooks: ^0.20.5 # 0.21.0 has a bug!!!
