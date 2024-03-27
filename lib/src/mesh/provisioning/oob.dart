@@ -17,23 +17,22 @@ class OobInformation {
 
   const OobInformation._(this.rawValue);
 
-  static const OobInformation other = OobInformation._(1 << 0);
-  static const OobInformation electronicURI = OobInformation._(1 << 1);
-  static const OobInformation qrCode = OobInformation._(1 << 2);
-  static const OobInformation barCode = OobInformation._(1 << 3);
-  static const OobInformation nfc = OobInformation._(1 << 4);
-  static const OobInformation number = OobInformation._(1 << 5);
-  static const OobInformation string = OobInformation._(1 << 6);
-  static const OobInformation supportForCertificateBasedProvisioning =
+  static const other = OobInformation._(1 << 0);
+  static const electronicURI = OobInformation._(1 << 1);
+  static const qrCode = OobInformation._(1 << 2);
+  static const barCode = OobInformation._(1 << 3);
+  static const nfc = OobInformation._(1 << 4);
+  static const number = OobInformation._(1 << 5);
+  static const string = OobInformation._(1 << 6);
+  static const supportForCertificateBasedProvisioning =
       OobInformation._(1 << 7);
-  static const OobInformation supportForProvisioningRecords =
-      OobInformation._(1 << 8);
+  static const supportForProvisioningRecords = OobInformation._(1 << 8);
   // Bits 9-10 are reserved for future use.
-  static const OobInformation onBox = OobInformation._(1 << 11);
-  static const OobInformation insideBox = OobInformation._(1 << 12);
-  static const OobInformation onPieceOfPaper = OobInformation._(1 << 13);
-  static const OobInformation insideManual = OobInformation._(1 << 14);
-  static const OobInformation onDevice = OobInformation._(1 << 15);
+  static const onBox = OobInformation._(1 << 11);
+  static const insideBox = OobInformation._(1 << 12);
+  static const onPieceOfPaper = OobInformation._(1 << 13);
+  static const insideManual = OobInformation._(1 << 14);
+  static const onDevice = OobInformation._(1 << 15);
 
   /// Checks if a particular option is set.
   bool contains(OobInformation option) {

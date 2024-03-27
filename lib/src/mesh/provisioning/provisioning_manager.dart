@@ -253,7 +253,10 @@ class ProvisioningManager implements BearerDataDelegate {
       // an attack.
       case OobPublicKey(key: final key):
         final res =
-            _provisioningData!.provisionerDidObtainPublicKey(key, oob: true);
+            await _provisioningData!.provisionerDidObtainDevicePublicKey(
+          key,
+          oob: true,
+        );
         if (res.isError) {
           logger.e("Failed to obtain OOB Public Key: ${res.asError!.error}");
           _stateSubject.add(
@@ -444,7 +447,7 @@ class ProvisioningManager implements BearerDataDelegate {
 
         _provisioningData?.accumulate(data.dropFirst());
 
-        _provisioningData?.provisionerDidObtainPublicKey(
+        _provisioningData?.provisionerDidObtainDevicePublicKey(
           response.key,
           oob: false,
         );

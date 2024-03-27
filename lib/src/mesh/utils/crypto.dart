@@ -4,6 +4,7 @@ import 'package:async/async.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
 import 'package:flutter_mesh/src/logger/logger.dart';
 import '../provisioning/algorithms.dart' as algo;
+import '../types.dart';
 
 // import 'package:pointycastle/export.dart';
 
@@ -48,20 +49,56 @@ class Crypto {
   /// - returns: The Private and Public Key pair.
   /// - throws: This method throws an error if the key pair generation has failed
   ///           or the given algorithm is not supported.
-  static Future<
-          Result<({crypto.SecretKey privateKey, crypto.EcPublicKey publicKey})>>
-      generateKeyPair({
+  static Future<Result<crypto.EcKeyPair>> generateKeyPair({
     required algo.Algorithm algorithm,
   }) async {
+    // TODO: this is the implementation for shared generating shared secreet
     try {
       // Elliptic Curve Diffie-Hellman (ECDH) with P-256 curve
       final algo = crypto.Ecdh.p256(length: 32); // 32 bytes == 256 bits
-      final wand = await algo.newKeyExchangeWand();
-      final pubKey = await (await algo.newKeyPair()).extractPublicKey();
+      final keyPair = await algo.newKeyPair();
+      return Result.value(keyPair);
+    } catch (e) {
+      logger.e("Error generating key pair: $e");
+      return Result.error(e);
+    }
+  }
 
-      final secretKey = await wand.sharedSecretKey(remotePublicKey: pubKey);
-      final res = (privateKey: secretKey, publicKey: pubKey);
-      return Result.value(res);
+  /// Calculates the Shared Secret based on the given Public Key
+  /// and the local Private Key.
+  ///
+  /// Elliptic Curve Diffie–Hellman (ECDH) is an anonymous key agreement protocol that allows two parties,
+  /// each having an elliptic curve public–private key pair, to establish a shared secret over an insecure channel.
+  /// ECDH’s purpose in Bluetooth mesh provisioning is to allow the creation of a secure link between
+  /// the provisioner and the unprovisioned device.
+  /// It uses public and private keys to distribute a symmetric secret key
+  /// which the two devices can then use for encryption and decryption of subsequent messages.
+  ///
+  /// - parameters:
+  ///   - privateKey: The local device's Private Key.
+  ///   - publicKey: The device's Public Key as bytes.
+  /// - returns: The ECDH Shared Secret.
+  static Future<Result<Data>> calculateSharedSecret({
+    required crypto.KeyPair privateKey,
+    required Data publicKey,
+  }) async {
+    // TODO: test this!
+    try {
+      publicKey = publicKey.markUncompressed(publicKey);
+
+      // Elliptic Curve Diffie-Hellman (ECDH) with P-256 curve
+      final algo = crypto.Ecdh.p256(length: 32); // 32 bytes == 256 bits
+
+      final wand = await algo.newKeyExchangeWandFromKeyPair(privateKey);
+      final sharedSecret = await wand.sharedSecretKey(
+        remotePublicKey: crypto.SimplePublicKey(
+          publicKey,
+          type: crypto.KeyPairType.p256,
+        ),
+      );
+
+      final sskBytes = await sharedSecret.extractBytes();
+      return Result.value(sskBytes);
     } catch (e) {
       logger.e("Error generating key pair: $e");
       return Result.error(e);
@@ -98,4 +135,22 @@ class Crypto {
   //   final keyPair = await algo.newKeyPair();
   //   return keyPair;
   // }
+}
+
+extension on Data {
+  Data markUncompressed(
+    Data publicKey,
+  ) {
+    final publicKeyBytes = publicKey;
+    // Create a new Uint8List with an additional byte at the start
+    final uncompressedKey = Uint8List(publicKeyBytes.length + 1);
+
+    // Set the first byte to 0x04 to mark it as uncompressed
+    uncompressedKey[0] = 0x04;
+
+    // Copy the original public key data after the 0x04
+    uncompressedKey.setRange(1, uncompressedKey.length, publicKeyBytes);
+
+    return uncompressedKey;
+  }
 }

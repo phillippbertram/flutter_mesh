@@ -1,9 +1,7 @@
 import 'package:async/async.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
 import 'package:flutter_mesh/src/logger/logger.dart';
-import 'package:flutter_mesh/src/mesh/models/address.dart';
-import 'package:flutter_mesh/src/mesh/models/mesh_network.dart';
-import 'package:flutter_mesh/src/mesh/models/network_key.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/algorithms.dart';
 import 'package:flutter_mesh/src/mesh/utils/crypto.dart';
 
@@ -20,8 +18,7 @@ class ProvisioningData {
   // IvIndex? ivIndex; TODO:
 
   // TODO: make private
-  crypto.SecretKey? privateKey; // TODO: SecKey
-  crypto.PublicKey? publicKey; // TODO: SecKey
+  crypto.EcKeyPair? keyPair;
   Data? sharedSecret;
   bool? oobPublicKey;
 
@@ -77,11 +74,10 @@ extension ProvisioningDataX on ProvisioningData {
       return Result.error(keyPairRes.asError!.error);
     }
     final keyPair = keyPairRes.asValue!.value;
+    this.keyPair = keyPair;
 
-    privateKey = keyPair.privateKey;
-    publicKey = keyPair.publicKey;
-    provisionerPublicKey =
-        keyPair.publicKey.toDer(); // TODO: is toDer() correct?
+    final pubKey = await keyPair.extractPublicKey();
+    provisionerPublicKey = pubKey.toDer(); // TODO: is .toDer() correct?
 
     this.algorithm = algorithm;
     provisionerRandom = Crypto.generateRandomBits(algorithm.lengthInBits);
@@ -99,17 +95,27 @@ extension ProvisioningDataX on ProvisioningData {
   ///   - oob: A flag indicating whether the Public Key was obtained Out-Of-Band.
   /// - throws: This method throws when generating ECDH Secure
   ///           Secret failed.
-  Result<void> provisionerDidObtainPublicKey(Data key, {required bool oob}) {
-    // TODO: implement this
-    if (privateKey == null) {
+  Future<Result<void>> provisionerDidObtainDevicePublicKey(
+    Data key, {
+    required bool oob,
+  }) async {
+    logger.t(
+      "ProvisioningData.provisionerDidObtainPublicKey key: ${key.length}, oob: $oob",
+    );
+
+    if (keyPair == null) {
       return Result.error('Invalid state: Private key is missing.');
     }
 
-    logger.e("MISSING IMPLEMENTATION");
-    // sharedSecret =
-    //     calculateSharedSecret(privateKey: privateKey!, publicKey: key);
+    final sharedSecretRes = await Crypto.calculateSharedSecret(
+        privateKey: keyPair!, publicKey: key);
+    if (sharedSecretRes.isError) {
+      return Result.error(sharedSecretRes.asError!.error);
+    }
+
+    sharedSecret = sharedSecretRes.asValue!.value;
     oobPublicKey = oob;
 
-    return Result.error('Not implemented');
+    return Result.value(null);
   }
 }

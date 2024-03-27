@@ -35,7 +35,7 @@ class ProvisioningPdu {
 
   /// Checks whether the PDU is valid and supported.
   ///
-  /// Validation is performed only based no length.
+  /// Validation is performed only based on length.
   bool get isValid {
     if (type == null) {
       return false;
@@ -108,10 +108,6 @@ class ProvisioningPduType {
   /// a received provisioning protocol PDU.
   static const failed = 9;
 }
-
-// sealed class ProvisioningRequest {
-//   const ProvisioningRequest();
-// }
 
 @freezed
 sealed class ProvisioningRequest with _$ProvisioningRequest {

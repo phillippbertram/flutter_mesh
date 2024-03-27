@@ -39,3 +39,14 @@ extension PublicKeyX on PublicKey {
     }
   }
 }
+
+// TODO: this is not used in the library 🤷‍♂️
+/// The type of Public Key information.
+class PublicKeyType {
+  final Uint8 rawValue;
+
+  const PublicKeyType._(this.rawValue);
+
+  /// Public Key OOB Information is available.
+  static const publicKeyOobInformationAvailable = PublicKeyType._(1 << 0);
+}
