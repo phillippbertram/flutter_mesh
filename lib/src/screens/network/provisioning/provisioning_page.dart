@@ -34,7 +34,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     final bearer = widget.device.bearer;
 
     final manager = AppNetworkManager.instance.meshNetworkManager;
-    final res = manager.provision(
+    final res = manager.provisionManager(
       unprovisionedDevice: device,
       bearer: bearer,
     );
@@ -221,7 +221,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     // TODO: dismiss
   }
 
-  void _startProvisioning() {
+  Future<void> _startProvisioning() async {
     logger.d('Provisioning Page Starting Provisioning');
     final capabilities = _provisioningManager.provisioningCapabilities;
     if (capabilities == null) {
@@ -231,7 +231,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
 
     // TODO: do stuff
 
-    _provisioningManager.startProvisioning(
+    await _provisioningManager.provision(
       algorithm: capabilities.algorithms.strongest,
       publicKey: NoOobPublicKey(), // TODO: obtain dynamically
       authenticationMethod: NoOob(), // TODO: obtain dynamically

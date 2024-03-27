@@ -65,11 +65,11 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
           )
         ],
       ),
-      body: _buildBody(),
+      body: _buildBody(context),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     return StreamBuilder<List<DiscoveredPeripheral>>(
       stream: _deviceScanService.scanResults,
       builder: (context, snapshot) {
@@ -80,9 +80,7 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
         }
 
         if (!snapshot.hasData) {
-          return const Center(
-            child: CircularProgressIndicator.adaptive(),
-          );
+          return _buildLoadingState(context);
         }
 
         final scanResults = snapshot.data!;
@@ -111,6 +109,24 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    return Align(
+      alignment: const Alignment(0, -(1 / 4)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("Looking for unprovisioned devices...",
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(color: Theme.of(context).colorScheme.secondary)),
+          const SizedBox(height: 8),
+          const CircularProgressIndicator.adaptive(),
+        ],
+      ),
     );
   }
 }
@@ -154,7 +170,9 @@ class DiscoveredDeviceTile extends StatelessWidget {
             value: device.scanResult.advertisementData.toString(),
           ),
           const SizedBox(height: 12),
-          RssiIndicator(rssi: device.scanResult.rssi),
+          // RssiIndicator(rssi: device.scanResult.rssi),
+          SignalStrengthIndicator(signalStrength: device.scanResult.rssi),
+          Text("${device.scanResult.rssi}")
         ],
       ),
       onTap: onTap,
@@ -205,6 +223,68 @@ class RssiIndicator extends StatelessWidget {
       return Colors.orange;
     } else {
       return Colors.red;
+    }
+  }
+}
+
+class SignalStrengthIndicator extends StatelessWidget {
+  final int signalStrength; // Value between 1 and 4
+
+  const SignalStrengthIndicator({
+    super.key,
+    required this.signalStrength,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size(60, 60), // Specify the widget's size
+      painter: _SignalStrengthPainter(signalStrength),
+    );
+  }
+}
+
+class _SignalStrengthPainter extends CustomPainter {
+  final int signalStrength;
+
+  _SignalStrengthPainter(this.signalStrength);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    // Center of the canvas
+    final center = Offset(size.width / 2, size.height / 2);
+    // Maximum radius based on the size of the canvas
+    final maxRadius = size.width / 2;
+
+    final discreteSignal = _convertSignalStrength(signalStrength);
+
+    // Draw each circle with the corresponding transparency
+    for (int i = 0; i < discreteSignal; i++) {
+      // Adjust alpha for each circle. 255 means no transparency, and we decrease it for each outer circle.
+      final alpha = (255 * (1 - (i * 0.25))).toInt();
+      paint.color = Colors.blue.withAlpha(alpha);
+
+      // Adjust the radius so the innermost circle is drawn first and is the smallest
+      double radius = maxRadius * ((i + 1) / 4);
+      canvas.drawCircle(center, radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+
+  int _convertSignalStrength(int signalStrength) {
+    if (signalStrength >= -50) {
+      return 4;
+    } else if (signalStrength >= -70) {
+      return 3;
+    } else if (signalStrength >= -80) {
+      return 2;
+    } else {
+      return 1;
     }
   }
 }
