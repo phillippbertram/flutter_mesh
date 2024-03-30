@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'screens/home/home.dart';
 import 'screens/settings/settings_controller.dart';
+import 'ui/ui.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
@@ -51,8 +52,8 @@ class MyApp extends StatelessWidget {
             // Define a light and dark color theme. Then, read the user's
             // preferred ThemeMode (light, dark, or system default) from the
             // SettingsController to display the correct theme.
-            theme: ThemeData(),
-            darkTheme: ThemeData.dark(),
+            theme: lightTheme,
+            darkTheme: darkTheme,
             themeMode: settingsController.themeMode,
 
             home: const HomePage(),

@@ -2,6 +2,7 @@ import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/screens/network/provisioning/device_scan_service.dart';
 import 'package:flutter_mesh/src/screens/network/provisioning/provisioning_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mesh/src/ui/ui.dart';
 
 class DeviceScannerPage extends StatefulWidget {
   const DeviceScannerPage({super.key});
@@ -263,7 +264,7 @@ class _SignalStrengthPainter extends CustomPainter {
     for (int i = 0; i < discreteSignal; i++) {
       // Adjust alpha for each circle. 255 means no transparency, and we decrease it for each outer circle.
       final alpha = (255 * (1 - (i * 0.25))).toInt();
-      paint.color = Colors.blue.withAlpha(alpha);
+      paint.color = AppColors.blueJay.withAlpha(alpha);
 
       // Adjust the radius so the innermost circle is drawn first and is the smallest
       double radius = maxRadius * ((i + 1) / 4);

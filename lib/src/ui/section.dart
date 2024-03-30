@@ -55,9 +55,10 @@ class Section extends StatelessWidget {
       children: [
         if (header != null)
           DefaultTextStyle(
-            style: Theme.of(context).textTheme.titleMedium!,
+            style: Theme.of(context).textTheme.titleSmall!,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16)
+                  .copyWith(bottom: 8),
               child: header,
             ),
           ),
