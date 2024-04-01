@@ -29,6 +29,7 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
     //     _deviceScanService.startScan();
     //   }
     // });
+
     _deviceScanService.startScan();
   }
 
@@ -144,39 +145,57 @@ class DiscoveredDeviceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(device.scanResult.device.platformName),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildDataRow(
-            title: "Localname",
-            value: device.scanResult.advertisementData.advName,
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                device.scanResult.device.platformName,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              _buildDataRow(
+                title: "Localname",
+                value: device.scanResult.advertisementData.advName,
+              ),
+              _buildDataRow(
+                title: "UUID",
+                value: device.device.uuid.toString(),
+              ),
+              _buildDataRow(
+                title: 'OOB',
+                value: device.device.oobInformation.rawValue.toHex(),
+              ),
+              _buildDataRow(
+                title: "Manufacturer",
+                value: device.scanResult.advertisementData.manufacturerData
+                    .toString(),
+              ),
+              _buildDataRow(
+                title: "Advertisement",
+                value: device.scanResult.advertisementData.toString(),
+              ),
+              const SizedBox(height: 12),
+              // RssiIndicator(rssi: device.scanResult.rssi),
+              Row(
+                children: [
+                  SizedBox.square(
+                    dimension: 42,
+                    child: SignalStrengthIndicator(
+                        signalStrength: device.scanResult.rssi),
+                  ),
+                  Text("${device.scanResult.rssi} dBm",
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ],
           ),
-          _buildDataRow(
-            title: "UUID",
-            value: device.device.uuid.toString(),
-          ),
-          _buildDataRow(
-            title: 'OOB',
-            value: device.device.oobInformation.rawValue.toHex(),
-          ),
-          _buildDataRow(
-            title: "Manufacturer",
-            value:
-                device.scanResult.advertisementData.manufacturerData.toString(),
-          ),
-          _buildDataRow(
-            title: "Advertisement",
-            value: device.scanResult.advertisementData.toString(),
-          ),
-          const SizedBox(height: 12),
-          // RssiIndicator(rssi: device.scanResult.rssi),
-          SignalStrengthIndicator(signalStrength: device.scanResult.rssi),
-          Text("${device.scanResult.rssi}")
-        ],
+        ),
       ),
-      onTap: onTap,
     );
   }
 
@@ -248,7 +267,7 @@ class SignalStrengthIndicator extends StatelessWidget {
 class _SignalStrengthPainter extends CustomPainter {
   final int signalStrength;
 
-  _SignalStrengthPainter(this.signalStrength);
+  const _SignalStrengthPainter(this.signalStrength);
 
   @override
   void paint(Canvas canvas, Size size) {

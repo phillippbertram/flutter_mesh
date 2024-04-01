@@ -19,10 +19,11 @@ class MeshNetworkManager with BearerDataDelegate {
 
   // TODO: ProxyFilter proxyFilter;
 
-  WeakReference<Transmitter>? _transmitter;
-  Transmitter? get transmitter => _transmitter?.target;
+  // NOTE: no WeakReference needed in dart?
+  Transmitter? _transmitter;
+  Transmitter? get transmitter => _transmitter;
   void setTransmitter(Transmitter transmitter) {
-    _transmitter = WeakReference(transmitter);
+    _transmitter = transmitter;
   }
 
   // TODO: NetworkParameters networkParameters;

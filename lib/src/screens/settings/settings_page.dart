@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 
+import 'network_keys/network_keys.dart';
 import 'settings_controller.dart';
 
 /// Displays the various settings that can be customized by the user.
@@ -54,22 +56,75 @@ class SettingsPage extends StatelessWidget {
               ),
             ],
           ),
-          Section.children(
-            header: const Text("Mesh Network"),
-            children: const [
-              ListTile(
-                title: Text("Provisioners"),
-              ),
-              ListTile(
-                title: Text("Network Keys"),
-              ),
-              ListTile(
-                title: Text("Application Keys"),
-              ),
-            ],
-          ),
+          _buildNetworkSettingsSection(context),
         ],
       ),
+    );
+  }
+
+  Section _buildNetworkSettingsSection(BuildContext context) {
+    final network = AppNetworkManager.instance.meshNetworkManager.meshNetwork;
+    if (network == null) {
+      return Section.children(
+        header: const Text("Mesh Network"),
+        children: [
+          ListTile(
+              title: const Text("No network"),
+              trailing: ElevatedButton(
+                onPressed: () {
+                  AppNetworkManager.instance.createNewMeshNetwork();
+                },
+                child: const Text("Create Network"),
+              )),
+        ],
+      );
+    }
+    return Section.children(
+      header: const Text("Mesh Network"),
+      children: [
+        ListTile(
+          title: const Text("Provisioners"),
+          trailing: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            children: [
+              Text(network.provisioners.length.toString()),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+        ListTile(
+          title: const Text("Network Keys"),
+          trailing: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            children: [
+              Text(network.networkKeys.length.toString()),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return const NetworkKeysPage();
+            }));
+          },
+        ),
+        ListTile(
+          title: const Text("Application Keys"),
+          trailing: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            children: [
+              Text(network.applicationKeys.length.toString()),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+        ListTile(
+          title: const Text("Last Modified"),
+          trailing: Text(network.timestamp.toString()),
+        ),
+      ],
     );
   }
 }

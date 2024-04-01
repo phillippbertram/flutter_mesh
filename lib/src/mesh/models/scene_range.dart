@@ -1,22 +1,42 @@
+import 'package:flutter_mesh/src/mesh/models/range_object.dart';
 import 'package:flutter_mesh/src/mesh/models/scene_number.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'scene_range.freezed.dart';
-part 'scene_range.g.dart';
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/SceneRange.swift
 
-@freezed
-class SceneRange with _$SceneRange {
+class SceneRange extends RangeObject {
+  SceneRange({
+    required SceneNumber first,
+    required SceneNumber last,
+  }) : super(
+          lowerBound: first.value,
+          upperBound: last.value,
+        );
+
   /// A range containing all valid Scene Numbers.
-  static const allScenes = SceneRange(
+  static final allScenes = SceneRange(
     first: SceneNumber.minScene,
     last: SceneNumber.maxScene,
   );
 
-  const factory SceneRange({
-    required SceneNumber first,
-    required SceneNumber last,
-  }) = _SceneRange;
+  SceneNumber get firstScene => SceneNumber(lowerBound);
+  SceneNumber get lastScene => SceneNumber(upperBound);
+}
 
-  factory SceneRange.fromJson(Map<String, dynamic> json) =>
-      _$SceneRangeFromJson(json);
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/Ranges.swift
+extension SceneRangeX on SceneRange {
+  /// Returns `true` if the scene range is valid.
+  ///
+  /// - returns: `True` if the scene range is valid, `false` otherwise.
+  bool get isValid {
+    return firstScene.isValidSceneNumber && lastScene.isValidSceneNumber;
+  }
+}
+
+extension SceneRangeListX on List<SceneRange> {
+  /// Returns `true` if all the scene ranges are valid.
+  ///
+  /// - returns: `True` if the all scene ranges are valid, `false` otherwise.
+  bool get isValid {
+    return !any((range) => !range.isValid);
+  }
 }

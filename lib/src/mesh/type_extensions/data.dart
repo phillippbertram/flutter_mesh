@@ -16,7 +16,7 @@ extension DataAccessX on Data {
     final byteData = ByteData.sublistView(bytes, offset);
     return byteData.getUint16(
       0,
-      endian ?? Endian.little, // TODO: or Endian.big?
+      endian ?? Endian.big, // TODO: or Endian.big?
     );
   }
 

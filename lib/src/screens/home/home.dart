@@ -26,7 +26,7 @@ class HomePage extends HookWidget {
         destinations: const <Widget>[
           NavigationDestination(
             selectedIcon: Icon(Icons.lightbulb),
-            icon: Icon(Icons.home_outlined),
+            icon: Icon(Icons.lightbulb_outline),
             label: 'Local Node',
           ),
           NavigationDestination(
@@ -34,7 +34,8 @@ class HomePage extends HookWidget {
             label: 'Network',
           ),
           NavigationDestination(
-            icon: Icon(Icons.group),
+            selectedIcon: Icon(Icons.group),
+            icon: Icon(Icons.group_outlined),
             label: 'Groups',
           ),
           NavigationDestination(

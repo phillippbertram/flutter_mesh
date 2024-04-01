@@ -8,6 +8,7 @@ class GroupsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Groups'),
+        centerTitle: false,
       ),
       body: const Center(
         child: Text('Groups Page'),

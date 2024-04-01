@@ -69,7 +69,7 @@ class ProvisioningPduType {
 
   /// A Provisioner sends a Provisioning Invite PDU to indicate to the intended
   /// Provisionee that the provisioning process is starting.
-  static const invite = 0;
+  static const Uint8 invite = 0;
 
   /// The Provisionee sends a Provisioning Capabilities PDU to indicate its
   /// supported provisioning capabilities to a Provisioner.

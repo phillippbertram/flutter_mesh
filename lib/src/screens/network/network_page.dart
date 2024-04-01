@@ -25,6 +25,14 @@ class NetworkPage extends StatelessWidget {
           )
         ],
       ),
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    // TODO: show nodes and provisioners
+    return const Center(
+      child: Text('Network Page'),
     );
   }
 }

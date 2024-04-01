@@ -37,11 +37,12 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
       ];
 
   @override
-  BearerDataDelegate? get dataDelegate => _dataDelegate?.target;
-  WeakReference<BearerDataDelegate>? _dataDelegate;
+  BearerDataDelegate? get dataDelegate => _dataDelegate;
+  // NOTE: no WeakReference needed in dart?
+  BearerDataDelegate? _dataDelegate;
   @override
   void setDataDelegate(BearerDataDelegate delegate) {
-    _dataDelegate = WeakReference(delegate);
+    _dataDelegate = delegate;
   }
 
   @override

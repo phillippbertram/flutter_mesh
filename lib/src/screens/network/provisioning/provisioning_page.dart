@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/algorithms.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -72,7 +73,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
             capabilities: final capabilities
           ):
           logger.d('ProvisioningPage: Capabilities Received: $capabilities');
-          _startProvisioning();
+          // _startProvisioning();
           break;
         case ProvisioningStateProvisioning():
           logger.d('ProvisioningPage: Provisioning');
@@ -84,22 +85,6 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
           logger.d('ProvisioningPage: Provisioning Failed: $error');
           break;
       }
-
-      // state.when(ready: () {
-      //   logger.d('Ready');
-      //   // nothing to do
-      // }, requestingCapabilities: () {
-      //   logger.d('Requesting Capabilities');
-      //   _startProvisioning(); // TODO: remove this here
-      // }, capabilitiesReceived: (capabilities) {
-      //   logger.d('Capabilities Received: $capabilities');
-      // }, provisioning: () {
-      //   logger.d('Provisioning');
-      // }, complete: () {
-      //   logger.d('Provisioning Complete');
-      // }, failed: (error) {
-      //   logger.d('Provisioning Failed: $error');
-      // });
     }).addTo(_subscriptions);
   }
 
@@ -116,12 +101,18 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
       appBar: AppBar(
         title: const Text('Device Capabilities'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.stop),
-            onPressed: () {
-              _abort();
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.stop),
+          //   onPressed: () {
+          //     _abort();
+          //   },
+          // ),
+          TextButton(
+            onPressed: _provisioningManager.provisioningCapabilities == null
+                ? null
+                : _startProvisioning,
+            child: const Text("Provision"),
+          )
         ],
       ),
       body: _buildBody(),
@@ -181,36 +172,88 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     return ListView(
       children: [
         _buildProvisioningState(),
-
         ListTile(
           title: const Text('Name'),
           trailing: Text(widget.device.device.name ?? ''),
         ),
-
         const Text("Provisioning Data"),
-        const ListTile(
-          title: Text('Unicast Address'),
-          trailing: Text("Automatic"),
+        ListTile(
+          title: const Text('Unicast Address'),
+          trailing: _provisioningManager.unicastAddress == null
+              ? const Text("Automatic")
+              : Text(_provisioningManager.unicastAddress!.value.toHex()),
         ),
-        const ListTile(
-          title: Text('Network Key'),
-          trailing: Text("-"),
+        ListTile(
+          title: const Text('Network Key'),
+          trailing: _provisioningManager.networkKey == null
+              ? const Text("Automatic")
+              : Text(_provisioningManager.networkKey!.name),
         ),
-
         const Text("Device Capabilities"),
-        const ListTile(
-          title: Text('Elements Count'),
+        ListTile(
+          title: const Text('Elements Count'),
+          subtitle: _unwrap(
+              _provisioningManager.provisioningCapabilities?.numberOfElements,
+              unwrap: (value) {
+            return Text(value.toString());
+          }, orElse: const Text("N/A")),
         ),
-        const ListTile(
-          title: Text('Supported Algorithms'),
+        ListTile(
+          title: const Text('Supported Algorithms'),
+          subtitle:
+              _unwrap(_provisioningManager.provisioningCapabilities?.algorithms,
+                  unwrap: (value) {
+            return Text(value.debugDescription);
+          }, orElse: const Text("N/A")),
         ),
-        const ListTile(
-          title: Text('Public Key Type'),
+        ListTile(
+          title: const Text('Public Key Type'),
+          subtitle: _unwrap(
+            _provisioningManager.provisioningCapabilities?.publicKeyType,
+            unwrap: (value) => Text(value.debugDescription),
+            orElse: const Text("N/A"),
+          ),
         ),
-        const ListTile(
-          title: Text('OOB Types'),
+        ListTile(
+          title: const Text('OOB Types'),
+          subtitle: _unwrap(
+            _provisioningManager.provisioningCapabilities?.oobType,
+            unwrap: (value) => Text(value.debugDescription),
+            orElse: const Text("N/A"),
+          ),
         ),
-        // TODO: ...
+        ListTile(
+          title: const Text("Output OOB Size"),
+          subtitle: _unwrap(
+            _provisioningManager.provisioningCapabilities?.outputOobSize,
+            unwrap: (value) => Text(value.toString()),
+            orElse: const Text("N/A"),
+          ),
+        ),
+        ListTile(
+          title: const Text("Supported Output OOB Actions"),
+          subtitle: _unwrap(
+            _provisioningManager.provisioningCapabilities?.outputOobActions,
+            unwrap: (value) => Text(value.debugDescription),
+            orElse: const Text("N/A"),
+          ),
+        ),
+        ListTile(
+          title: const Text("Input OOB Size"),
+          subtitle: _unwrap(
+            _provisioningManager.provisioningCapabilities?.inputOobSize,
+            unwrap: (value) => Text(value.toString()),
+            orElse: const Text("N/A"),
+          ),
+        ),
+        ListTile(
+          title: const Text("Supported Input OOB Actions"),
+          subtitle: _unwrap(
+            _provisioningManager.provisioningCapabilities?.inputOobActions,
+            unwrap: (value) => Text(value.debugDescription),
+            orElse: const Text("N/A"),
+          ),
+        )
       ],
     );
   }
@@ -238,4 +281,12 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
           const AuthenticationMethod.noOob(), // TODO: obtain dynamically
     );
   }
+}
+
+Y _unwrap<T, Y>(T? value,
+    {required Y Function(T value) unwrap, required Y orElse}) {
+  if (value == null) {
+    return orElse;
+  }
+  return unwrap(value);
 }

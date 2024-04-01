@@ -11,6 +11,9 @@ final lightTheme = ThemeData.light().copyWith(
     brightness: Brightness.light,
     seedColor: AppColors.blueJay,
   ),
+  appBarTheme: ThemeData.light().appBarTheme.copyWith(
+        centerTitle: false,
+      ),
 );
 
 final darkTheme = ThemeData.dark().copyWith(
@@ -19,4 +22,7 @@ final darkTheme = ThemeData.dark().copyWith(
     brightness: Brightness.dark,
     seedColor: AppColors.blueJay,
   ),
+  appBarTheme: ThemeData.light().appBarTheme.copyWith(
+        centerTitle: false,
+      ),
 );

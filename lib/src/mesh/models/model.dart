@@ -5,12 +5,29 @@ import 'element.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/Model.swift#L45
 class Model {
-  Model._({required this.modelId});
+  Model._({
+    required this.modelId,
+    // TODO:
+    //   self.subscribe = []
+    //   self.bind      = []
+    //   self.delegate  = nil
+  });
 
   factory Model({
     required Uint32 modelId,
   }) {
     return Model._(modelId: modelId);
+  }
+
+  factory Model.createWithSigModelId(Uint16 sigModelId) {
+    return Model(modelId: sigModelId);
+  }
+
+  factory Model.createWithVendorModelId({
+    required Uint16 companyIdentifier,
+    required Uint16 modelIdentifier,
+  }) {
+    return Model(modelId: (companyIdentifier << 16) | modelIdentifier);
   }
 
   /// Bluetooth SIG or vendor-assigned model identifier.
@@ -31,7 +48,7 @@ class Model {
 
   // TODO: test this
   /// Bluetooth SIG or vendor-assigned model identifier.
-  Uint16 get modelIdentitfier => modelId & 0x0000FFFF;
+  Uint16 get modelIdentifier => modelId & 0x0000FFFF;
 
   /// The Company Identifier or `nil`, if the model is Bluetooth SIG-assigned.
   Uint16? get companyIdentifier {
@@ -44,10 +61,29 @@ class Model {
   // TODO:
   // final List<String> subscribe;
 
-  Element? get parentElement => _parentElement?.target;
-  WeakReference<Element>? _parentElement;
+  Element? get parentElement => _parentElement;
+  Element? _parentElement; // NOTE: no WeakReference needed in dart?
 
   void setParentElement(Element parentElement) {
-    _parentElement = WeakReference(parentElement);
+    _parentElement = parentElement;
   }
+}
+
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Models.swift#L536
+
+// The following are the Bluetooth SIG Model Identifiers.
+// These are used to identify the models defined by the Bluetooth SIG.
+// The Bluetooth SIG has assigned a 16-bit Model Identifier for each model.
+// The Model Identifier is a unique 16-bit number that identifies a model within a SIG Model.
+class ModelIdentifier {
+  // Foundation
+  static const Uint16 configurationServer = 0x0000;
+  static const configurationClient = 0x0001;
+  static const healthServer = 0x0002;
+  static const healthClient = 0x0003;
+
+  // Configuration models added in Mesh Protocol 1.1
+
+  // Generic
+  static const genericOnOffServer = 0x1000;
 }

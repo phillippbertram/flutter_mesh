@@ -26,7 +26,7 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
     required MeshNetwork meshNetwork,
   }) : _meshNetwork = meshNetwork;
 
-  // TODO: WeakReference?
+  // NOTE: no WeakReference needed in dart?
   final MeshNetwork _meshNetwork;
 
   final _scanResultsController = StreamController<List<ScanResult>>.broadcast();
@@ -36,11 +36,11 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
   bool get isScanning => _isScanning;
 
   @override
-  BearerDataDelegate? get dataDelegate => _dataDelegate?.target;
-  WeakReference<BearerDataDelegate>? _dataDelegate;
+  BearerDataDelegate? get dataDelegate => _dataDelegate;
+  BearerDataDelegate? _dataDelegate; // NOTE: no WeakReference needed in dart?
   @override
   void setDataDelegate(BearerDataDelegate delegate) {
-    _dataDelegate = WeakReference(delegate);
+    _dataDelegate = delegate;
   }
 
   @override
@@ -149,6 +149,6 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
 
   @override
   void bearerDidDeliverData(Data data, PduType type) {
-    _dataDelegate?.target?.bearerDidDeliverData(data, type);
+    _dataDelegate?.bearerDidDeliverData(data, type);
   }
 }

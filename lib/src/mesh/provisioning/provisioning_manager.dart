@@ -62,8 +62,9 @@ class ProvisioningManager implements BearerDataDelegate {
   ProvisioningData? _provisioningData;
 
   /// The original Bearer delegate. It will be notified on bearer state updates.
-  // TODO: WeakReference<BearerDelegate>? _bearerDelegate;
-  WeakReference<BearerDataDelegate>? _bearerDataDelegate;
+  // NOTE: no WeakReference needed in dart?
+  // TODO: BearerDelegate? _bearerDelegate;
+  BearerDataDelegate? _bearerDataDelegate;
 
   // MARK: - Public properties
 
@@ -151,7 +152,7 @@ class ProvisioningManager implements BearerDataDelegate {
     // bearerDelegate = bearer.delegate
     // bearer.delegate = self
     if (bearer.dataDelegate != null) {
-      _bearerDataDelegate = WeakReference(bearer.dataDelegate!);
+      _bearerDataDelegate = bearer.dataDelegate!;
     }
     bearer.setDataDelegate(this);
 
@@ -377,7 +378,7 @@ class ProvisioningManager implements BearerDataDelegate {
     logger.d(
       "ProvisioningManager: bearerDidDeliverData. Data length: ${data.length}, type: ${type.value}",
     );
-    _bearerDataDelegate?.target?.bearerDidDeliverData(data, type);
+    _bearerDataDelegate?.bearerDidDeliverData(data, type);
 
     // TODO: implement bearerDidDeliverData
 
@@ -399,7 +400,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningStateRequestingCapabilities _,
           ProvisioningResponseCapabilities response
         ):
-        logger.d("IMPLEMENTATION MISSING - Response Capabilities: $response");
+        logger.d("Response Capabilities: $response");
         _provisioningCapabilities = response.capabilities;
         _provisioningData?.accumulate(data.dropFirst());
 
@@ -418,6 +419,7 @@ class ProvisioningManager implements BearerDataDelegate {
         }
 
         // TODO: set state ProvisioningStateCapabilitiesReceived in else case below?
+
         _stateSubject.add(ProvisioningState.capabilitiesReceived(
           capabilities: response.capabilities,
         ));
@@ -433,7 +435,8 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningStateRequestingCapabilities _,
           ProvisioningResponsePublicKey response
         ):
-        logger.d("IMPLEMENTATION MISSING - Response PublicKey: $response");
+        // TODO:
+        logger.f("IMPLEMENTATION MISSING - Response PublicKey: $response");
 
         // Errata E16350 added an extra validation whether the received Public Key
         // is different than Provisioner's one.
@@ -462,7 +465,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseInputComplete response
         ):
         // TODO:
-        logger.d(
+        logger.f(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response InputComplete: $response");
 
         break;
@@ -473,7 +476,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseConfirmation response
         ):
         // TODO:
-        logger.d(
+        logger.f(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response Confirmation: $response");
 
         break;
@@ -484,7 +487,7 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseRandom response
         ):
         // TODO:
-        logger.d(
+        logger.f(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response Random: $response");
 
         break;
@@ -495,12 +498,12 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseComplete response
         ):
         // TODO:
-        logger.d(
+        logger.e(
             "ProvisioningManager: IMPLEMENTATION MISSING - Provisioning complete: $response");
 
       // The provisioned device sent an error.
       case (_, ProvisioningResponseFailed response):
-        logger.e("ProvisioningManager: Provisioning failed: ${response.error}");
+        logger.e("Provisioning failed: ${response.error}");
         _stateSubject.add(ProvisioningState.failed(error: response.error));
 
       default:

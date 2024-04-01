@@ -1,5 +1,9 @@
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Algorithm.swift#L78
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_mesh/src/mesh/provisioning/provisioning_pdu.dart';
+import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
+
 enum Algorithm {
   // Algorithms
   BTM_ECDH_P256_CMAC_AES128_AES_CCM,
@@ -24,6 +28,12 @@ class Algorithms {
   final int rawValue;
 
   const Algorithms._(this.rawValue);
+
+  factory Algorithms.fromPdu(ProvisioningPdu pdu, {required int offset}) {
+    final data = pdu.data;
+    final rawValue = data.readUint16(offset: offset, endian: Endian.big);
+    return Algorithms._(rawValue);
+  }
 
   // Algorithms
   static const Algorithms BTM_ECDH_P256_CMAC_AES128_AES_CCM =
@@ -85,5 +95,26 @@ class Algorithms {
       Algorithms.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
       Algorithms.BTM_ECDH_P256_HMAC_SHA256_AES_CCM,
     };
+  }
+}
+
+extension AlgorithmDebugging on Algorithm {
+  String get debugDescription {
+    switch (this) {
+      case Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM:
+        return "BTM_ECDH_P256_CMAC_AES128_AES_CCM";
+      case Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM:
+        return "BTM_ECDH_P256_HMAC_SHA256_AES_CCM";
+    }
+  }
+}
+
+extension AlgorithmsDebugging on Algorithms {
+  String get debugDescription {
+    if (rawValue == 0) {
+      return "None";
+    }
+
+    return algorithms.map((a) => a.debugDescription).join(", ");
   }
 }

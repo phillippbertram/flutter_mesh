@@ -114,53 +114,273 @@ sealed class AuthenticationMethod with _$AuthenticationMethod {
 /// number of times. That number should be provided to
 /// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
 enum OutputAction {
-  blink,
-  beep,
-  vibrate,
-  outputNumeric,
-  outputAlphanumeric,
+  blink._(1),
+  beep._(2),
+  vibrate._(3),
+  outputNumeric._(4),
+  outputAlphanumeric._(5);
+
+  final Uint8 value;
+
+  const OutputAction._(this.value);
 }
 
-extension OutputActionExtension on OutputAction {
-  Uint8 get value {
-    switch (this) {
-      case OutputAction.blink:
-        return 0;
-      case OutputAction.beep:
-        return 1;
-      case OutputAction.vibrate:
-        return 2;
-      case OutputAction.outputNumeric:
-        return 3;
-      case OutputAction.outputAlphanumeric:
-        return 4;
-    }
+/// A set of supported Output Out-of-band actions.
+class OutputOobActions {
+  final Uint16 rawValue;
+
+  const OutputOobActions._(this.rawValue);
+
+  static const blink = OutputOobActions._(1 << 0);
+  static const beep = OutputOobActions._(1 << 1);
+  static const vibrate = OutputOobActions._(1 << 2);
+  static const outputNumeric = OutputOobActions._(1 << 3);
+  static const outputAlphanumeric = OutputOobActions._(1 << 4);
+
+  bool contains(OutputOobActions action) {
+    return rawValue & action.rawValue == action.rawValue;
+  }
+
+  factory OutputOobActions.fromPdu(
+    ProvisioningPdu pdu, {
+    required int offset,
+  }) {
+    return OutputOobActions._(pdu.data.readUint16(offset: offset));
+  }
+
+  @override
+  String toString() {
+    return debugDescription;
   }
 }
 
-/// Available output actions to be performed during provisioning.
+/// Available input actions to be performed during provisioning.
 ///
 /// For example,if the Unprovisioned Device is a light, then it would blink random
 /// number of times. That number should be provided to
 /// ``ProvisioningDelegate/authenticationActionRequired(_:)``.
 enum InputAction {
-  push,
-  twist,
-  inputNumeric,
-  inputAlphanumeric,
+  push._(1),
+  twist._(2),
+  inputNumeric._(3),
+  inputAlphanumeric._(4);
+
+  final Uint8 value;
+
+  const InputAction._(this.value);
 }
 
-extension InputActionExtension on InputAction {
-  Uint8 get value {
+/// A set of supported Input Out-of-band actions.
+class InputOobActions {
+  final Uint16 rawValue;
+
+  const InputOobActions._(this.rawValue);
+
+  static const push = InputOobActions._(1 << 0);
+  static const twist = InputOobActions._(1 << 1);
+  static const inputNumeric = InputOobActions._(1 << 2);
+  static const inputAlphanumeric = InputOobActions._(1 << 3);
+
+  bool contains(InputOobActions action) {
+    return rawValue & action.rawValue == action.rawValue;
+  }
+
+  factory InputOobActions.fromPdu(
+    ProvisioningPdu pdu, {
+    required int offset,
+  }) {
+    return InputOobActions._(pdu.data.readUint16(offset: offset));
+  }
+
+  @override
+  String toString() {
+    return debugDescription;
+  }
+}
+
+/// A set of supported Out-Of-Band types.
+class OobType {
+  final Uint8 rawValue;
+
+  const OobType._(this.rawValue);
+
+  factory OobType.fromPdu(
+    ProvisioningPdu pdu, {
+    required int offset,
+  }) {
+    return OobType._(pdu.data.readUint8(offset: offset));
+  }
+
+  /// Static OOB Information is available.
+  static const staticOobInformationAvailable = OobType._(1 << 0);
+
+  /// Only OOB authenticated provisioning supported.
+  ///
+  /// - since: Mesh Protocol 1.1.
+  static const onlyOobAuthenticatedProvisioningSupported = OobType._(1 << 1);
+
+  /// Checks if a particular option is set.
+  bool contains(OobType option) {
+    return rawValue & option.rawValue == option.rawValue;
+  }
+
+  @override
+  String toString() {
+    return debugDescription;
+  }
+}
+
+extension OobTypeDebugging on OobType {
+  String get debugDescription {
+    if (rawValue == 0) {
+      return "None";
+    }
+
+    final options = <String>[];
+    if (contains(OobType.staticOobInformationAvailable)) {
+      options.add("Static OOB Information Available");
+    }
+    if (contains(OobType.onlyOobAuthenticatedProvisioningSupported)) {
+      options.add("Only OOB Authenticated Provisioning Supported");
+    }
+
+    return options.join(", ");
+  }
+}
+
+extension OobInformationDebugging on OobInformation {
+  String get debugDescription {
+    if (rawValue == 0) {
+      return "None";
+    }
+
+    final options = <String>[];
+    if (contains(OobInformation.other)) {
+      options.add("Other");
+    }
+    if (contains(OobInformation.electronicURI)) {
+      options.add("Electronic URI");
+    }
+    if (contains(OobInformation.qrCode)) {
+      options.add("QR Code");
+    }
+    if (contains(OobInformation.barCode)) {
+      options.add("Bar Code");
+    }
+    if (contains(OobInformation.nfc)) {
+      options.add("NFC");
+    }
+    if (contains(OobInformation.number)) {
+      options.add("Number");
+    }
+    if (contains(OobInformation.string)) {
+      options.add("String");
+    }
+    if (contains(OobInformation.supportForCertificateBasedProvisioning)) {
+      options.add("Support for certificate-based provisioning");
+    }
+    if (contains(OobInformation.supportForProvisioningRecords)) {
+      options.add("Support for provisioning records");
+    }
+    if (contains(OobInformation.onBox)) {
+      options.add("On Box");
+    }
+    if (contains(OobInformation.insideBox)) {
+      options.add("Inside Box");
+    }
+    if (contains(OobInformation.onPieceOfPaper)) {
+      options.add("On Piece Of Paper");
+    }
+    if (contains(OobInformation.insideManual)) {
+      options.add("Inside Manual");
+    }
+    if (contains(OobInformation.onDevice)) {
+      options.add("On Device");
+    }
+
+    return options.join(", ");
+  }
+}
+
+extension OutputActionDebugging on OutputAction {
+  String get debugDescription {
+    switch (this) {
+      case OutputAction.blink:
+        return "Blink";
+      case OutputAction.beep:
+        return "Beep";
+      case OutputAction.vibrate:
+        return "Vibrate";
+      case OutputAction.outputNumeric:
+        return "Output Numeric";
+      case OutputAction.outputAlphanumeric:
+        return "Output Alphanumeric";
+    }
+  }
+}
+
+extension OutputOobActionsDebugging on OutputOobActions {
+  String get debugDescription {
+    if (rawValue == 0) {
+      return "None";
+    }
+
+    final options = <String>[];
+    if (contains(OutputOobActions.blink)) {
+      options.add("Blink");
+    }
+    if (contains(OutputOobActions.beep)) {
+      options.add("Beep");
+    }
+    if (contains(OutputOobActions.vibrate)) {
+      options.add("Vibrate");
+    }
+    if (contains(OutputOobActions.outputNumeric)) {
+      options.add("Output Numeric");
+    }
+    if (contains(OutputOobActions.outputAlphanumeric)) {
+      options.add("Output Alphanumeric");
+    }
+
+    return options.join(", ");
+  }
+}
+
+extension InputActionDebugging on InputAction {
+  String get debugDescription {
     switch (this) {
       case InputAction.push:
-        return 0;
+        return "Push";
       case InputAction.twist:
-        return 1;
+        return "Twist";
       case InputAction.inputNumeric:
-        return 2;
+        return "Input Numeric";
       case InputAction.inputAlphanumeric:
-        return 3;
+        return "Input Alphanumeric";
     }
+  }
+}
+
+extension InputOobActionsDebugging on InputOobActions {
+  String get debugDescription {
+    if (rawValue == 0) {
+      return "None";
+    }
+
+    final options = <String>[];
+    if (contains(InputOobActions.push)) {
+      options.add("Push");
+    }
+    if (contains(InputOobActions.twist)) {
+      options.add("Twist");
+    }
+    if (contains(InputOobActions.inputNumeric)) {
+      options.add("Input Numeric");
+    }
+    if (contains(InputOobActions.inputAlphanumeric)) {
+      options.add("Input Alphanumeric");
+    }
+
+    return options.join(", ");
   }
 }

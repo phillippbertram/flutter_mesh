@@ -1,7 +1,10 @@
 // from AppDelegate.swift example
 
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh_app/network_connection.dart';
+
+// TODO: implement ChangeNotifier?
 
 // @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Example/Source/AppDelegate.swift
 class AppNetworkManager {
@@ -40,26 +43,26 @@ class AppNetworkManager {
   }
 
 // TODO:
-// void createNewMeshNetwork() {
-//   final localProvisioner = Provisioner.create(
-//     name: 'Local Provisioner',
-//   );
+  void createNewMeshNetwork() {
+    final localProvisioner = Provisioner.create(
+      name: 'Local Provisioner',
+    );
 
-//   final networkRes = meshNetworkManager.createMeshNetwork(
-//     name: "My MeshNetwork",
-//     provisioner: localProvisioner,
-//   );
-//   if (networkRes.isError) {
-//     logger.d('Error: ${networkRes.asError!.error}');
-//   }
+    final networkRes = meshNetworkManager.createNewMeshNetwork(
+      name: "My MeshNetwork",
+      provisioner: localProvisioner,
+    );
+    if (networkRes.isError) {
+      logger.e('Error: ${networkRes.asError!.error}');
+    }
 
-//   final saveRes = meshNetworkManager.save();
-//   if (saveRes.isError) {
-//     logger.d('Error: ${saveRes.asError!.error}');
-//   }
+    final saveRes = meshNetworkManager.save();
+    if (saveRes.isError) {
+      logger.e('Error: ${saveRes.asError!.error}');
+    }
 
-//   meshNetworkDidChange()
-// }
+    meshNetworkDidChange();
+  }
 
   void meshNetworkDidChange() {
     this.connection?.close();

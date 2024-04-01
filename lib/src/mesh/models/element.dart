@@ -10,6 +10,7 @@ class Element {
     required this.location,
     required this.models,
     required this.index,
+    required this.unicastAddress,
   });
 
   static Element create({
@@ -21,6 +22,7 @@ class Element {
       name: name,
       location: location,
       models: models,
+      unicastAddress: Address.minUnicastAddress, // TODO:
       // Set temporary index.
       // Final index will be set when Element is added to the Node.
       index: 0,
@@ -40,10 +42,28 @@ class Element {
   final List<Model> models;
   final Address unicastAddress;
 
-  Node? get parentNode => _parentNode?.target;
-  WeakReference<Node>? _parentNode;
+  Node? get parentNode => _parentNode;
+  Node? _parentNode; // NOTE: no WeakReference needed in dart?
   void setParentNode(Node parentNode) {
-    _parentNode = WeakReference(parentNode);
+    _parentNode = parentNode;
+  }
+
+  static Element get primaryElement {
+    // The Provisioner will always have a first Element with obligatory
+    // Models (Configuration Server and Health Server) and supported clients
+    //(Configuration Client and Health Client).
+    final element = Element.create(
+      name: 'Primary Element',
+      location: Location.unknown,
+      models: [
+        Model.createWithSigModelId(ModelIdentifier.configurationServer),
+        Model.createWithSigModelId(ModelIdentifier.configurationClient),
+        Model.createWithSigModelId(ModelIdentifier.healthServer),
+        Model.createWithSigModelId(ModelIdentifier.healthClient),
+      ],
+    );
+
+    return element;
   }
 }
 
@@ -101,26 +121,5 @@ extension ElementX on Element {
   //           // Some of them are supported natively in the library.
   //           !model.requiresDeviceKey
   //       }
-  //   }
-
-  //   /// The primary Element for Provisioner's Node.
-  //   ///
-  //   /// The Element will contain all mandatory Models (Configuration Server
-  //   /// and Health Server) and supported clients (Configuration Client
-  //   /// and Health Client).
-  //   static var primaryElement: Element {
-  //       // The Provisioner will always have a first Element with obligatory
-  //       // Models.
-  //       let element = Element(location: .unknown)
-  //       element.name = "Primary Element"
-  //       // Configuration Server is required for all nodes.
-  //       element.add(model: Model(sigModelId: .configurationServerModelId))
-  //       // Configuration Client is added, as this is a Provisioner's node.
-  //       element.add(model: Model(sigModelId: .configurationClientModelId))
-  //       // Health Server is required for all nodes.
-  //       element.add(model: Model(sigModelId: .healthServerModelId))
-  //       // Health Client is added, as this is a Provisioner's node.
-  //       element.add(model: Model(sigModelId: .healthClientModelId))
-  //       return element
   //   }
 }

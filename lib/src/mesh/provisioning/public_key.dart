@@ -1,6 +1,8 @@
+import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../types.dart';
+import 'provisioning_pdu.dart';
 
 part 'public_key.freezed.dart';
 
@@ -47,6 +49,53 @@ class PublicKeyType {
 
   const PublicKeyType._(this.rawValue);
 
+  factory PublicKeyType.fromPdu(ProvisioningPdu pdu, {required int offset}) {
+    return PublicKeyType._(pdu.data.readUint8(offset: offset));
+  }
+
   /// Public Key OOB Information is available.
   static const publicKeyOobInformationAvailable = PublicKeyType._(1 << 0);
+
+  bool contains(PublicKeyType option) {
+    return rawValue & option.rawValue == option.rawValue;
+  }
+
+  @override
+  String toString() {
+    return debugDescription;
+  }
+}
+
+extension PublicKeyMethodDebugging on PublicKeyMethod {
+  String get debugDescription {
+    switch (this) {
+      case PublicKeyMethod.noOobPublicKey:
+        return "No OOB Public Key";
+      case PublicKeyMethod.oobPublicKey:
+        return "OOB Public Key";
+    }
+  }
+}
+
+extension PublicKeyDebugging on PublicKey {
+  String get debugDescription {
+    return when(
+      noOob: () => "No OOB Public Key",
+      oobPublicKey: (_) => "OOB Public Key",
+    );
+  }
+}
+
+extension PublicKeyTypeDebugging on PublicKeyType {
+  String get debugDescription {
+    if (rawValue == 0) {
+      return "None";
+    }
+
+    if (contains(PublicKeyType.publicKeyOobInformationAvailable)) {
+      return "Public Key OOB Information Available";
+    }
+
+    return "None";
+  }
 }

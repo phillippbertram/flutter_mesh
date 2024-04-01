@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 @JsonEnum(valueField: 'value')
 enum Location {
+  unknown(0x0000),
   auxiliary(0x0108),
   back(0x0101),
   backup(0x0107),
