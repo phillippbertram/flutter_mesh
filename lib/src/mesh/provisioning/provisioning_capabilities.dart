@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/algorithms.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
@@ -55,12 +54,12 @@ extension ProvisioningCapabilitiesX on ProvisioningCapabilities {
   Data get value {
     // TODO: this might not be very efficient?
     return Data.from([numberOfElements])
-      ..addUint16(algorithms.rawValue, endian: Endian.big)
-      ..addUint8(publicKeyType.rawValue)
-      ..addUint8(oobType.rawValue)
-      ..addUint8(outputOobSize)
-      ..addUint16(outputOobActions.rawValue, endian: Endian.big)
-      ..addUint8(inputOobSize)
-      ..addUint16(inputOobActions.rawValue, endian: Endian.big);
+        .addUint16(algorithms.rawValue, endian: Endian.big)
+        .addUint8(publicKeyType.rawValue)
+        .addUint8(oobType.rawValue)
+        .addUint8(outputOobSize)
+        .addUint16(outputOobActions.rawValue, endian: Endian.big)
+        .addUint8(inputOobSize)
+        .addUint16(inputOobActions.rawValue, endian: Endian.big);
   }
 }

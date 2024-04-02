@@ -272,13 +272,14 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
       return;
     }
 
-    // TODO: do stuff
+    // TODO: if device supports oob, present the options to the user
+    const publicKey = PublicKey.noOob();
+    const authenticationMethod = AuthenticationMethod.noOob();
 
     await _provisioningManager.provision(
       algorithm: capabilities.algorithms.strongest,
-      publicKey: const PublicKey.noOob(), // TODO: obtain dynamically
-      authenticationMethod:
-          const AuthenticationMethod.noOob(), // TODO: obtain dynamically
+      publicKey: publicKey,
+      authenticationMethod: authenticationMethod,
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
-import 'package:flutter_mesh/src/mesh/models/network_key.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 
 class NetworkKeysPage extends StatelessWidget {

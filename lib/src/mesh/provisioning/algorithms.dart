@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_pdu.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 
+import '../types.dart';
+
 enum Algorithm {
   // Algorithms
   BTM_ECDH_P256_CMAC_AES128_AES_CCM,
@@ -19,6 +21,16 @@ extension AlgorithmValue on Algorithm {
       // TODO: this is Mesh1.1?
       case Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM:
         return 256;
+    }
+  }
+
+  Uint8 get value {
+    switch (this) {
+      case Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM:
+        return 0x00;
+
+      case Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM:
+        return 0x01;
     }
   }
 }

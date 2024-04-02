@@ -1,8 +1,9 @@
-
 import 'package:flutter_mesh/src/mesh/types.dart';
 import 'dart:math' as math;
 
 import '../bearer.dart';
+
+// TODO: @freezed?
 
 // TODO: https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Bearer/GATT/ProxyProtocolHandler.swift
 

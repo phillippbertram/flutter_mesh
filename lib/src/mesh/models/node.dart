@@ -3,10 +3,6 @@
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 
-import '../types.dart';
-import 'address.dart';
-import 'address_range.dart';
-import 'element.dart';
 
 class Node {
   Node._({

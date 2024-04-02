@@ -108,6 +108,29 @@ sealed class AuthenticationMethod with _$AuthenticationMethod {
   }) = InputOob;
 }
 
+extension AuthenticationMethodValue on AuthenticationMethod {
+  Data get value {
+    return when(
+      noOob: () => Data.from([0, 0, 0]),
+      staticOob: () => Data.from([1, 0, 0]),
+      outputOob: (action, size) {
+        return Data.from([
+          2,
+          action.value,
+          size,
+        ]);
+      },
+      inputOob: (action, size) {
+        return Data.from([
+          3,
+          action.value,
+          size,
+        ]);
+      },
+    );
+  }
+}
+
 /// Available output actions to be performed during provisioning.
 ///
 /// For example,if the Unprovisioned Device is a light, then it would blink random
