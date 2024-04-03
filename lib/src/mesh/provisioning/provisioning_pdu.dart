@@ -275,25 +275,3 @@ extension ProvisioningResponseX on ProvisioningResponse {
     };
   }
 }
-
-
-
-//     var pdu: ProvisioningPdu {
-//         switch self {
-//         case let .capabilities(capabilities):
-//             return ProvisioningPdu(pdu: .capabilities) + capabilities.value
-//         case .inputComplete:
-//             return ProvisioningPdu(pdu: .inputComplete)
-//         case let .publicKey(key):
-//             return ProvisioningPdu(pdu: .publicKey) + key
-//         case let .confirmation(confirmation):
-//             return ProvisioningPdu(pdu: .confirmation) + confirmation
-//         case let .random(random):
-//             return ProvisioningPdu(pdu: .random) + random
-//         case .complete:
-//             return ProvisioningPdu(pdu: .complete)
-//         case let .failed(error):
-//             return ProvisioningPdu(pdu: .failed) + error.rawValue
-//         }
-//     }
-// }

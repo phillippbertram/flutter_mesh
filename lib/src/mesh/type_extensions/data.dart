@@ -34,6 +34,12 @@ extension DataAccessX on Data {
     return Data.from([...this, ...byteData.buffer.asUint8List()]);
   }
 
+  Data addUint32(Uint32 value, {Endian endian = Endian.little}) {
+    final byteData = ByteData(4);
+    byteData.setUint32(0, value, endian);
+    return Data.from([...this, ...byteData.buffer.asUint8List()]);
+  }
+
   /// drops the first `n` bytes from the data.
   Data dropFirst([int n = 1]) {
     return sublist(n);

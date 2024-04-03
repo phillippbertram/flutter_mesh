@@ -51,15 +51,12 @@ class ProvisioningCapabilities with _$ProvisioningCapabilities {
 
 extension ProvisioningCapabilitiesX on ProvisioningCapabilities {
   // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningPdu.swift#L141
-  Data get value {
-    // TODO: this might not be very efficient?
-    return Data.from([numberOfElements])
-        .addUint16(algorithms.rawValue, endian: Endian.big)
-        .addUint8(publicKeyType.rawValue)
-        .addUint8(oobType.rawValue)
-        .addUint8(outputOobSize)
-        .addUint16(outputOobActions.rawValue, endian: Endian.big)
-        .addUint8(inputOobSize)
-        .addUint16(inputOobActions.rawValue, endian: Endian.big);
-  }
+  Data get value => Data.from([numberOfElements])
+      .addUint16(algorithms.rawValue, endian: Endian.big)
+      .addUint8(publicKeyType.rawValue)
+      .addUint8(oobType.rawValue)
+      .addUint8(outputOobSize)
+      .addUint16(outputOobActions.rawValue, endian: Endian.big)
+      .addUint8(inputOobSize)
+      .addUint16(inputOobActions.rawValue, endian: Endian.big);
 }

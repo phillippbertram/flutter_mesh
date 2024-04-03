@@ -16,7 +16,7 @@ class SectionedListView extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16)
               .copyWith(bottom: 18, top: 8),
-          child: const Divider(height: 1),
+          // child: const Divider(height: 1),
         );
       },
       itemBuilder: (context, index) {

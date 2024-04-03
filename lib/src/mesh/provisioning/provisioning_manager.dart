@@ -7,6 +7,7 @@ import 'package:flutter_mesh/src/mesh/provisioning/provisioning_capabilities.dar
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../models/node.dart';
 import 'algorithms.dart';
 import 'provisioning_data.dart';
 
@@ -284,8 +285,10 @@ class ProvisioningManager implements BearerDataDelegate {
       authenticationMethod: authenticationMethod,
     );
     logger.d("Sending $startRequest");
-    final reqStartRes = await _sendProvisioningRequest(startRequest,
-        accumulatedData: _provisioningData);
+    final reqStartRes = await _sendProvisioningRequest(
+      startRequest,
+      accumulatedData: _provisioningData,
+    );
     if (reqStartRes.isError) {
       final errMess =
           "Failed to send provisioning start request: ${reqStartRes.asError!.error}";
@@ -413,9 +416,10 @@ class ProvisioningManager implements BearerDataDelegate {
     final confirmation = ProvisioningRequest.confirmation(
       data: _provisioningData!.provisionerConfirmation,
     );
+
     logger.d("Sending $confirmation");
-    final res = await _sendProvisioningRequest(confirmation,
-        accumulatedData: _provisioningData);
+    final res = await _sendProvisioningRequest(confirmation);
+
     if (res.isError) {
       logger.e(
           "Failed to send Provisioner's Confirmation: ${res.asError!.error}");
@@ -463,7 +467,8 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningStateRequestingCapabilities _,
           ProvisioningResponseCapabilities response
         ):
-        logger.d("Response Capabilities: $response");
+        logger.t("Handling Response Capabilities: $response");
+
         _provisioningCapabilities = response.capabilities;
         _provisioningData?.accumulate(data.dropFirst());
 
@@ -498,16 +503,15 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningStateProvisioning _,
           ProvisioningResponsePublicKey response
         ):
-        // TODO:
-        logger.f("IMPLEMENTATION MISSING - Response PublicKey: $response");
+        logger.t("Handling response PublicKey: $response");
 
         // Errata E16350 added an extra validation whether the received Public Key
         // is different than Provisioner's one.
         if (response.key == _provisioningData?.provisionerPublicKey) {
-          logger.e("Public Key mismatch");
+          logger.e("Invalid Public Key: same as Provisioner's");
 
-          // TODO: this is not done in original code, but should?
-          // _stateSubject.add(const ProvisioningStateFailed("Public Key mismatch"));
+          _stateSubject
+              .add(const ProvisioningStateFailed(error: "Invalid Public Key"));
           return;
         }
 
@@ -548,9 +552,31 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningStateProvisioning _,
           ProvisioningResponseConfirmation response
         ):
-        // TODO:
-        logger.f(
-            "ProvisioningManager: IMPLEMENTATION MISSING - Response Confirmation: $response");
+        logger.t("Handling Response Confirmation: $response");
+        // Errata E16350 added an extra validation whether the received Confirmation
+        // is different than Provisioner's one.
+        if (response.key == _provisioningData!.provisionerConfirmation) {
+          logger.e("Confirmation failed");
+          _stateSubject.add(
+            const ProvisioningState.failed(error: "Confirmation failed"),
+          );
+          return;
+        }
+
+        _provisioningData!.provisionerDidObtainDeviceConfirmation(response.key);
+        final request = ProvisioningRequest.random(
+          data: _provisioningData!.provisionerRandom!,
+        );
+        logger.d("Sending $request");
+        final result = await _sendProvisioningRequest(request);
+        if (result.isError) {
+          logger.e(
+              "Failed to send Provisioner's Random: ${result.asError!.error}");
+          _stateSubject.add(
+            const ProvisioningState.failed(
+                error: "Failed to send Provisioner's Random"),
+          );
+        }
 
         break;
 
@@ -563,6 +589,32 @@ class ProvisioningManager implements BearerDataDelegate {
         logger.f(
             "ProvisioningManager: IMPLEMENTATION MISSING - Response Random: $response");
 
+        _provisioningData!.provisionerDidObtainDeviceRandom(response.key);
+        final confirmed = _provisioningData!.validateConfirmation();
+        if (!confirmed) {
+          logger.e("Confirmation failed");
+          _stateSubject.add(
+            const ProvisioningState.failed(error: "Confirmation failed"),
+          );
+          return;
+        }
+
+        final request = ProvisioningRequest.data(
+          encryptedDataWithMic:
+              _provisioningData!.encryptedProvisioningDataWithMic,
+        );
+        logger.d("Sending $request");
+
+        final result = await _sendProvisioningRequest(request);
+        if (result.isError) {
+          logger
+              .e("Failed to send Provisioner's Data: ${result.asError!.error}");
+          _stateSubject.add(
+            const ProvisioningState.failed(
+                error: "Failed to send Provisioner's Data"),
+          );
+        }
+
         break;
 
       // The provisioning process is complete.
@@ -571,19 +623,39 @@ class ProvisioningManager implements BearerDataDelegate {
           ProvisioningResponseComplete response
         ):
         // TODO:
-        logger.e(
-            "ProvisioningManager: IMPLEMENTATION MISSING - Provisioning complete: $response");
+        logger.t("Handling Provisioning complete: $response");
+
+        final security = _provisioningData!.security;
+        final deviceKey = _provisioningData!.deviceKey;
+        final numberOfElements = _provisioningCapabilities!.numberOfElements;
+
+        logger.f("IMPLEMENTATION MISSING - Create node and add to network");
+        // final node = Node.forUnprovisionedDevice(
+        //   device: unprovisionedDevice,
+        //   network: meshNetwork,
+        //   unicastAddress: unicastAddress!,
+        //   deviceKey: deviceKey,
+        //   security: security,
+        //   numberOfElements: numberOfElements,
+        // );
+        // meshNetwork.add(node);
+        _stateSubject.add(const ProvisioningState.complete());
+
+        break;
 
       // The provisioned device sent an error.
       case (_, ProvisioningResponseFailed response):
         logger.e("Provisioning failed: ${response.error}");
         _stateSubject.add(ProvisioningState.failed(error: response.error));
+        break;
 
       default:
         logger.e(
             "ProvisioningManager: Unexpected response: $response for state $state");
         _stateSubject
             .add(const ProvisioningState.failed(error: "Invalid state"));
+
+        break;
     }
   }
 }

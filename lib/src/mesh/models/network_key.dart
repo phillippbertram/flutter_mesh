@@ -1,3 +1,4 @@
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/models/key.dart';
 import 'package:flutter_mesh/src/mesh/models/key_refresh_phase.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data_keys.dart';
@@ -43,6 +44,19 @@ class NetworkKey implements MeshKey {
 
   @override
   final Data key;
+
+  Data? get oldKey => _oldKey;
+  Data? _oldKey;
+  void setOldKey(Data? key) {
+    _oldKey = key;
+    if (oldKey == null) {
+      // TODO:
+      logger.f("MISSING IMPLEMENTATION: oldKey is null");
+      // oldNetworkId = null
+      // oldKeys = null;
+      // phase = KeyRefreshPhase.normalOperation;
+    }
+  }
 
   final KeyRefreshPhase phase;
   final DateTime timestamp;
