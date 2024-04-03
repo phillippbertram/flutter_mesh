@@ -1,13 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:async/async.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/algorithms.dart';
+import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:flutter_mesh/src/mesh/utils/crypto.dart';
 
-
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningData.swift#L33
-
 class ProvisioningData {
   ProvisioningData();
 
@@ -19,6 +20,7 @@ class ProvisioningData {
   // TODO: make private
   crypto.EcKeyPair? keyPair;
   Data? sharedSecret;
+  Data? authValue;
   bool? oobPublicKey;
 
   // TODO: private setter
@@ -42,7 +44,7 @@ class ProvisioningData {
     required NetworkKey netKey,
     required Address unicastAddress,
   }) {
-    logger.e("MISSING IMPLEMENTATION - IVIndex");
+    logger.f("MISSING IMPLEMENTATION - IVIndex");
     networkKey = netKey;
     this.unicastAddress = unicastAddress;
     // this.ivIndex = network.ivIndex; // TODO:
@@ -76,7 +78,7 @@ extension ProvisioningDataX on ProvisioningData {
     this.keyPair = keyPair;
 
     final pubKey = await keyPair.extractPublicKey();
-    provisionerPublicKey = pubKey.toDer(); // TODO: is .toDer() correct?
+    provisionerPublicKey = Uint8List.fromList(pubKey.x + pubKey.y);
 
     this.algorithm = algorithm;
     provisionerRandom = Crypto.generateRandomBits(algorithm.lengthInBits);
@@ -116,5 +118,24 @@ extension ProvisioningDataX on ProvisioningData {
     oobPublicKey = oob;
 
     return Result.value(null);
+  }
+
+  void provisionerDidObtainAuthValue(Data authValue) {
+    logger.t(
+        "ProvisioningData.provisionerDidObtainAuthValue: ${authValue.length}");
+    this.authValue = authValue;
+  }
+
+  /// Returns the Provisioner Confirmation value.
+  ///
+  /// The Auth Value must be set prior to calling this method.
+  Data get provisionerConfirmation {
+    return Crypto.calculateConfirmation(
+      confirmationInputs: confirmationInputs,
+      sharedSecret: sharedSecret!,
+      random: provisionerRandom!,
+      authValue: authValue!,
+      algorithm: algorithm!,
+    );
   }
 }

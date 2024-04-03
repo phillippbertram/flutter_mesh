@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mesh/src/ui/ui.dart';
 
 class ProxyPage extends StatelessWidget {
   const ProxyPage({super.key});
@@ -9,8 +10,35 @@ class ProxyPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Proxy'),
       ),
-      body: const Center(
-        child: Text('Proxy Page'),
+      body: SectionedListView(
+        children: [
+          Section.children(
+            children: [
+              // TODO:
+              const ListTile(
+                title: Text('Automatic Connection'),
+                trailing: Switch(value: false, onChanged: null),
+              ),
+              const ListTile(
+                title: Text('Proxy'),
+                trailing: Text('TBD'),
+              ),
+              ListTile(
+                trailing: TextButton(
+                    child: Text("Disconnect"),
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+                    onPressed: null),
+              )
+            ],
+          ),
+          Section.children(
+            header: const Text("Proxy Filter"),
+            children: const [],
+          )
+        ],
       ),
     );
   }

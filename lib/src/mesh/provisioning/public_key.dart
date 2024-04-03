@@ -21,6 +21,18 @@ enum PublicKeyMethod {
   oobPublicKey
 }
 
+extension PublicKeyMethodValue on PublicKeyMethod {
+  Uint8 get value {
+    switch (this) {
+      case PublicKeyMethod.noOobPublicKey:
+        return 0x00;
+
+      case PublicKeyMethod.oobPublicKey:
+        return 0x01;
+    }
+  }
+}
+
 @freezed
 sealed class PublicKey with _$PublicKey {
   const factory PublicKey.noOob() = NoOobPublicKey;

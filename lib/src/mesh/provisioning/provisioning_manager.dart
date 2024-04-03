@@ -368,27 +368,90 @@ class ProvisioningManager implements BearerDataDelegate {
   /// This method will call `authValueReceived(:)` when the value
   /// has been obtained.
   void _obtainAuthValue() {
-    logger.e("IMPLEMENTATION MISSING - Obtain Auth Value");
+    logger.d("Obtain Auth Value for $_authenticationMethod");
+    // The AuthValue is 16 or 32 bytes long, depending on the selected algorithm.
+    final sizeInBytes = _provisioningData!.algorithm!.lengthInBits >> 3;
+
+    switch (_authenticationMethod!) {
+      case NoOob():
+        logger.d("No OOB Auth Value");
+        final authValue = Data.from(List.filled(sizeInBytes, 0));
+        _authValueReceived(authValue);
+        break;
+
+      case StaticOob(value: final value):
+        // TODO:
+        logger.f("IMPLEMENTATION MISSING - Static OOB Auth Value: $value");
+        break;
+
+      case OutputOob():
+        // TODO:
+        logger.f("IMPLEMENTATION MISSING - Output OOB Auth");
+        break;
+
+      case InputOob():
+        // TODO:
+        logger.f("IMPLEMENTATION MISSING - Input OOB Auth");
+        break;
+    }
+  }
+
+  /// This method should be called when the OOB value has been received
+  /// and Auth Value has been calculated.
+  ///
+  /// It computes and sends the Provisioner Confirmation to the device.
+  ///
+  /// - parameter value: The 16 or 32 byte long Auth Value, depending on the
+  ///                    selected algorithm.
+  Future<void> _authValueReceived(Data authValue) async {
+    logger.d("Auth Value received: 0x${authValue.toHex()}");
+
+    // Accumulate the Auth Value.
+    _provisioningData!.provisionerDidObtainAuthValue(authValue);
+
+    // Calculate the Confirmation.
+    final confirmation = ProvisioningRequest.confirmation(
+      data: _provisioningData!.provisionerConfirmation,
+    );
+    logger.d("Sending $confirmation");
+    final res = await _sendProvisioningRequest(confirmation,
+        accumulatedData: _provisioningData);
+    if (res.isError) {
+      logger.e(
+          "Failed to send Provisioner's Confirmation: ${res.asError!.error}");
+      _stateSubject.add(
+        const ProvisioningState.failed(
+            error: "Failed to send Provisioner's Confirmation"),
+      );
+    }
   }
 
   // MARK: - BearerDataDelegate
 
   @override
-  void bearerDidDeliverData(Data data, PduType type) {
+  Future<void> bearerDidDeliverData(Data data, PduType type) async {
     logger.d(
-      "ProvisioningManager: bearerDidDeliverData. Data length: ${data.length}, type: ${type.value}",
+      "ProvisioningManager: bearerDidDeliverData. Data: 0x${data.toHex()}, type: ${type.value}",
     );
     _bearerDataDelegate?.bearerDidDeliverData(data, type);
 
     // TODO: implement bearerDidDeliverData
-
-    final responseRes = ProvisioningResponse.fromPdu(ProvisioningPdu(data));
+    final provisioningPdu = ProvisioningPdu(data);
+    print("<<< provisioningPdu: ${provisioningPdu.type?.value}");
+    final responseRes = ProvisioningResponse.fromPdu(provisioningPdu);
     final response = responseRes.asValue?.value;
     if (response == null) {
       logger.d(
           "ProvisioningManager: Invalid response: ${responseRes.asError!.error}");
       return;
     }
+
+    // TODO:
+    //  guard response.isValid(forAlgorithm: provisioningData.algorithm) else {
+    //         state = .fail(ProvisioningError.invalidPdu)
+    //         return
+    //     }
+    //     logger?.v(.provisioning, "\(response) received")
 
     logger.d(
       "ProvisioningManager: handling received response: $response in state $state",
@@ -432,7 +495,7 @@ class ProvisioningManager implements BearerDataDelegate {
 
       // Device Public Key has been received.
       case (
-          ProvisioningStateRequestingCapabilities _,
+          ProvisioningStateProvisioning _,
           ProvisioningResponsePublicKey response
         ):
         // TODO:
@@ -443,17 +506,27 @@ class ProvisioningManager implements BearerDataDelegate {
         if (response.key == _provisioningData?.provisionerPublicKey) {
           logger.e("Public Key mismatch");
 
-          // TODO: this is not done in original code
+          // TODO: this is not done in original code, but should?
           // _stateSubject.add(const ProvisioningStateFailed("Public Key mismatch"));
           return;
         }
 
-        _provisioningData?.accumulate(data.dropFirst());
-
-        _provisioningData?.provisionerDidObtainDevicePublicKey(
+        _provisioningData!.accumulate(data.dropFirst());
+        final pubKeyRes =
+            await _provisioningData!.provisionerDidObtainDevicePublicKey(
           response.key,
           oob: false,
         );
+        if (pubKeyRes.isError) {
+          logger.e(
+              "Failed to obtain device Public Key: ${pubKeyRes.asError!.error}");
+          _stateSubject.add(
+            const ProvisioningState.failed(
+                error: "Failed to obtain device Public Key"),
+          );
+          return;
+        }
+        _obtainAuthValue();
 
         // TODO:
 

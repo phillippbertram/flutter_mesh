@@ -11,6 +11,6 @@ class DataUtils {
   // TODO: use crypto library?
   static Data random128BitKey() {
     final d = Crypto.generateRandomBits(128);
-    return d.toList();
+    return d.toList(growable: false);
   }
 }

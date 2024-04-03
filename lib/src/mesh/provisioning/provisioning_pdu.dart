@@ -60,6 +60,10 @@ class ProvisioningPdu {
   ProvisioningPdu operator +(Data data) {
     return ProvisioningPdu(this.data + data);
   }
+
+  ProvisioningPdu addUint8(int value) {
+    return ProvisioningPdu(data.addUint8(value));
+  }
 }
 
 class ProvisioningPduType {
@@ -157,13 +161,10 @@ extension ProvisioningRequestX on ProvisioningRequest {
         publicKey: final publicKey,
         authenticationMethod: final authenticationMethod,
       ) =>
-        ProvisioningPdu.fromPduType(ProvisioningPduType.start) +
-            Data.from([
-              // TODO:
-              // algorithm.value,
-              // publicKey.value,
-              // authenticationMethod.value,
-            ]),
+        (ProvisioningPdu.fromPduType(ProvisioningPduType.start)
+                .addUint8(algorithm.value)
+                .addUint8(publicKey.value)) +
+            authenticationMethod.value,
       ProvisioningRequestPublicKey(key: final key) =>
         ProvisioningPdu.fromPduType(ProvisioningPduType.publicKey) + key,
       ProvisioningRequestConfirmation(data: final data) =>
