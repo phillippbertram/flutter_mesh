@@ -53,6 +53,9 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
     );
     await basePeripheral.disconnect();
     _isOpenSubject.add(false);
+
+    _subscriptions.dispose();
+
     return Result.value(null);
   }
 
@@ -64,11 +67,6 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   Stream<bool> get isOpenStream => _isOpenSubject.stream;
 
   final _isOpenSubject = BehaviorSubject.seeded(false);
-
-  void dispose() {
-    close();
-    _subscriptions.dispose();
-  }
 
   @override
   Future<Result<void>> open() async {
@@ -204,11 +202,11 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
       logger.d("BaseGattBearer: received <- 0x${value.toHex()}");
       final message = _protocolHandler.reassemble(value);
       if (message == null) {
-        logger.d("BaseGattBearer: Failed to reassemble message");
+        logger.d("BaseGattBearer: Reassembling message not complete");
         return;
       }
       logger.d(
-          'BaseGattBearer: Reassembled message type: ${message.messageType}');
+          'BaseGattBearer: Reassembled message type: ${message.messageType}, 0x${message.data.toHex()}');
       dataDelegate?.bearerDidDeliverData(message.data, message.messageType);
     }).addTo(_subscriptions);
 
