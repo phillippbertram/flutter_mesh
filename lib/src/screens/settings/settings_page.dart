@@ -124,7 +124,53 @@ class SettingsPage extends StatelessWidget {
           title: const Text("Last Modified"),
           trailing: Text(network.timestamp.toString()),
         ),
+        ListTile(
+          trailing: TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+              ),
+              onPressed: () async {
+                final shouldReset = await _showForgetNetworkPrompt(context);
+                if (shouldReset) {
+                  AppNetworkManager.instance.createNewMeshNetwork();
+                  AppNetworkManager.instance.save();
+                }
+              },
+              child: const Text("Forget this Network")),
+        )
       ],
     );
   }
+}
+
+Future<bool> _showForgetNetworkPrompt(BuildContext context) async {
+  return await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Forget Network"),
+            content:
+                const Text("Are you sure you want to forget this network?"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onErrorContainer,
+                ),
+                child: const Text("Forget"),
+              ),
+            ],
+          );
+        },
+      ) ??
+      false;
 }

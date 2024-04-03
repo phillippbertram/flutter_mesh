@@ -628,19 +628,28 @@ class ProvisioningManager implements BearerDataDelegate {
         final security = _provisioningData!.security;
         final deviceKey = _provisioningData!.deviceKey;
         final numberOfElements = _provisioningCapabilities!.numberOfElements;
+        final networkKey = _provisioningData!.networkKey;
 
         logger.f("IMPLEMENTATION MISSING - Create node and add to network");
-        // final node = Node.forUnprovisionedDevice(
-        //   device: unprovisionedDevice,
-        //   network: meshNetwork,
-        //   unicastAddress: unicastAddress!,
-        //   deviceKey: deviceKey,
-        //   security: security,
-        //   numberOfElements: numberOfElements,
-        // );
-        // meshNetwork.add(node);
-        _stateSubject.add(const ProvisioningState.complete());
+        final node = Node.forUnprovisionedDevice(
+          unprovisionedDevice,
+          networkKey: networkKey!,
+          address: unicastAddress!,
+          deviceKey: deviceKey!,
+          security: security,
+          elementCount: numberOfElements,
+        );
+        final addRes = meshNetwork.addNode(node);
+        if (addRes.isError) {
+          logger.e("Failed to add node to network: ${addRes.asError!.error}");
+          _stateSubject.add(
+            const ProvisioningState.failed(
+                error: "Failed to add node to network"),
+          );
+          return;
+        }
 
+        _stateSubject.add(const ProvisioningState.complete());
         break;
 
       // The provisioned device sent an error.

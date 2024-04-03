@@ -16,7 +16,7 @@ class Element {
   static Element create({
     String? name,
     required Location location,
-    required List<Model> models,
+    List<Model> models = const [],
   }) {
     final element = Element._(
       name: name,
@@ -37,7 +37,7 @@ class Element {
   }
 
   final String? name;
-  final int index;
+  int index; // TODO: indernal set
   final Location location;
   final List<Model> models;
   final Address unicastAddress;

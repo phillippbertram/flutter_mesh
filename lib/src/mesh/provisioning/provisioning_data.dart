@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:cryptography/cryptography.dart' as crypto;

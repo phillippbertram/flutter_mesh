@@ -25,12 +25,12 @@ class ProxyPage extends StatelessWidget {
               ),
               ListTile(
                 trailing: TextButton(
-                    child: Text("Disconnect"),
                     style: TextButton.styleFrom(
                       foregroundColor:
                           Theme.of(context).colorScheme.onErrorContainer,
                     ),
-                    onPressed: null),
+                    onPressed: null,
+                    child: const Text("Disconnect")),
               )
             ],
           ),

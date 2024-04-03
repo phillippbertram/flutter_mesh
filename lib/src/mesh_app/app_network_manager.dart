@@ -42,6 +42,13 @@ class AppNetworkManager {
     );
   }
 
+  void save() {
+    final saveRes = meshNetworkManager.save();
+    if (saveRes.isError) {
+      logger.e('Error: ${saveRes.asError!.error}');
+    }
+  }
+
 // TODO:
   void createNewMeshNetwork() {
     final localProvisioner = Provisioner.create(

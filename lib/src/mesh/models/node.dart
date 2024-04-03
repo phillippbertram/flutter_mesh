@@ -3,7 +3,6 @@
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 
-
 class Node {
   Node._({
     required this.uuid,
@@ -13,7 +12,7 @@ class Node {
 
   factory Node.create({
     required String uuid,
-    required String name,
+    String? name,
     required Address primaryUnicastAddress,
   }) {
     return Node._(
@@ -42,8 +41,91 @@ class Node {
     );
   }
 
-  final String uuid;
-  final String name;
+  /// Initializes a Node for given unprovisioned device.
+  ///
+  /// The Node will have the same UUID as the device in the advertising
+  /// packet.
+  ///
+  /// - parameters:
+  ///   - unprovisionedDevice: The newly provisioned device.
+  ///   - n: Number of Elements on the new Node.
+  ///   - deviceKey: The Device Key.
+  ///   - security: The Node's security. A Node is considered secure if it was
+  ///               provisioned using a OOB Public Key.
+  ///   - networkKey: The Network Key.
+  ///   - address: The Unicast Address to be assigned to the Node.
+  factory Node.forUnprovisionedDevice(
+    UnprovisionedDevice device, {
+    required Uint8 elementCount,
+    required Data deviceKey,
+    required Security security,
+    required NetworkKey networkKey,
+    required Address address,
+  }) {
+    final node = Node._create(
+      uuid: device.uuid.str,
+      name: device.name,
+      deviceKey: deviceKey,
+      security: security,
+      networkKey: networkKey,
+      primaryUnicastAddress: address,
+    );
+    // Elements will be queried with Composition Data.
+    // Let's just add n empty Elements to reserve addresses.
+    List.generate(
+      elementCount,
+      (index) => {
+        node._addElement(
+          Element.create(location: Location.unknown),
+        ),
+      },
+    );
+    return node;
+  }
+
+  factory Node._create({
+    required String uuid,
+    String? name,
+    required Data deviceKey,
+    required Security security,
+    required NetworkKey networkKey,
+    required Address primaryUnicastAddress,
+  }) {
+    final node = Node.create(
+      uuid: uuid,
+      name: name,
+      primaryUnicastAddress: primaryUnicastAddress,
+    );
+
+    logger.f("MISSING IMPLEMENTATION");
+    // TODO: set missing properties
+
+    // self.uuid = uuid
+    // self.name = name
+    // self.primaryUnicastAddress = address
+    // self.deviceKey = deviceKey
+    // self.security  = security
+    // // Composition Data were not obtained.
+    // self.isConfigComplete = false
+
+    // // The updated flag is set to true if the Node was provisioned using
+    // // a Network Key in Phase 2 (Using New Keys).
+    // let updated = networkKey.phase == .usingNewKeys
+    // self.netKeys  = [NodeKey(index: networkKey.index, updated: updated)]
+    // self.appKeys  = []
+    // self.elements = []
+
+    // // If the Node as provisioned in an insecure way, lower the minimum security
+    // // of the Network Key.
+    // if security == .insecure {
+    //     networkKey.lowerSecurity()
+    // }
+
+    return node;
+  }
+
+  final UUID uuid; // TODO: use the `Uuid` class
+  final String? name;
 
   final List<Element> elements = []; // TODO:
 
@@ -59,14 +141,29 @@ class Node {
     // TODO
   }
 
+  // TODO: internal
+  /// Adds given list of Elements to the Node.
+  ///
+  /// - parameter element: The list of Elements to be added.
   void addElements(List<Element> elements) {
-    logger.e("MISSING IMPLEMENTATION");
-    // TODO: implement this
-    this.elements.addAll(elements);
+    for (var element in elements) {
+      _addElement(element);
+    }
   }
 
+  // TODO: internal
+  /// Adds the given Element to the Node.
+  ///
+  /// - parameter element: The Element to be added.
   void addElement(Element element) {
     logger.e("MISSING IMPLEMENTATION");
+  }
+
+  void _addElement(Element element) {
+    final index = elements.length;
+    elements.add(element);
+    element.setParentNode(this);
+    element.index = index;
   }
 }
 

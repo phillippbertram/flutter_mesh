@@ -73,16 +73,21 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
             capabilities: final capabilities
           ):
           logger.d('ProvisioningPage: Capabilities Received: $capabilities');
-          // _startProvisioning();
+          setState(() {}); // TODO: updates UI
           break;
         case ProvisioningStateProvisioning():
           logger.d('ProvisioningPage: Provisioning');
           break;
         case ProvisioningStateComplete():
           logger.d('ProvisioningPage: Provisioning Complete');
+          logger.t('Disconnecting...');
+          bearer.close();
+          // TODO: close this view?
+          AppNetworkManager.instance.save();
           break;
         case ProvisioningStateFailed(error: final error):
           logger.d('ProvisioningPage: Provisioning Failed: $error');
+          _abort();
           break;
       }
     }).addTo(_subscriptions);
@@ -119,35 +124,6 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     );
   }
 
-  Widget _buildProvisioningState() {
-    return StreamBuilder<ProvisioningState>(
-      stream: _provisioningManager.stateStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final state = snapshot.data!;
-          switch (state) {
-            case ProvisioningStateReady():
-              return const Text('Ready');
-            case ProvisioningStateRequestingCapabilities():
-              return const Text('Requesting Capabilities');
-            case ProvisioningStateCapabilitiesReceived(
-                capabilities: final capabilities
-              ):
-              return Text('Capabilities Received: $capabilities');
-            case ProvisioningStateProvisioning():
-              return const Text('Provisioning');
-            case ProvisioningStateComplete():
-              return const Text('Provisioning Complete');
-            case ProvisioningStateFailed(error: final error):
-              return Text('Provisioning Failed: $error');
-          }
-        }
-
-        return const SizedBox();
-      },
-    );
-  }
-
   Widget _buildBody() {
     return StreamBuilder<bool>(
       stream: widget.device.bearer.isOpenStream,
@@ -171,7 +147,6 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
   Widget _buildDeviceInfo() {
     return ListView(
       children: [
-        _buildProvisioningState(),
         ListTile(
           title: const Text('Name'),
           trailing: Text(widget.device.device.name ?? ''),
