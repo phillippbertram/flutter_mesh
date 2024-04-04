@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'network_keys/network_keys.dart';
 import 'settings_controller.dart';
@@ -57,6 +59,9 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
           _buildNetworkSettingsSection(context),
+          const Section(
+            child: AppVersion(),
+          ),
         ],
       ),
     );
@@ -173,4 +178,27 @@ Future<bool> _showForgetNetworkPrompt(BuildContext context) async {
         },
       ) ??
       false;
+}
+
+class AppVersion extends HookWidget {
+  const AppVersion({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final appInfo = useState<PackageInfo?>(null);
+    useEffect(() {
+      PackageInfo.fromPlatform().then((packageInfo) {
+        appInfo.value = packageInfo;
+      });
+
+      return null;
+    }, const []);
+
+    return appInfo.value == null
+        ? const SizedBox()
+        : ListTile(
+            title: const Text("App Version"),
+            trailing: Text(appInfo.value!.version),
+          );
+  }
 }

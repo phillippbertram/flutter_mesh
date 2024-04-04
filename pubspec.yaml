@@ -31,6 +31,8 @@ dependencies:
   flutter_hooks: ^0.20.5 # 0.21.0 has a bug!!!
   logger: ^2.2.0
   equatable: ^2.0.5
+  path_provider: ^2.1.2
+  package_info_plus: ^6.0.0
 
 dev_dependencies:
   flutter_test:
