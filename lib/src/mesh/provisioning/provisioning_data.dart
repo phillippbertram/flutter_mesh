@@ -1,4 +1,3 @@
-
 import 'package:async/async.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
 import 'package:flutter/foundation.dart';
@@ -76,10 +75,7 @@ extension ProvisioningDataX on ProvisioningData {
   /// - Provisioner's Public Key,
   /// - Provisionee's Public Key.
   void accumulate(Data data) {
-    final lengthBefore = confirmationInputs.length;
     confirmationInputs.addAll(data);
-    print(
-        "<<< accumulate: ${data.length} -> ${confirmationInputs.length} (was $lengthBefore)");
   }
 
   Future<Result<void>> generateKeys({required Algorithm algorithm}) async {

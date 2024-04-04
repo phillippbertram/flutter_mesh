@@ -24,7 +24,7 @@ class NetworkKeysPage extends StatelessWidget {
         final networkKey = networkKeys[index];
         return ListTile(
             title: Text(networkKey.name),
-            trailing: const Icon(Icons.chevron_right),
+            trailing: const Icon(Icons.copy_all),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

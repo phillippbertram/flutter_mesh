@@ -27,7 +27,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
 
   final _subscriptions = CompositeSubscription();
 
-  var _provisioningState = ProvisioningState.ready();
+  var _provisioningState = const ProvisioningState.ready();
 
   @override
   void initState() {

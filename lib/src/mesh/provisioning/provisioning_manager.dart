@@ -28,7 +28,7 @@ import 'provisioning_data.dart';
 /// and call ``provision(usingAlgorithm:publicKey:authenticationMethod:)``. If user interaction is required
 /// during provisioning process corresponding delegate callbacks will be invoked.
 ///
-/// The provisioning is completed when ``ProvisioningState/complete`` state is returned.
+/// The provisioning is completed when `ProvisioningState/complete` state is returned.
 class ProvisioningManager implements BearerDataDelegate {
   ProvisioningManager._({
     required this.unprovisionedDevice,

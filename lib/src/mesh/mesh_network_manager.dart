@@ -1,3 +1,4 @@
+
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
@@ -59,6 +60,9 @@ class MeshNetworkManager with BearerDataDelegate {
   Result<void> save() {
     logger.f("MISSING IMPLEMENTATION: save");
     // TODO:
+
+    // final meshJson = jsonEncode(_meshData);
+
     return Result.value(null);
   }
 
