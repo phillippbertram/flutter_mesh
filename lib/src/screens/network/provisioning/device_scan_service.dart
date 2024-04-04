@@ -30,6 +30,25 @@ class DeviceProvisioningScanService {
   Stream<bool> get isScanningStream => _isScanningSubject.stream;
   bool get isScanning => _isScanningSubject.value;
 
+  final _subscriptions = CompositeSubscription();
+
+  DeviceProvisioningScanService() {
+    FlutterBluePlus.isScanning.listen((isScanning) {
+      _isScanningSubject.add(isScanning);
+    }).addTo(_subscriptions);
+
+    final scanSubscription = FlutterBluePlus.onScanResults.listen((results) {
+      _handleResults(results);
+    }, onError: (e) {
+      logger.e("Error scanning: $e");
+      _scanResultSubject.addError(e);
+    });
+    _subscriptions.add(scanSubscription);
+
+    // cleanup: cancel subscription when scanning stops
+    // FlutterBluePlus.cancelWhenScanComplete(scanSubscription);
+  }
+
   // Check permissions
   Future<bool> checkPermissions() async {
     final isSupported = await FlutterBluePlus.isSupported;
@@ -46,43 +65,34 @@ class DeviceProvisioningScanService {
   }) async {
     logger.t("Starting scanning for unprovisioned devices");
 
-    if (!await checkPermissions()) {
-      logger.w("Bluetooth not enabled or permission denied");
+    if (isScanning) {
+      logger.w("Already scanning for unprovisioned devices, ignoring request");
       return;
     }
 
-    final scanSubscription = FlutterBluePlus.onScanResults.listen((results) {
-      _handleResults(results);
-    }, onError: (e) {
-      logger.e("Error scanning: $e");
-      _scanResultSubject.addError(e);
-    });
-
-    // cleanup: cancel subscription when scanning stops
-    FlutterBluePlus.cancelWhenScanComplete(scanSubscription);
+    // if (!await checkPermissions()) {
+    //   logger.w("Bluetooth not enabled or permission denied");
+    //   return;
+    // }
 
     // Wait for Bluetooth enabled & permission granted
     // In your real app you should use `FlutterBluePlus.adapterState.listen` to handle all states
-    await FlutterBluePlus.adapterState
-        .where((val) => val == BluetoothAdapterState.on)
-        .first;
+    // await FlutterBluePlus.adapterState
+    //     .where((val) => val == BluetoothAdapterState.on)
+    //     .first;
 
     // Start scanning w/ timeout
     // Optional: you can use `stopScan()` as an alternative to using a timeout
     // Note: scan filters use an *or* behavior. i.e. if you set `withServices` & `withNames`
     //   we return all the advertisements that match any of the specified services *or* any
     //   of the specified names.
-    _isScanningSubject.add(true);
+
     await FlutterBluePlus.startScan(
       continuousUpdates: true,
       removeIfGone: const Duration(seconds: 5),
       withServices: [Guid(MeshProvisioningService().uuid)],
       timeout: stopAfter,
     );
-
-    // wait for scanning to stop
-    await FlutterBluePlus.isScanning.where((val) => val == false).first;
-    _isScanningSubject.add(false);
   }
 
   // Stop scanning
@@ -92,7 +102,8 @@ class DeviceProvisioningScanService {
 
   // Dispose resources
   void dispose() {
-    _scanResultSubject.close();
+    _subscriptions.dispose();
+    FlutterBluePlus.stopScan();
   }
 
   void _handleResults(List<ScanResult> results) {
@@ -109,7 +120,8 @@ class DeviceProvisioningScanService {
     final discoveryPeripherals = results
         .map((result) {
           final device = UnprovisionedDevice.fromAdvertisementData(
-              result.advertisementData);
+            result.advertisementData,
+          );
 
           if (device == null) {
             return null;

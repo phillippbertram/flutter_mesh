@@ -3,6 +3,7 @@ import 'package:flutter_mesh/src/screens/network/provisioning/device_scan_servic
 import 'package:flutter_mesh/src/screens/network/provisioning/provisioning_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DeviceScannerPage extends StatefulWidget {
   const DeviceScannerPage({super.key});
@@ -13,6 +14,9 @@ class DeviceScannerPage extends StatefulWidget {
 
 class _DeviceScannerPageState extends State<DeviceScannerPage> {
   final _deviceScanService = DeviceProvisioningScanService();
+  final _subscriptions = CompositeSubscription();
+
+  var _isScanning = false;
 
   @override
   initState() {
@@ -30,12 +34,19 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
     //   }
     // });
 
-    _deviceScanService.startScan();
+    _startScan();
+
+    _deviceScanService.isScanningStream.listen((isScanning) {
+      setState(() {
+        _isScanning = isScanning;
+      });
+    }).addTo(_subscriptions);
   }
 
   @override
   void dispose() {
     _deviceScanService.dispose();
+    _subscriptions.cancel();
     super.dispose();
   }
 
@@ -45,24 +56,17 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
       appBar: AppBar(
         title: const Text('Provision Device'),
         actions: [
-          StreamBuilder<bool>(
-            stream: _deviceScanService.isScanningStream,
-            initialData: false,
-            builder: (context, snapshot) {
-              final isScanning = snapshot.data!;
-              return IconButton(
-                // TODO: disable stop action, when scanning, not needed. Its just for testing
-                icon: isScanning
-                    ? const CircularProgressIndicator.adaptive()
-                    : const Icon(Icons.search),
-                onPressed: () {
-                  if (isScanning) {
-                    _deviceScanService.stopScan();
-                  } else {
-                    _deviceScanService.startScan();
-                  }
-                },
-              );
+          IconButton(
+            // TODO: disable stop action, when scanning, not needed. Its just for testing
+            icon: _isScanning
+                ? const CircularProgressIndicator.adaptive()
+                : const Icon(Icons.search),
+            onPressed: () {
+              if (_isScanning) {
+                _deviceScanService.stopScan();
+              } else {
+                _startScan();
+              }
             },
           )
         ],
@@ -80,15 +84,31 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
             child: Text('Error: ${snapshot.error}'),
           );
         }
+        final scanResults = snapshot.data ?? [];
 
-        if (!snapshot.hasData) {
+        if (scanResults.isEmpty && _isScanning) {
           return _buildLoadingState(context);
         }
 
-        final scanResults = snapshot.data!;
         if (scanResults.isEmpty) {
-          return const Center(
-            child: Text('No devices found'),
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '😭\nNo devices found!',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () {
+                    _startScan();
+                  },
+                  child: const Text('Scan again'),
+                )
+              ],
+            ),
           );
         }
 
@@ -115,12 +135,12 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    return Align(
-      alignment: const Alignment(0, -(1 / 4)),
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Looking for unprovisioned devices...",
+          Text("🔎\nLooking for unprovisioned devices...",
+              textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium!
@@ -129,6 +149,12 @@ class _DeviceScannerPageState extends State<DeviceScannerPage> {
           const CircularProgressIndicator.adaptive(),
         ],
       ),
+    );
+  }
+
+  void _startScan() {
+    _deviceScanService.startScan(
+      stopAfter: const Duration(seconds: 30),
     );
   }
 }
