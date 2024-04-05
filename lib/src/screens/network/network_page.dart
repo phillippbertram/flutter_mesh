@@ -1,4 +1,5 @@
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
+import 'package:flutter_mesh/src/screens/network/configuration/node_config_page.dart';
 import 'package:flutter_mesh/src/screens/network/provisioning/device_scanner_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
@@ -45,6 +46,13 @@ class NetworkPage extends StatelessWidget {
         );
         return ListTile(
           tileColor: Theme.of(context).hoverColor,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => NodeConfigPage(node: node),
+              ),
+            );
+          },
           title: Text(
             node.name ?? "Node ${node.uuid}",
             style: Theme.of(context).textTheme.titleLarge,

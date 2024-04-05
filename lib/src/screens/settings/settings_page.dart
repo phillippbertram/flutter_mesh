@@ -168,8 +168,7 @@ Future<bool> _showForgetNetworkPrompt(BuildContext context) async {
                   Navigator.of(context).pop(true);
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor:
-                      Theme.of(context).colorScheme.onErrorContainer,
+                  foregroundColor: context.theme.appColors.error.defaultColor,
                 ),
                 child: const Text("Forget"),
               ),

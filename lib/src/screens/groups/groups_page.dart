@@ -7,10 +7,7 @@ class GroupsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Groups'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('Groups')),
       body: Center(
         child: EmptyView(
           image: Container(

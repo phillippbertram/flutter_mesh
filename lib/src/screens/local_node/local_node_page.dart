@@ -10,7 +10,6 @@ class LocalNodePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Local Node'),
-        centerTitle: false,
       ),
       body: _buildEmptyView(),
     );
