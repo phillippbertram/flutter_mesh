@@ -8,8 +8,9 @@ export 'mesh_constants.dart';
 extension IntegerHex on int {
   /// Returns a string representation of the integer as a hexadecimal number.
   ///
-  /// The string is prefixed with `0x`.
-  String toHex() => '0x${toRadixString(16).toUpperCase()}';
+  /// The string is prefixed with `0x`. With padding
+  String toHex({int? pad}) =>
+      '0x${toRadixString(16).toUpperCase().padLeft(pad ?? 0, '0')}';
 }
 
 extension DataHex on Data {

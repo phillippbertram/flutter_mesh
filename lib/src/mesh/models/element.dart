@@ -10,7 +10,6 @@ class Element {
     required this.location,
     required this.models,
     required this.index,
-    required this.unicastAddress,
   });
 
   static Element create({
@@ -22,7 +21,6 @@ class Element {
       name: name,
       location: location,
       models: models,
-      unicastAddress: Address.minUnicastAddress, // TODO:
       // Set temporary index.
       // Final index will be set when Element is added to the Node.
       index: 0,
@@ -40,7 +38,20 @@ class Element {
   int index; // TODO: indernal set
   final Location location;
   final List<Model> models;
-  final Address unicastAddress;
+
+  /// Returns the Unicast Address of the Element.
+  ///
+  /// For Elements not added to Node this returns the Element index
+  /// value as ``Address``.
+  Address get unicastAddress => Address(
+        (parentNode?.primaryUnicastAddress.value ?? 0),
+      );
+
+  /// Returns whether the Element is a Primary Element on the Node,
+  /// that is its index is equal to 0.
+  bool get isPrimary {
+    return index == 0;
+  }
 
   Node? get parentNode => _parentNode;
   Node? _parentNode; // NOTE: no WeakReference needed in dart?

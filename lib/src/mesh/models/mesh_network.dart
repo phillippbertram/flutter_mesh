@@ -22,6 +22,7 @@ import 'provisioner.dart';
 //     "https://www.bluetooth.com/specifications/specs/mesh-cdb-1-0-1-schema.json#";
 
 // TODO: JSONSerialization + Equatable
+// TODO: implement ChangeNotifier?
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/MeshNetwork.swift
 class MeshNetwork {
@@ -68,12 +69,40 @@ class MeshNetwork {
 
   /// The local Elements that will be added to the Provisioner's Node.
   List<Element> get localElements => _localElements;
-  List<Element> _localElements = []; // TODO:
+  List<Element> _localElements = [Element.primaryElement]; // TODO:
   void setLocalElements(List<Element> elements) {
+    // make copy so we can make changes without affecting the original list
+    elements = [...elements];
+
     // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20Model/MeshNetwork.swift#L92
     // TODO:
-    logger.e("MISSING IMPLEMENTATION . setLocalElements");
+    logger.e("MISSING IMPLEMENTATION .setLocalElements");
+
+    // Remove all empty Elements.
+    elements.removeWhere((element) => element.models.isEmpty);
+
+    // add required models and primary element if needed
+    // TODO:
+    // if elements.isEmpty {
+    //   elements.append(Element(location: .unknown))
+    //  }
+    // elements[0].addPrimaryElementModels(self)
+    if (elements.isEmpty) {
+      elements.add(Element.primaryElement);
+    }
+
+    // TODO: // Make sure the indexes are correct.
+
     _localElements = elements;
+
+    // TODO:  Make sure there is enough address space for all the Elements
+    // that are not taken by other Nodes and are in the local Provisioner's
+    // address range. If required, cut the Elements array.
+
+    // if (localProvisioner?.node) {
+    // // Assign the Elements to the Provisioner's Node.
+    //   node.set(elements: availableElements)
+    // }
   }
 
   /// The IV Index of the mesh network.
@@ -170,7 +199,7 @@ extension MeshNetworkNodes on MeshNetwork {
       return Result.error("Address is not available.");
     }
 
-    logger.e("MISSING IMPLENENTATION - addNode");
+    logger.e("MISSING IMPLEMENTATION - addNode");
 
     // Ensure the Network Key exists.
     // TODO:
@@ -253,6 +282,7 @@ extension MeshNetworkAddress on MeshNetwork {
         }
       }
 
+      // If the range has available space, return the address.
       if (address + elementsCount - 1 <= range.high) {
         return address;
       }
@@ -375,13 +405,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
   }
 
   Result<void> addProvisioner(Provisioner provisioner) {
-    logger.e("MeshNetork: AddProvisioner Not implemented");
-
-    // Find the Unicast Address to be assigned.
-    // guard let address = nextAvailableUnicastAddress(for: provisioner) else {
-    //     throw MeshNetworkError.noAddressAvailable
-    // }
-    // try add(provisioner: provisioner, withAddress: address)
+    logger.t("adding provisioner: ${provisioner.name}");
 
     final address = nextAvailableUnicastAddress(provisioner: provisioner);
     if (address == null) {
@@ -389,7 +413,9 @@ extension MeshNetworkProvisioner on MeshNetwork {
     }
 
     return addProvisionerWithAddress(
-        provisioner: provisioner, unicastAddress: address);
+      provisioner: provisioner,
+      unicastAddress: address,
+    );
   }
 
   /// Adds the Provisioner and assigns the given Unicast Address to it.
@@ -406,7 +432,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
     required Provisioner provisioner,
     Address? unicastAddress,
   }) {
-    logger.e("MISSING IMPLEMENTATION - addProvisionerWithAddress");
+    logger.f("MISSING IMPLEMENTATION - addProvisionerWithAddress (incomplete)");
 
     // TODO:
     // if (provisioner.meshNetwork != null) {
@@ -434,8 +460,10 @@ extension MeshNetworkProvisioner on MeshNetwork {
       }
 
       // Is the address already used?
-      if (nodes
-          .any((node) => node.containsElementWithAddress(unicastAddress))) {
+      final isAddressInUse = nodes.any(
+        (node) => node.containsElementWithAddress(unicastAddress),
+      );
+      if (isAddressInUse) {
         return Result.error("Unicast address is already used.");
       }
     }
@@ -482,7 +510,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
       }
     }
 
-    logger.e("MISSING IMPLEMENTATION - addProvisionerWithAddress");
+    logger.f("MISSING IMPLEMENTATION - addProvisionerWithAddress (incomplete)");
     // TODO:
     // provisioner.meshNetwork = this;
     provisioners.add(provisioner);
@@ -491,7 +519,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
     // When the local provisioner has been added, save its UUID.
     if (provisioners.length == 1) {
       // TODO:
-      logger.e("MISSING IMPLEMENTATION - save local provisioner UUID");
+      logger.f("MISSING IMPLEMENTATION - save local provisioner UUID");
     }
 
     return Result.value(null);

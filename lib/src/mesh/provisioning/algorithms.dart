@@ -6,9 +6,24 @@ import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 
 import '../types.dart';
 
+// BTM: General reference to Bluetooth Mesh security or transport management.
+// ECDH: Elliptic Curve Diffie-Hellman, a key agreement protocol for secure key exchange.
+// P256: A specific elliptic curve (prime256v1 or secp256r1) used for cryptography in ECDH.
+// CMAC: Cipher-based Message Authentication Code, used for message integrity and authenticity.
+// AES128: A variant of the Advanced Encryption Standard using a 128-bit key for encryption.
+// AES: Advanced Encryption Standard, a symmetric encryption algorithm used in mesh security.
+// CCM: Counter with CBC-MAC, a mode for block ciphers combining encryption and authentication.
 enum Algorithm {
-  // Algorithms
+  /// BTM ECDH P256 CMAC AES128 AES CCM algorithm will be used to calculate the
+  /// shared secret.
   BTM_ECDH_P256_CMAC_AES128_AES_CCM,
+
+  /// BTM ECDH P256 HMAC SHA256 AES CCM algorithm will be used to calculate the
+  /// shared secret.
+  ///
+  /// This algorithm must be supported by devices claming support with Mesh Protocol 1.1.
+  ///
+  /// - since: Mesh Protocol 1.1.
   BTM_ECDH_P256_HMAC_SHA256_AES_CCM,
 }
 

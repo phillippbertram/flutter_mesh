@@ -1,7 +1,10 @@
 // Bluetooth Mesh address type in Dart.
 // Represents various address types used in Bluetooth mesh networking.
 
+import 'package:flutter_mesh/src/mesh/utils/utils.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../types.dart';
 
 part 'address.freezed.dart';
 part 'address.g.dart';
@@ -22,7 +25,7 @@ class Address with _$Address implements Comparable<Address> {
   static const Address allRelays = Address(0xFFFE);
   static const Address allNodes = Address(0xFFFF);
 
-  const factory Address(int value) = _Address;
+  const factory Address(Uint16 value) = _Address;
 
   const Address._();
 
@@ -77,4 +80,7 @@ class Address with _$Address implements Comparable<Address> {
   Address operator -(int other) {
     return Address(value - other);
   }
+
+  @override
+  String toString() => value.toHex(pad: 4);
 }

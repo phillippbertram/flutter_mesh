@@ -91,7 +91,7 @@ extension ProvisioningDataX on ProvisioningData {
 
     final pubKey = await keyPair.extractPublicKey();
 
-    // TODO: I assume that this is how the public key get's concatenated as data
+    // TODO: I assume that this is how the public key get's concatenated as data, seems to work!
     provisionerPublicKey = Uint8List.fromList(pubKey.x + pubKey.y);
 
     this.algorithm = algorithm;

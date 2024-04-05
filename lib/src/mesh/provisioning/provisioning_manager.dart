@@ -11,6 +11,8 @@ import '../models/node.dart';
 import 'algorithms.dart';
 import 'provisioning_data.dart';
 
+// TODO: implement ChangeNotifier?
+
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
 
 /// @see https://www.bluetooth.com/blog/provisioning-a-bluetooth-mesh-network-part-1/
@@ -47,6 +49,7 @@ class ProvisioningManager implements BearerDataDelegate {
       meshNetwork: meshNetwork,
     );
     manager.networkKey = meshNetwork.networkKeys.firstOrNull;
+    manager.deviceName = unprovisionedDevice.name;
     return manager;
   }
 
@@ -74,6 +77,9 @@ class ProvisioningManager implements BearerDataDelegate {
   ProvisioningCapabilities? get provisioningCapabilities =>
       _provisioningCapabilities;
   ProvisioningCapabilities? _provisioningCapabilities;
+
+  /// The name of the device that will be used as node name
+  String? deviceName;
 
   /// The Unicast Address that will be assigned to the device.
   /// After device capabilities are received, the address is automatically set to
@@ -481,6 +487,7 @@ class ProvisioningManager implements BearerDataDelegate {
             elementsCount: count,
             provisioner: localProvisioner,
           );
+          logger.t("Calculated unicast address: $unicastAddress");
           _suggestedUnicastAddress = unicastAddress;
         } else {
           logger.w("Uni-cast address already set or local provisioner missing");
@@ -631,6 +638,10 @@ class ProvisioningManager implements BearerDataDelegate {
         final networkKey = _provisioningData!.networkKey;
 
         logger.f("IMPLEMENTATION MISSING - Create node and add to network");
+        // ignore: unnecessary_this
+        final unprovisionedDevice = this.unprovisionedDevice.copyWith(
+              name: deviceName,
+            );
         final node = Node.forUnprovisionedDevice(
           unprovisionedDevice,
           networkKey: networkKey!,
