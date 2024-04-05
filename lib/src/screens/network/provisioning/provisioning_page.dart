@@ -34,12 +34,12 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     super.initState();
     // TODO:  auto connect to device
     widget.device.bearer.open();
-    final device = widget.device.device;
+    final unprovisionedDevice = widget.device.device;
     final bearer = widget.device.bearer;
 
     final manager = AppNetworkManager.instance.meshNetworkManager;
     final res = manager.provisionManager(
-      unprovisionedDevice: device,
+      unprovisionedDevice: unprovisionedDevice,
       bearer: bearer,
     );
     if (res.isError) {
@@ -166,7 +166,29 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
         Section(
           child: ListTile(
             title: const Text('Name'),
-            trailing: Text(widget.device.device.name ?? ''),
+            trailing: Wrap(
+              children: [
+                Text(_provisioningManager.deviceName ?? '',
+                    style: Theme.of(context).textTheme.bodyMedium!),
+                const SizedBox(width: 12),
+                const Icon(Icons.edit, size: 16),
+              ],
+            ),
+            onTap: () {
+              _showTextInputDialog(
+                context: context,
+                title: 'Change Device Name',
+                label: 'New Name',
+                initialValue: widget.device.device.name,
+                autofocus: true,
+              ).then((value) {
+                if (value != null) {
+                  setState(() {
+                    _provisioningManager.deviceName = value;
+                  });
+                }
+              });
+            },
           ),
         ),
         Section.children(
@@ -177,7 +199,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
               title: const Text('Unicast Address'),
               trailing: _provisioningManager.unicastAddress == null
                   ? const Text("Automatic")
-                  : Text(_provisioningManager.unicastAddress!.value.toHex()),
+                  : Text("${_provisioningManager.unicastAddress ?? 0}"),
             ),
             // TODO: make this configurable
             ListTile(
@@ -328,6 +350,41 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
       authenticationMethod: authenticationMethod,
     );
   }
+}
+
+Future<String?> _showTextInputDialog({
+  required BuildContext context,
+  required String title,
+  required String label,
+  String? initialValue,
+  bool? autofocus,
+}) async {
+  return showDialog<String>(
+    context: context,
+    builder: (context) {
+      final controller = TextEditingController(text: initialValue);
+      return AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          autofocus: autofocus ?? false,
+          decoration: InputDecoration(labelText: label),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(controller.text);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 Y _unwrap<T, Y>(T? value,

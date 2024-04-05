@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 
 import 'screens/home/home.dart';
-import 'screens/settings/settings_controller.dart';
 import 'ui/ui.dart';
 
-/// The Widget that configures your application.
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  final SettingsController settingsController = SettingsController.instance;
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +15,8 @@ class MyApp extends StatelessWidget {
     //
     // The ListenableBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    return ListenableBuilder(
-        listenable: settingsController,
+    return ChangeNotifierProvider(
+        create: (_) => AppTheme(),
         builder: (context, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
@@ -55,9 +52,9 @@ class MyApp extends StatelessWidget {
             // Define a light and dark color theme. Then, read the user's
             // preferred ThemeMode (light, dark, or system default) from the
             // SettingsController to display the correct theme.
-            theme: lightTheme,
-            darkTheme: darkTheme,
-            themeMode: settingsController.themeMode,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: context.watch<AppTheme>().themeMode,
 
             home: const HomePage(),
 

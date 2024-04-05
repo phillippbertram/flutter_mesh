@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mesh/src/ui/ui.dart';
 
 class GroupsPage extends StatelessWidget {
   const GroupsPage({super.key});
@@ -10,8 +11,22 @@ class GroupsPage extends StatelessWidget {
         title: const Text('Groups'),
         centerTitle: false,
       ),
-      body: const Center(
-        child: Text('Groups Page'),
+      body: Center(
+        child: EmptyView(
+          image: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: Image.network(
+              "https://picsum.photos/seed/groups/100/100",
+            ),
+          ),
+          title: const Text("Groups"),
+          subtitle: const Text(
+            "No groups found in the network.",
+          ),
+        ),
       ),
     );
   }

@@ -3,20 +3,18 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 
 import 'network_keys/network_keys.dart';
-import 'settings_controller.dart';
 
 /// Displays the various settings that can be customized by the user.
 ///
 /// When a user changes a setting, the SettingsController is updated and
 /// Widgets that listen to the SettingsController are rebuilt.
 class SettingsPage extends StatelessWidget {
-  SettingsPage({super.key});
+  const SettingsPage({super.key});
 
   static const routeName = '/settings';
-
-  final _settingsController = SettingsController.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -31,30 +29,32 @@ class SettingsPage extends StatelessWidget {
             children: [
               ListTile(
                 title: const Text("Appearance"),
-                trailing: ListenableBuilder(
-                    listenable: _settingsController,
-                    builder: (context, _) {
-                      return DropdownButton<ThemeMode>(
-                        // Read the selected themeMode from the controller
-                        value: _settingsController.themeMode,
-                        // Call the updateThemeMode method any time the user selects a theme.
-                        onChanged: _settingsController.updateThemeMode,
-                        items: const [
-                          DropdownMenuItem(
-                            value: ThemeMode.system,
-                            child: Text('System Theme'),
-                          ),
-                          DropdownMenuItem(
-                            value: ThemeMode.light,
-                            child: Text('Light Theme'),
-                          ),
-                          DropdownMenuItem(
-                            value: ThemeMode.dark,
-                            child: Text('Dark Theme'),
-                          )
-                        ],
-                      );
-                    }),
+                trailing: Consumer<AppTheme>(builder: (context, appTheme, _) {
+                  return DropdownButton<ThemeMode>(
+                    // Read the selected themeMode from the controller
+                    value: appTheme.themeMode,
+                    // Call the updateThemeMode method any time the user selects a theme.
+                    onChanged: (mode) {
+                      if (mode != null) {
+                        appTheme.themeMode = mode;
+                      }
+                    },
+                    items: const [
+                      DropdownMenuItem(
+                        value: ThemeMode.system,
+                        child: Text('System Theme'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.light,
+                        child: Text('Light Theme'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.dark,
+                        child: Text('Dark Theme'),
+                      )
+                    ],
+                  );
+                }),
               ),
             ],
           ),
@@ -132,7 +132,7 @@ class SettingsPage extends StatelessWidget {
         ListTile(
           trailing: TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+                foregroundColor: context.theme.appColors.error.defaultColor,
               ),
               onPressed: () async {
                 final shouldReset = await _showForgetNetworkPrompt(context);

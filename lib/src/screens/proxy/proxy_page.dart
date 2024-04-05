@@ -27,7 +27,7 @@ class ProxyPage extends StatelessWidget {
                 trailing: TextButton(
                     style: TextButton.styleFrom(
                       foregroundColor:
-                          Theme.of(context).colorScheme.onErrorContainer,
+                          context.theme.appColors.error.defaultColor,
                     ),
                     onPressed: null,
                     child: const Text("Disconnect")),

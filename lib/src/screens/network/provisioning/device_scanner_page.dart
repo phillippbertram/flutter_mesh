@@ -185,7 +185,7 @@ class DiscoveredDeviceTile extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               _buildDataRow(
-                title: "Localname",
+                title: "Adv Name",
                 value: device.scanResult.advertisementData.advName,
               ),
               _buildDataRow(
@@ -309,7 +309,7 @@ class _SignalStrengthPainter extends CustomPainter {
     for (int i = 0; i < discreteSignal; i++) {
       // Adjust alpha for each circle. 255 means no transparency, and we decrease it for each outer circle.
       final alpha = (255 * (1 - (i * 0.25))).toInt();
-      paint.color = AppColors.blueJay.withAlpha(alpha);
+      paint.color = AppColorPalette.blueJay.defaultColor.withAlpha(alpha);
 
       // Adjust the radius so the innermost circle is drawn first and is the smallest
       double radius = maxRadius * ((i + 1) / 4);

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
+import 'package:flutter_mesh/src/ui/empty_view.dart';
 
 class LocalNodePage extends StatelessWidget {
   const LocalNodePage({super.key});
@@ -10,8 +12,26 @@ class LocalNodePage extends StatelessWidget {
         title: const Text('Local Node'),
         centerTitle: false,
       ),
-      body: const Center(
-        child: Text("Local Node Page"),
+      body: _buildEmptyView(),
+    );
+  }
+
+  Widget _buildEmptyView() {
+    return Center(
+      child: EmptyView(
+        image: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Image.network(
+            "https://picsum.photos/seed/pilot/100/100",
+          ),
+        ),
+        title: const Text("Local Node"),
+        subtitle: const Text(
+          "No local node found in the network.",
+        ),
       ),
     );
   }
