@@ -88,6 +88,10 @@ class SettingsPage extends StatelessWidget {
       header: const Text("Mesh Network"),
       children: [
         ListTile(
+          title: const Text("Name"),
+          trailing: Text(network.meshName),
+        ),
+        ListTile(
           title: const Text("Provisioners"),
           trailing: Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
