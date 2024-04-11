@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/ProvisioningManager.swift
 
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
@@ -12,7 +12,7 @@ import 'provisioning_data.dart';
 
 // TODO: implement ChangeNotifier?
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/ProvisioningManager.swift
 
 /// @see https://www.bluetooth.com/blog/provisioning-a-bluetooth-mesh-network-part-1/
 ///

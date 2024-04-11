@@ -1,6 +1,6 @@
 part of 'mesh_network.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/MeshNetwork%2BProvisioner.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/MeshNetwork%2BProvisioner.swift
 extension MeshNetworkProvisioner on MeshNetwork {
   // TODO: internal
   /// Returns whether the Provisioner is in the mesh network.

@@ -21,7 +21,7 @@ part 'mesh_network.p.nodes.dart';
 // TODO: JSONSerialization + Equatable
 // TODO: implement ChangeNotifier?
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/MeshNetwork.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/MeshNetwork.swift
 class MeshNetwork with ChangeNotifier {
   MeshNetwork._({
     required this.uuid,
@@ -71,7 +71,7 @@ class MeshNetwork with ChangeNotifier {
     // make copy so we can make changes without affecting the original list
     elements = [...elements];
 
-    // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20Model/MeshNetwork.swift#L92
+    // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/MeshNetwork.swift#L92
     // TODO:
     logger.e("MISSING IMPLEMENTATION .setLocalElements (incomplete)");
 

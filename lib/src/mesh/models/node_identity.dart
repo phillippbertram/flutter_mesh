@@ -10,7 +10,7 @@ import 'node.dart';
 /// It can be used to match advertising device to a specific ``Node`` in the network.
 ///
 /// - since: 4.0.0
-/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/NodeIdentity.swift
+/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/NodeIdentity.swift
 abstract class NodeIdentity {
   /// Returns whether the identity matches given ``Node``.
   ///

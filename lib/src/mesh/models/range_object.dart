@@ -4,7 +4,7 @@ import '../types.dart';
 
 // TODO: freezed?
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/RangeObject.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/RangeObject.swift
 
 /// A base class for an address or scene range.
 ///

@@ -8,7 +8,7 @@ import 'package:flutter_mesh/src/mesh_app/network_connection.dart';
 // TODO: implement ChangeNotifier?
 // TODO: provide via AppMeshNetworkManager.of(context)
 
-// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Example/Source/AppDelegate.swift
+// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Example/Source/AppDelegate.swift
 class AppNetworkManager {
   AppNetworkManager._() {
     _initializeNetwork();

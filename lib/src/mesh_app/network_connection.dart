@@ -20,7 +20,7 @@ import 'package:rxdart/rxdart.dart';
 /// receive outgoing messages. However, the ``NetworkConnection/dataDelegate`` will be
 /// notified about messages received from any of the connected proxies.
 ///
-/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Example/Source/Mesh%20Network/NetworkConnection.swift
+/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Example/Source/Mesh%20Network/NetworkConnection.swift
 class NetworkConnection with BearerDataDelegate implements Bearer {
   NetworkConnection({
     required MeshNetwork meshNetwork,

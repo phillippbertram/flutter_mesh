@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Algorithm.swift#L78
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/Algorithm.swift#L78
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_pdu.dart';

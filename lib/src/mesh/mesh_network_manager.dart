@@ -7,7 +7,7 @@ import 'layers/network_manager.dart';
 // STATUS: IN PROGRESS
 
 // TODO: implements NetworkParametersProvider
-// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/MeshNetworkManager.swift
+// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/MeshNetworkManager.swift
 class MeshNetworkManager with BearerDataDelegate {
   MeshNetworkManager() : _meshData = MeshData(meshNetwork: null);
 

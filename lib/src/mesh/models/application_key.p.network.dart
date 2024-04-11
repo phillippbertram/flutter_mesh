@@ -1,6 +1,6 @@
 part of 'application_key.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/ApplicationKey%2BMeshNetwork.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/ApplicationKey%2BMeshNetwork.swift
 extension ApplicationKeyNetworkKey on ApplicationKey {
   /// Bounds the Application Key to the given Network Key.
   /// The Application Key must not be in use. If any of the network Nodes

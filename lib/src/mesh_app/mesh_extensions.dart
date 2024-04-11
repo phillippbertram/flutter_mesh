@@ -14,8 +14,8 @@ extension ModelX on Model {
       } else {
         return "Company ID: $companyIdentifier";
       }
-    } else {
-      return "Company ID: Unknown";
     }
+
+    return "Company ID: Unknown";
   }
 }

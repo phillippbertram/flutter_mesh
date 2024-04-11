@@ -43,7 +43,7 @@ class Provisioner {
   MeshNetwork? meshNetwork;
 }
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/Provisioner%2BRanges.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/Provisioner%2BRanges.swift
 extension ProvisionerRangeX on Provisioner {
   /// Returns `true` if all defined ranges are valid.
   ///

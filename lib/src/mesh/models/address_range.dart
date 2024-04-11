@@ -66,7 +66,7 @@ extension ListAddressRangeX on List<AddressRange> {
   }
 }
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Ranges.swift#L255
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/Ranges.swift#L255
 extension ListAddressRangeRanges on List<AddressRange> {
   /// Returns `true` if all the address ranges are of unicast type.
   ///
@@ -85,7 +85,7 @@ extension ListAddressRangeRanges on List<AddressRange> {
   }
 }
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Ranges.swift#L200
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/Ranges.swift#L200
 extension AddressRangeRanges on AddressRange {
   /// Returns `true` if the address range is valid. Valid address ranges
   /// are in Unicast or Group ranges.

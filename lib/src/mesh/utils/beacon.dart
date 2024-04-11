@@ -5,7 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../provisioning/oob.dart';
 import 'mesh_constants.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Utils/Beacon.swift#L102
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Utils/Beacon.swift#L102
 extension AdvertisementDataX on AdvertisementData {
   NetworkIdentity? get networkIdentity {
     // TODO: also add PrivateNetworkIdentity (Mesh 1.1)

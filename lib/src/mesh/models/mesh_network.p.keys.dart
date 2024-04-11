@@ -1,6 +1,6 @@
 part of 'mesh_network.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/MeshNetwork%2BKeys.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/MeshNetwork%2BKeys.swift
 extension MeshNetworkKeys on MeshNetwork {
   // TODO: implement something like this?
   // ApplicationKey? nextRandomApplicationKey() {

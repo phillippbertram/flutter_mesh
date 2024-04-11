@@ -1,6 +1,6 @@
 part of 'mesh_network.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/MeshNetwork%2BNodes.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/MeshNetwork%2BNodes.swift
 extension MeshNetworkNodes on MeshNetwork {
   /// Returns Provisioner's Node object, if such exist and the Provisioner
   /// is in the mesh network; `nil` otherwise.

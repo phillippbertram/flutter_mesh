@@ -1,6 +1,6 @@
 part of 'node.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Node%2BKeys.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/Node%2BKeys.swift
 extension NodeKeysX on Node {
   /// Returns whether the Node has knowledge about the given Application Key.
   /// The Application Key comparison bases only on the Key Index.

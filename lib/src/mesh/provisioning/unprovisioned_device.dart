@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'unprovisioned_device.freezed.dart';
 
 /// A class representing an unprovisioned device.
-/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/UnprovisionedDevice.swift#L34
+/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/UnprovisionedDevice.swift
 @freezed
 class UnprovisionedDevice with _$UnprovisionedDevice {
   const factory UnprovisionedDevice._({

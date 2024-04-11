@@ -1,6 +1,6 @@
 part of 'node.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Node%2BAddress.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/Node%2BAddress.swift
 extension NodeAddressX on Node {
   /// Number of Node's Elements.
   Uint8 get elementsCount {

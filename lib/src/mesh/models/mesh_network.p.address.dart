@@ -1,6 +1,6 @@
 part of 'mesh_network.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/MeshNetwork%2BAddress.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/MeshNetwork%2BAddress.swift
 extension MeshNetworkAddress on MeshNetwork {
   List<Address> get usedAddresses {
     final exclusions =
@@ -82,7 +82,7 @@ extension MeshNetworkAddress on MeshNetwork {
   ///              from checking address collisions.
   /// - returns: `True`, if the address is available, `false` otherwise.
   bool isAddressAvailableForNode(Address address, {required Node node}) {
-    // TODO: https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/MeshNetwork%2BAddress.swift#L84
+    // TODO: https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/MeshNetwork%2BAddress.swift#L84
 
     logger.e("MISSING IMPLEMENTATION - isAddressAvailableForNode");
 

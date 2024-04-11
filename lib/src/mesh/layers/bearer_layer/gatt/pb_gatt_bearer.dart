@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Bearer/GATT/PBGattBearer.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Bearer/GATT/PBGattBearer.swift
 
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 

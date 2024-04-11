@@ -37,7 +37,7 @@ class Node {
   ///
   /// - parameter provisioner: The Provisioner for which the node is added.
   /// - parameter address:     The unicast address to be assigned to the Node.
-  /// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20Model/Node.swift#L282
+  /// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/Node.swift#L282
   factory Node.forProvisioner(
     Provisioner provisioner, {
     required Address address,

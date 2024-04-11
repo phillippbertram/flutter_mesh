@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import '../types.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Type%20Extensions/Data.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Type%20Extensions/Data.swift
 
 extension DataAccessX on Data {
   /// Converts the required number of bytes, starting from `offset`

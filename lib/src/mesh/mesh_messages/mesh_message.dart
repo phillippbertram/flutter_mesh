@@ -1,6 +1,6 @@
 import '../types.dart';
 
-// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Messages/MeshMessage.swift#L74
+// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Messages/MeshMessage.swift#L74
 
 /// The Message Integrity Check for Transport (TransMIC) is a 32-bit or 64-bit
 /// field that authenticates that the Access payload has not been changed.
