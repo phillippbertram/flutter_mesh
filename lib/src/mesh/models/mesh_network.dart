@@ -621,4 +621,40 @@ extension MeshNetworkKeys on MeshNetwork {
 
     _networkDidChange();
   }
+
+  Result<ApplicationKey?> removeApplicationKeyWithKeyIndex(KeyIndex keyIndex,
+      {bool force = false}) {
+    final firstIndex =
+        applicationKeys.indexWhere((key) => key.index == keyIndex);
+    if (firstIndex == -1) {
+      return Result.value(null);
+    }
+    return removeApplicationKeyAt(firstIndex, force: force);
+  }
+
+  /// Removes Application Key at the given index.
+  ///
+  /// - parameter index: The position of the element to remove.
+  ///                    `index` must be a valid index of the array.
+  /// - parameter force: If set to `true`, the key will be deleted even
+  ///                    if there are other Nodes known to use this key.
+  /// - returns: The removed key.
+  /// - throws: The method throws if the key is in use and cannot be
+  ///           removed (unless `force` was set to `true`).
+  Result<ApplicationKey?> removeApplicationKeyAt(int index,
+      {bool force = false}) {
+    final key = applicationKeys.elementAtOrNull(index);
+    if (key == null) {
+      return Result.value(null);
+    }
+
+    if (!(force || !key.isUsedInNetwork(this))) {
+      return Result.error("Key is in use.");
+    }
+
+    key.setMeshNetwork(null);
+    final removedKey = applicationKeys.removeAt(index);
+    _networkDidChange();
+    return Result.value(removedKey);
+  }
 }

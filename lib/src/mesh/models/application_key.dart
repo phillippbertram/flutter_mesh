@@ -2,6 +2,7 @@
 
 import 'package:async/async.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_mesh/src/mesh/models/node.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data_keys.dart';
 import '../types.dart';
 import 'key.dart';
@@ -20,7 +21,7 @@ class ApplicationKey extends Equatable implements MeshKey {
   MeshNetwork? _meshNetwork;
 
   // TODO: internal
-  void setMeshNetwork(MeshNetwork meshNetwork) {
+  void setMeshNetwork(MeshNetwork? meshNetwork) {
     _meshNetwork = meshNetwork;
   }
 
@@ -98,27 +99,6 @@ extension ApplicationKeyDataValidation on Data {
 }
 
 extension ApplicationKeyNetworkKey on ApplicationKey {
-  /// Return whether the Application Key is used in the given mesh network.
-  ///
-  /// A Application Key must be added to Application Keys array of the network
-  /// and be known to at least one node to be used by it.
-  ///
-  /// An used Application Key may not be removed from the network.
-  ///
-  /// - parameter meshNetwork: The mesh network to look the key in.
-  /// - returns: `True` if the key is used in the given network,
-  ///            `false` otherwise.
-  bool isUsedInNetwork(MeshNetwork meshNetwork) {
-    // TODO:
-    // final localProvisioner = meshNetwork.localProvisioner
-    // return meshNetwork.applicationKeys.contains(self) &&
-    //        // Application Key known by at least one node.
-    //        meshNetwork.nodes
-    //             .filter { $0.uuid != localProvisioner?.uuid }
-    //             .knows(applicationKey: self)
-    return false;
-  }
-
   /// Bounds the Application Key to the given Network Key.
   /// The Application Key must not be in use. If any of the network Nodes
   /// already knows this key, this method throws an error.
@@ -145,11 +125,19 @@ extension ApplicationKeyNetworkKey on ApplicationKey {
 
     return meshNetwork?.networkKeys[boundNetworkKeyIndex!];
   }
-}
 
-// TODO:
-// extension ListApplicationKeyExtension on List<ApplicationKey> {
-//   List<ApplicationKey> knownToNode(Node node) {
-//     return where((element) => false)
-//   }
-// }
+  bool isUsedInNetwork(MeshNetwork meshNetwork) {
+    return meshNetwork.applicationKeys.contains(this) &&
+        meshNetwork.nodes
+            .where((node) => node.uuid != meshNetwork.localProvisioner?.uuid)
+            .knowsApplicationKey(this);
+  }
+
+  bool get isInUse {
+    if (meshNetwork == null) {
+      return false;
+    }
+
+    return isUsedInNetwork(meshNetwork!);
+  }
+}

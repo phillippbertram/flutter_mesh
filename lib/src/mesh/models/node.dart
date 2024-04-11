@@ -131,6 +131,8 @@ class Node {
 
   Address primaryUnicastAddress;
 
+  final List<ApplicationKey> appKeys = []; // TODO:
+
   void setNetworkKeys(List<NetworkKey> networkKeys) {
     logger.f("MISSING IMPLEMENTATION");
     // TODO
@@ -176,7 +178,7 @@ extension NodeAddressX on Node {
 
   /// The Unicast Address range assigned to all Elements of the Node.
   ///
-  /// The address range is continous and starts with ``primaryUnicastAddress``
+  /// The address range is continuous and starts with ``primaryUnicastAddress``
   /// and ends with ``lastUnicastAddress``.
   AddressRange get unicastAddressRange {
     return AddressRange.fromAddress(
@@ -193,5 +195,49 @@ extension NodeAddressX on Node {
   ///            the given address, `false` otherwise.
   bool containsElementWithAddress(Address address) {
     return unicastAddressRange.contains(address);
+  }
+}
+
+extension NodeKeysX on Node {
+  /// Returns whether the Node has knowledge about the given Application Key.
+  /// The Application Key comparison bases only on the Key Index.
+  ///
+  /// - parameter applicationKey: The Application Key to look for.
+  /// - returns: `True` if the Node has knowledge about the Application Key
+  ///            with the same Key Index as given key, `false` otherwise.
+  bool knowsApplicationKey(ApplicationKey key) {
+    return knowsApplicationKeyIndex(key.index);
+  }
+
+  /// Returns whether the Node has knowledge about Application Key with the
+  /// given index.
+  ///
+  /// - parameter applicationKeyIndex: The Application Key Index to look for.
+  /// - returns: `True` if the Node has knowledge about the Application Key
+  ///            index, `false` otherwise.
+  bool knowsApplicationKeyIndex(KeyIndex keyIndex) {
+    return appKeys.any((element) => element.index == keyIndex);
+  }
+}
+
+extension NodeKeysListX on Iterable<Node> {
+  /// Returns whether the Node has knowledge about the given list of Application Keys.
+  ///
+  /// - parameter keys: The list of Application Keys to look for.
+  /// - returns: `True` if the Node has knowledge about all the Application Keys
+  ///            with the same Key Index as given keys, `false` otherwise.
+  bool knowsApplicationKey(ApplicationKey key) {
+    return knowsApplicationKeyIndex(key.index);
+  }
+
+  /// Returns whether any of elements of this array is using an
+  /// Application Key with given Key Index.
+  ///
+  /// - parameter applicationKeyIndex: The Application Key Index to look for.
+  /// - returns: `True` if any of the Nodes have knowledge about the
+  ///            Application Key Index, `false` otherwise.
+  bool knowsApplicationKeyIndex(KeyIndex keyIndex) {
+    // return contains(where: { $0.knows(applicationKeyIndex: applicationKeyIndex) })
+    return any((node) => node.knowsApplicationKeyIndex(keyIndex));
   }
 }

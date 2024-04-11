@@ -71,7 +71,7 @@ class AppKeysPage extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => const AppKeyDetailPage(),
+        builder: (context) => AppKeyDetailPage(appKey: key),
       ),
     );
   }
@@ -160,24 +160,26 @@ class _AppKeyDetailPageState extends State<AppKeyDetailPage> {
             ),
           ],
         ),
-        Section.children(children: [
-          // Delete
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
+        if (_key != null)
+          Section.children(children: [
+            // Delete
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    _onDeleteKey(context);
                   },
                   icon: const Icon(Icons.delete),
                   label: const Text("Delete"),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: context.theme.appColors.error.defaultColor,
-                  )),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ])
+          ])
       ],
     );
   }
@@ -212,5 +214,31 @@ class _AppKeyDetailPageState extends State<AppKeyDetailPage> {
       ),
     );
     return true;
+  }
+
+  void _onDeleteKey(BuildContext context) {
+    if (_key == null) {
+      return;
+    }
+
+    final network = AppNetworkManager.instance.meshNetworkManager.meshNetwork!;
+    final res = network.removeApplicationKeyWithKeyIndex(_key!.index);
+
+    if (res.isError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to delete key: ${res.asError!.error}"),
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Key deleted successfully"),
+      ),
+    );
+
+    Navigator.of(context).pop();
   }
 }
