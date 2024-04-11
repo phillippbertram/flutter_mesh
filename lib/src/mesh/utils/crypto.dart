@@ -40,6 +40,14 @@ class Crypto {
     return generateRandomBytes(lengthInBytes);
   }
 
+  static Uint8List generateRandom128BitKey() {
+    return generateRandomBits(128);
+  }
+
+  static Uint8List generateRandom256BitKey() {
+    return generateRandomBits(256);
+  }
+
   // TODO: test this
   /// Generates a pair of Private and Public Keys using P256 Elliptic Curve
   /// algorithm.

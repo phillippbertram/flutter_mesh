@@ -1,6 +1,8 @@
 import 'package:async/async.dart';
+import 'package:flutter/material.dart' show ChangeNotifier;
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_mesh/src/mesh/models/key.dart';
 
 import '../types.dart';
 import '../utils/utils.dart';
@@ -25,7 +27,7 @@ import 'provisioner.dart';
 // TODO: implement ChangeNotifier?
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/MeshNetwork.swift
-class MeshNetwork {
+class MeshNetwork with ChangeNotifier {
   MeshNetwork._({
     required this.uuid,
     required this.meshName,
@@ -118,6 +120,11 @@ class MeshNetwork {
     // if networkExclusions?.isEmpty ?? false {
     //     networkExclusions = nil
     // }
+  }
+
+  void _networkDidChange() {
+    timestamp = DateTime.now();
+    notifyListeners();
   }
 }
 
@@ -216,7 +223,7 @@ extension MeshNetworkNodes on MeshNetwork {
     // TODO:
     // node.meshNetwork = this;
     nodes.add(node);
-    timestamp = DateTime.now();
+    _networkDidChange();
     return Result.value(null);
   }
 }
@@ -514,7 +521,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
     // TODO:
     // provisioner.meshNetwork = this;
     provisioners.add(provisioner);
-    timestamp = DateTime.now();
+    _networkDidChange();
 
     // When the local provisioner has been added, save its UUID.
     if (provisioners.length == 1) {
@@ -523,5 +530,95 @@ extension MeshNetworkProvisioner on MeshNetwork {
     }
 
     return Result.value(null);
+  }
+}
+
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/MeshNetwork%2BKeys.swift
+extension MeshNetworkKeys on MeshNetwork {
+  // TODO: implement something like this?
+  // ApplicationKey? nextRandomApplicationKey() {
+  //   final keyIndex = nextAvailableApplicationKeyIndex;
+  //   if (keyIndex == null) {
+  //     return null;
+  //   }
+
+  //   return ApplicationKey.random(index: keyIndex, name: ...);
+  // }
+
+  /// Next available Key Index that can be assigned to a new Application Key.
+  ///
+  /// - note: This method does not look for gaps in key indexes. It returns the
+  ///         next available Key Index after the last Key Index used.
+  KeyIndex? get nextAvailableApplicationKeyIndex {
+    if (applicationKeys.isEmpty) {
+      return 0;
+    }
+
+    final lastAppKey = applicationKeys.last;
+    final nextKeyIndex = lastAppKey.index + 1;
+    if (!nextKeyIndex.isValidKeyIndex) {
+      return null;
+    }
+
+    return nextKeyIndex;
+  }
+
+  /// Adds a new Application Key and binds it to the first Network Key.
+  ///
+  /// - parameter applicationKey: The 128-bit Application Key.
+  /// - parameter index:          An optional Key Index to assign. If `nil`,
+  ///                             the next available Key Index will be assigned
+  ///                             automatically.
+  /// - parameter name:           The human readable name.
+  /// - throws: This method throws an error if the key is not 128-bit long,
+  ///           there isn't any Network Key to bind the new key to
+  ///           or the assigned Key Index is out of range.
+  Result<ApplicationKey> addApplicationKey({
+    required String name,
+    required Data keyData,
+    KeyIndex? index,
+  }) {
+    if (!keyData.isValidApplicationKey) {
+      return Result.error("Key must be 128-bit long.");
+    }
+
+    index ??= nextAvailableApplicationKeyIndex;
+    if (index == null || !index.isValidKeyIndex) {
+      return Result.error("No available key index.");
+    }
+
+    final defaultNetworkKey = networkKeys.firstOrNull;
+    if (defaultNetworkKey == null) {
+      return Result.error("No network key found.");
+    }
+
+    final appKeyRes = ApplicationKey.create(
+      name: name,
+      index: index,
+      key: keyData,
+      boundNetworkKey: defaultNetworkKey,
+    );
+    if (appKeyRes.isError) {
+      return Result.error(appKeyRes.asError!.error);
+    }
+    final appKey = appKeyRes.asValue!.value;
+    _addApplicationKey(appKey);
+    return Result.value(appKey);
+  }
+
+  /// Adds the given Application Key to the network.
+  ///
+  /// - parameter key: The new Application Key to be added.
+  void _addApplicationKey(ApplicationKey key) {
+    logger.t("adding application key: ${key.name} (${key.index})");
+    key.setMeshNetwork(this);
+    applicationKeys.add(key);
+
+    // Make the local Provisioner aware of the new key.
+    logger.f("MISSING IMPLEMENTATION - Update AppKey for LocalProvisioner!");
+    // TODO:
+    // localProvisioner?.node?.add(applicationKey: key);
+
+    _networkDidChange();
   }
 }

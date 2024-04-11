@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
+import 'package:flutter_mesh/src/screens/settings/app_keys/app_keys.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -128,6 +129,11 @@ class SettingsPage extends StatelessWidget {
               const Icon(Icons.chevron_right),
             ],
           ),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return const AppKeysPage();
+            }));
+          },
         ),
         ListTile(
           title: const Text("Last Modified"),

@@ -30,10 +30,14 @@ class NetworkKey implements MeshKey {
 
   factory NetworkKey.primaryRandom() {
     return NetworkKey(
-      name: 'Primary NetworkKey',
+      name: 'Primary Network Key',
       index: 0,
-      key: DataUtils.random128BitKey(),
+      key: randomKeyData(),
     );
+  }
+
+  static Data randomKeyData() {
+    return KeyUtils.random128BitKey();
   }
 
   @override

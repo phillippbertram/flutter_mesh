@@ -1,33 +1,34 @@
+import 'package:equatable/equatable.dart';
+
+import '../model_delegate.dart';
 import '../types.dart';
 import 'element.dart';
 
-// TODO: JSON Serialization + Equatable
+// TODO: JSON Serialization + Equatable + Hashable
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/Model.swift#L45
-class Model {
+class Model extends Equatable {
   Model._({
     required this.modelId,
+    required this.delegate,
     // TODO:
     //   self.subscribe = []
     //   self.bind      = []
     //   self.delegate  = nil
   });
 
-  factory Model({
-    required Uint32 modelId,
-  }) {
-    return Model._(modelId: modelId);
+  factory Model.createWithSigModelId(
+      Uint16 sigModelId, {required ModelDelegate delegate,}) {
+    return Model._(modelId: sigModelId, delegate: delegate);
   }
 
-  factory Model.createWithSigModelId(Uint16 sigModelId) {
-    return Model(modelId: sigModelId);
-  }
-
-  factory Model.createWithVendorModelId({
-    required Uint16 companyIdentifier,
-    required Uint16 modelIdentifier,
+  factory Model.createWithVendorModelId(
+    Uint16 vendorModelId, {
+    required Uint16 companyId,
+    required ModelDelegate delegate,
   }) {
-    return Model(modelId: (companyIdentifier << 16) | modelIdentifier);
+    final modelId = (companyId << 16) | vendorModelId;
+    return Model._(modelId: modelId, delegate: delegate);
   }
 
   /// Bluetooth SIG or vendor-assigned model identifier.
@@ -63,10 +64,20 @@ class Model {
 
   Element? get parentElement => _parentElement;
   Element? _parentElement; // NOTE: no WeakReference needed in dart?
-
   void setParentElement(Element parentElement) {
     _parentElement = parentElement;
   }
+
+  /// The model message handler. This is non-`nil` for supported local Models
+  /// and `nil` for Models of remote Nodes.
+  final ModelDelegate? delegate;
+
+  @override
+  List<Object?> get props => [
+        modelId, parentElement,
+        // TODO:
+        // bind, subscribe, publish
+      ];
 }
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Models.swift#L536
@@ -78,12 +89,25 @@ class Model {
 class ModelIdentifier {
   // Foundation
   static const Uint16 configurationServer = 0x0000;
-  static const configurationClient = 0x0001;
-  static const healthServer = 0x0002;
-  static const healthClient = 0x0003;
+  static const Uint16 configurationClient = 0x0001;
+  static const Uint16 healthServer = 0x0002;
+  static const Uint16 healthClient = 0x0003;
 
-  // Configuration models added in Mesh Protocol 1.1
+  // TODO: add the remaining models
 
   // Generic
   static const genericOnOffServer = 0x1000;
+}
+
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20Model/Model.swift#L232
+extension ModelExtensions on Model {
+  bool get isConfigurationServer =>
+      modelIdentifier == ModelIdentifier.configurationServer;
+  bool get isConfigurationClient =>
+      modelIdentifier == ModelIdentifier.configurationClient;
+
+  bool get isHealthServer => modelIdentifier == ModelIdentifier.healthServer;
+  bool get isHealthClient => modelIdentifier == ModelIdentifier.healthClient;
+
+  // TODO: add the remaining models
 }

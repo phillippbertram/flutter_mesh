@@ -94,6 +94,8 @@ class AppNetworkManager {
       name: "Primary Element",
       location: Location.first,
       models: [
+        // Model.createWithSigModelId(ModelIdentifier.genericOnOffServer,
+        //     delegate: GenericOnOffServerDelegate()),
         // Model(sigModelId: .genericOnOffClientModelId, delegate: GenericOnOffClientDelegate()),
       ],
     );

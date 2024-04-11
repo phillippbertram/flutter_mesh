@@ -9,14 +9,30 @@ extension IntegerHex on int {
   /// Returns a string representation of the integer as a hexadecimal number.
   ///
   /// The string is prefixed with `0x`. With padding
-  String toHex({int? pad}) =>
-      '0x${toRadixString(16).toUpperCase().padLeft(pad ?? 0, '0')}';
+  String toHex({
+    int? pad,
+    bool includePrefix = false,
+  }) {
+    final hex = toRadixString(16).toUpperCase().padLeft(pad ?? 0, '0');
+    if (includePrefix) {
+      return '0x$hex';
+    }
+    return hex;
+  }
 }
 
 extension DataHex on Data {
-  String toHex() =>
-      map((byte) => byte.toRadixString(16).toUpperCase().padLeft(2, '0'))
-          .join();
+  String toHex({
+    bool includePrefix = false,
+  }) {
+    final hex =
+        map((byte) => byte.toRadixString(16).toUpperCase().padLeft(2, '0'))
+            .join();
+    if (includePrefix) {
+      return '0x$hex';
+    }
+    return hex;
+  }
 }
 
 extension StringHex on String {

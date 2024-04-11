@@ -7,10 +7,13 @@ import '../utils/crypto.dart';
 
 final random = Random.secure();
 
-class DataUtils {
-  // TODO: use crypto library?
+// TODO: needed?
+abstract class KeyUtils {
   static Data random128BitKey() {
-    final d = Crypto.generateRandomBits(128);
-    return d.toList(growable: false);
+    return Crypto.generateRandom128BitKey();
+  }
+
+  static Data random256BitKey() {
+    return Crypto.generateRandom256BitKey();
   }
 }

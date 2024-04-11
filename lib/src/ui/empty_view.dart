@@ -32,10 +32,11 @@ class EmptyView extends StatelessWidget {
               child: image!,
             ),
           DefaultTextStyle(
-              style: textTheme.titleLarge!.copyWith(
-                color: theme.appColors.accent.defaultColor,
-              ),
-              child: title),
+            style: textTheme.titleLarge!.copyWith(
+              color: theme.appColors.accent.defaultColor,
+            ),
+            child: title,
+          ),
           if (subtitle != null)
             Padding(
                 padding: const EdgeInsets.only(top: 8.0),

@@ -29,7 +29,7 @@ class AppTheme with ChangeNotifier {
   static final _darkAppColors = AppColorsExtension(
     primary: AppColorPalette.carissma,
     accent: AppColorPalette.midsummer,
-    error: AppColorPalette.blueJay,
+    error: AppColorPalette.carissma,
   );
 }
 

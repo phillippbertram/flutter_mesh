@@ -132,12 +132,12 @@ class Node {
   Address primaryUnicastAddress;
 
   void setNetworkKeys(List<NetworkKey> networkKeys) {
-    logger.e("MISSING IMPLEMENTATION");
+    logger.f("MISSING IMPLEMENTATION");
     // TODO
   }
 
   void setApplicationKeys(List<ApplicationKey> applicationKeys) {
-    logger.e("MISSING IMPLEMENTATION");
+    logger.f("MISSING IMPLEMENTATION");
     // TODO
   }
 
@@ -156,7 +156,7 @@ class Node {
   ///
   /// - parameter element: The Element to be added.
   void addElement(Element element) {
-    logger.e("MISSING IMPLEMENTATION");
+    logger.f("MISSING IMPLEMENTATION");
   }
 
   void _addElement(Element element) {

@@ -1,3 +1,4 @@
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/models/node.dart';
 import 'address.dart';
 import 'model.dart'; // Assuming you have a Model class defined somewhere
@@ -60,6 +61,8 @@ class Element {
   }
 
   static Element get primaryElement {
+    logger.f("MISSING Implementation - Element.primaryElement");
+
     // The Provisioner will always have a first Element with obligatory
     // Models (Configuration Server and Health Server) and supported clients
     //(Configuration Client and Health Client).
@@ -67,10 +70,11 @@ class Element {
       name: 'Primary Element',
       location: Location.unknown,
       models: [
-        Model.createWithSigModelId(ModelIdentifier.configurationServer),
-        Model.createWithSigModelId(ModelIdentifier.configurationClient),
-        Model.createWithSigModelId(ModelIdentifier.healthServer),
-        Model.createWithSigModelId(ModelIdentifier.healthClient),
+        // TODO:
+        // Model.createWithSigModelId(ModelIdentifier.configurationServer),
+        // Model.createWithSigModelId(ModelIdentifier.configurationClient),
+        // Model.createWithSigModelId(ModelIdentifier.healthServer),
+        // Model.createWithSigModelId(ModelIdentifier.healthClient),
       ],
     );
 

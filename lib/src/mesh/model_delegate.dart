@@ -27,7 +27,7 @@ typedef MessageComposer = MeshMessage Function();
 /// and defines publication composer for automatic publications.
 mixin ModelDelegate {
   // NOTE: `Type` should be `MeshMessage` but it's not possible to use it as a type here
-  Map<Uint32, Type> messageTypes = {};
+  Map<Uint32, dynamic> get messageTypes; // TODO: implement this
 
   /// This method should handle the received Acknowledged Message.
   ///

@@ -50,11 +50,11 @@ class HomePage extends HookWidget {
       ),
       body: IndexedStack(
         index: currentPageIndex.value,
-        children: <Widget>[
-          const LocalNodePage(),
-          const NetworkPage(),
-          const GroupsPage(),
-          const ProxyPage(),
+        children: const <Widget>[
+          LocalNodePage(),
+          NetworkPage(),
+          GroupsPage(),
+          ProxyPage(),
           SettingsPage(),
         ],
       ),

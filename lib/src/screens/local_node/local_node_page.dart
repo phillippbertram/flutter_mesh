@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/ui/empty_view.dart';
 
 class LocalNodePage extends StatelessWidget {
