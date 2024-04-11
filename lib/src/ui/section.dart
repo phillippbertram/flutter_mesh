@@ -34,11 +34,11 @@ class Section extends StatelessWidget {
   });
 
   factory Section.children({
-    Widget? header,
+    Widget? title,
     required List<Widget> children,
   }) {
     return Section(
-      header: header,
+      header: title,
       child: Column(
         children: children,
       ),

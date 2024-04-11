@@ -26,7 +26,7 @@ class SettingsPage extends StatelessWidget {
       body: SectionedListView(
         children: [
           Section.children(
-            header: const Text("UI"),
+            title: const Text("UI"),
             children: [
               ListTile(
                 title: const Text("Appearance"),
@@ -72,7 +72,7 @@ class SettingsPage extends StatelessWidget {
     final network = AppNetworkManager.instance.meshNetworkManager.meshNetwork;
     if (network == null) {
       return Section.children(
-        header: const Text("Mesh Network"),
+        title: const Text("Mesh Network"),
         children: [
           ListTile(
               title: const Text("No network"),
@@ -86,7 +86,7 @@ class SettingsPage extends StatelessWidget {
       );
     }
     return Section.children(
-      header: const Text("Mesh Network"),
+      title: const Text("Mesh Network"),
       children: [
         ListTile(
           title: const Text("Name"),

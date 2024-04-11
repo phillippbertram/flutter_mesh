@@ -192,7 +192,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
           ),
         ),
         Section.children(
-          header: const Text("Provisioning Data"),
+          title: const Text("Provisioning Data"),
           children: [
             // TODO: make this configurable
             ListTile(
@@ -211,7 +211,7 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
           ],
         ),
         Section.children(
-          header: const Text("Device Capabilities"),
+          title: const Text("Device Capabilities"),
           children: [
             ListTile(
               title: const Text('Elements Count'),

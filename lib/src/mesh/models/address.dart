@@ -82,5 +82,5 @@ class Address with _$Address implements Comparable<Address> {
   }
 
   @override
-  String toString() => value.toHex(pad: 4);
+  String toString() => value.toHex(pad: 4, includePrefix: true);
 }

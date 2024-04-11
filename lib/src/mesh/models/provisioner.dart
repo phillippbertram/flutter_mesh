@@ -1,21 +1,23 @@
 import 'package:flutter_mesh/src/mesh/models/address_range.dart';
+import 'package:flutter_mesh/src/mesh/models/mesh_network.dart';
 import 'package:flutter_mesh/src/mesh/models/scene_range.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 import 'package:flutter_mesh/src/mesh/utils/utils.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'provisioner.freezed.dart';
+import 'node.dart';
 
-@freezed
-class Provisioner with _$Provisioner {
-  // TODO:
-  const factory Provisioner({
-    required UUID uuid,
-    required String name,
-    required List<AddressRange> allocatedUnicastRange,
-    required List<AddressRange> allocatedGroupRange,
-    required List<SceneRange> allocatedSceneRange,
-  }) = _Provisioner;
+part 'provisioner.p.node.dart';
+
+// TODO: immutable + codable + equatable
+
+class Provisioner {
+  Provisioner._({
+    required this.uuid,
+    required this.name,
+    required this.allocatedUnicastRange,
+    required this.allocatedGroupRange,
+    required this.allocatedSceneRange,
+  });
 
   factory Provisioner.create({
     required String name,
@@ -23,7 +25,7 @@ class Provisioner with _$Provisioner {
     List<AddressRange>? allocatedGroupRange,
     List<SceneRange>? allocatedSceneRange,
   }) {
-    return Provisioner(
+    return Provisioner._(
         uuid: generateUuid(),
         name: name,
         allocatedUnicastRange:
@@ -33,9 +35,12 @@ class Provisioner with _$Provisioner {
         allocatedSceneRange: allocatedSceneRange ?? [SceneRange.allScenes]);
   }
 
-// TODO:
-  // factory Provisioner.fromJson(Map<String, dynamic> json) =>
-  //     _$ProvisionerFromJson(json);
+  final UUID uuid;
+  final String name;
+  final List<AddressRange> allocatedUnicastRange;
+  final List<AddressRange> allocatedGroupRange;
+  final List<SceneRange> allocatedSceneRange;
+  MeshNetwork? meshNetwork;
 }
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/Provisioner%2BRanges.swift

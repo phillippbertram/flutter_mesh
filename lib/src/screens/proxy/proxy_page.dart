@@ -35,7 +35,7 @@ class ProxyPage extends StatelessWidget {
             ],
           ),
           Section.children(
-            header: const Text("Proxy Filter"),
+            title: const Text("Proxy Filter"),
             children: const [],
           )
         ],

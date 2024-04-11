@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
@@ -111,7 +112,8 @@ class _AppKeyDetailPageState extends State<AppKeyDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create App Key'),
+        title:
+            _key == null ? const Text("New App Key") : const Text("Edit Key"),
         actions: [
           TextButton(
             onPressed: _onDone,
@@ -119,11 +121,19 @@ class _AppKeyDetailPageState extends State<AppKeyDetailPage> {
           ),
         ],
       ),
-      body: _buildBody(context),
+      body: ListenableBuilder(
+          listenable:
+              AppNetworkManager.instance.meshNetworkManager.meshNetwork!,
+          builder: (context, _) {
+            return _buildBody(
+              context,
+              AppNetworkManager.instance.meshNetworkManager.meshNetwork!,
+            );
+          }),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, MeshNetwork network) {
     return SectionedListView(
       children: [
         Section.children(
@@ -135,7 +145,7 @@ class _AppKeyDetailPageState extends State<AppKeyDetailPage> {
           ],
         ),
         Section.children(
-          header: const Text("Key Details"),
+          title: const Text("Key Details"),
           children: [
             ListTile(
               title: const Text("Key"),
@@ -152,13 +162,18 @@ class _AppKeyDetailPageState extends State<AppKeyDetailPage> {
           ],
         ),
         Section.children(
-          header: const Text("Bound Network Keys"),
-          children: const [
-            ListTile(
-              leading: Icon(Icons.key),
-              title: Text("Primary Network Key (TBD)"),
-            ),
-          ],
+          title: const Text("Bound Network Key"),
+          children: network.networkKeys.map((key) {
+            return ListTile(
+              leading: const Icon(Icons.vpn_key),
+              title: Text(key.name),
+              trailing:
+                  const Icon(Icons.check), // TODO: checkmark for bound key only
+              onTap: () {
+                // TODO: select network key
+              },
+            );
+          }).toList(),
         ),
         if (_key != null)
           Section.children(children: [

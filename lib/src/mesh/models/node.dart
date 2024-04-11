@@ -3,11 +3,17 @@
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 
+import '../utils/crypto.dart';
+
+part 'node.p.keys.dart';
+part 'node.p.address.dart';
+
 class Node {
   Node._({
     required this.uuid,
     required this.name,
     required this.primaryUnicastAddress,
+    required this.deviceKey,
   });
 
   factory Node.create({
@@ -19,6 +25,7 @@ class Node {
       uuid: uuid,
       name: name,
       primaryUnicastAddress: primaryUnicastAddress,
+      deviceKey: Crypto.generateRandom128BitKey(),
     );
   }
 
@@ -91,10 +98,11 @@ class Node {
     required NetworkKey networkKey,
     required Address primaryUnicastAddress,
   }) {
-    final node = Node.create(
+    final node = Node._(
       uuid: uuid,
       name: name,
       primaryUnicastAddress: primaryUnicastAddress,
+      deviceKey: deviceKey,
     );
 
     logger.f("MISSING IMPLEMENTATION");
@@ -103,7 +111,7 @@ class Node {
     // self.uuid = uuid
     // self.name = name
     // self.primaryUnicastAddress = address
-    // self.deviceKey = deviceKey
+    // this.deviceKey = deviceKey
     // self.security  = security
     // // Composition Data were not obtained.
     // self.isConfigComplete = false
@@ -130,6 +138,9 @@ class Node {
   final List<Element> elements = []; // TODO:
 
   Address primaryUnicastAddress;
+
+  /// 128-bit device key for this Node.
+  final Data? deviceKey;
 
   final List<ApplicationKey> appKeys = []; // TODO:
 
@@ -166,78 +177,5 @@ class Node {
     elements.add(element);
     element.setParentNode(this);
     element.index = index;
-  }
-}
-
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Node%2BAddress.swift
-extension NodeAddressX on Node {
-  /// Number of Node's Elements.
-  Uint8 get elementsCount {
-    return elements.length;
-  }
-
-  /// The Unicast Address range assigned to all Elements of the Node.
-  ///
-  /// The address range is continuous and starts with ``primaryUnicastAddress``
-  /// and ends with ``lastUnicastAddress``.
-  AddressRange get unicastAddressRange {
-    return AddressRange.fromAddress(
-      address: primaryUnicastAddress,
-      elementsCount: elementsCount,
-    );
-  }
-
-  /// Returns whether the Node has the given Unicast Address assigned to one
-  /// of its Elements.
-  ///
-  /// - parameter address: Address to check.
-  /// - returns: `True` if any of node's elements (or the node itself) was assigned
-  ///            the given address, `false` otherwise.
-  bool containsElementWithAddress(Address address) {
-    return unicastAddressRange.contains(address);
-  }
-}
-
-extension NodeKeysX on Node {
-  /// Returns whether the Node has knowledge about the given Application Key.
-  /// The Application Key comparison bases only on the Key Index.
-  ///
-  /// - parameter applicationKey: The Application Key to look for.
-  /// - returns: `True` if the Node has knowledge about the Application Key
-  ///            with the same Key Index as given key, `false` otherwise.
-  bool knowsApplicationKey(ApplicationKey key) {
-    return knowsApplicationKeyIndex(key.index);
-  }
-
-  /// Returns whether the Node has knowledge about Application Key with the
-  /// given index.
-  ///
-  /// - parameter applicationKeyIndex: The Application Key Index to look for.
-  /// - returns: `True` if the Node has knowledge about the Application Key
-  ///            index, `false` otherwise.
-  bool knowsApplicationKeyIndex(KeyIndex keyIndex) {
-    return appKeys.any((element) => element.index == keyIndex);
-  }
-}
-
-extension NodeKeysListX on Iterable<Node> {
-  /// Returns whether the Node has knowledge about the given list of Application Keys.
-  ///
-  /// - parameter keys: The list of Application Keys to look for.
-  /// - returns: `True` if the Node has knowledge about all the Application Keys
-  ///            with the same Key Index as given keys, `false` otherwise.
-  bool knowsApplicationKey(ApplicationKey key) {
-    return knowsApplicationKeyIndex(key.index);
-  }
-
-  /// Returns whether any of elements of this array is using an
-  /// Application Key with given Key Index.
-  ///
-  /// - parameter applicationKeyIndex: The Application Key Index to look for.
-  /// - returns: `True` if any of the Nodes have knowledge about the
-  ///            Application Key Index, `false` otherwise.
-  bool knowsApplicationKeyIndex(KeyIndex keyIndex) {
-    // return contains(where: { $0.knows(applicationKeyIndex: applicationKeyIndex) })
-    return any((node) => node.knowsApplicationKeyIndex(keyIndex));
   }
 }

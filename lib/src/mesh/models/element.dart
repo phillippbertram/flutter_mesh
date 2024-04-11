@@ -61,7 +61,7 @@ class Element {
   }
 
   static Element get primaryElement {
-    logger.f("MISSING Implementation - Element.primaryElement");
+    logger.f("MISSING IMPLEMENTATION - Element.primaryElement (INCOMPLETE)");
 
     // The Provisioner will always have a first Element with obligatory
     // Models (Configuration Server and Health Server) and supported clients
