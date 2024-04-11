@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/utils/company_identifier.dart';
+import 'package:flutter_mesh/src/mesh_app/mesh_extensions.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
+
+import '../model_config_page/model_config_page.dart';
 
 class ElementConfigPage extends StatelessWidget {
   const ElementConfigPage({
@@ -35,20 +38,20 @@ class ElementConfigPage extends StatelessWidget {
         Section.children(
           children: [
             ListTile(
-              title: Text("Unicast Address"),
+              title: const Text("Unicast Address"),
               trailing: Text(element.unicastAddress.toString()),
             ),
             ListTile(
-              title: Text("Location"),
+              title: const Text("Location"),
               trailing: Text(element.location.toString()),
             ),
           ],
         ),
         Section.children(
-          title: Text("Models"),
+          title: const Text("Models"),
           children: [
             if (element.models.isEmpty)
-              ListTile(
+              const ListTile(
                 dense: true,
                 title: Text("No models available."),
               ),
@@ -61,32 +64,38 @@ class ElementConfigPage extends StatelessWidget {
 }
 
 List<Widget> _modelWidgets(BuildContext context, MeshElement element) {
+  showModelConfig(Model model) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ModelConfigPage(model: model),
+      ),
+    );
+  }
+
   return element.models.map((model) {
     final isSIGModel = model.isBluetoothSIGAssigned;
     var modelName =
         model.name ?? "Unknown Model ${model.modelIdentifier.asString()}";
+    final companyName = model.companyName();
     if (isSIGModel) {
       return ListTile(
         title: Text(modelName),
-        subtitle: const Text("Bluetooth SIG"),
+        subtitle: Text(companyName),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          showModelConfig(model);
+        },
       );
     }
 
     modelName = "Vendor Model ${model.modelIdentifier.asString()}";
-    final String companyName;
-    if (model.companyIdentifier != null) {
-      final companyIdName = model.companyIdentifier!.companyNameForId();
-      if (companyIdName != null) {
-        companyName = companyIdName;
-      } else {
-        companyName = "Company ID: ${model.companyIdentifier}";
-      }
-    } else {
-      companyName = "Company ID: Unknown";
-    }
     return ListTile(
       title: Text(modelName),
       subtitle: Text(companyName),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        showModelConfig(model);
+      },
     );
   }).toList();
 }

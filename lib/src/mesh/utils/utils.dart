@@ -4,6 +4,7 @@ import '../types.dart';
 
 export 'beacon.dart';
 export 'mesh_constants.dart';
+export 'company_identifier.dart';
 
 extension IntegerHex on int {
   /// Returns a string representation of the integer as a hexadecimal number.

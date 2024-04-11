@@ -155,11 +155,11 @@ class NodeConfigPage extends StatelessWidget {
                     onPressed: () {
                       // TODO:
                     },
-                    child: Text("Reset"),
                     style: ElevatedButton.styleFrom(
                       foregroundColor:
                           context.theme.appColors.error.defaultColor,
-                    )),
+                    ),
+                    child: const Text("Reset")),
               ),
             ),
             const SizedBox(height: 10),
@@ -171,11 +171,11 @@ class NodeConfigPage extends StatelessWidget {
                     onPressed: () {
                       // TODO:
                     },
-                    child: Text("Remove"),
                     style: ElevatedButton.styleFrom(
                       foregroundColor:
                           context.theme.appColors.error.defaultColor,
-                    )),
+                    ),
+                    child: const Text("Remove")),
               ),
             )
           ],

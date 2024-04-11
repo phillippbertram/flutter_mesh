@@ -7,7 +7,6 @@ import 'package:flutter_mesh/src/mesh/provisioning/provisioning_capabilities.dar
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../models/node.dart';
 import 'algorithms.dart';
 import 'provisioning_data.dart';
 
