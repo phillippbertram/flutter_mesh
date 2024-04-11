@@ -2,6 +2,7 @@
 
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh_app/model_delegates/model_delegates.dart';
 import 'package:flutter_mesh/src/mesh_app/network_connection.dart';
 
 // TODO: implement ChangeNotifier?
@@ -34,13 +35,7 @@ class AppNetworkManager {
 
     // }
 
-    final localProvisioner = Provisioner.create(
-      name: 'Local Provisioner',
-    );
-    meshNetworkManager.createNewMeshNetwork(
-      name: "Mesh Network",
-      provisioner: localProvisioner,
-    );
+    createNewMeshNetwork();
   }
 
   void save() {
@@ -90,13 +85,18 @@ class AppNetworkManager {
     //     let sceneSetupServer = SceneSetupServerDelegate(server: sceneServer)
 
     // TODO: create elements and models for this phone
-    final element0 = Element.create(
+    final element0 = MeshElement.create(
       name: "Primary Element",
       location: Location.first,
       models: [
-        // Model.createWithSigModelId(ModelIdentifier.genericOnOffServer,
-        //     delegate: GenericOnOffServerDelegate()),
-        // Model(sigModelId: .genericOnOffClientModelId, delegate: GenericOnOffClientDelegate()),
+        Model.createWithSigModelId(
+          ModelIdentifier.genericOnOffServer,
+          delegate: LoggingModelDelegate(),
+        ),
+        Model.createWithSigModelId(
+          ModelIdentifier.genericOnOffClient,
+          delegate: LoggingModelDelegate(),
+        ),
       ],
     );
 

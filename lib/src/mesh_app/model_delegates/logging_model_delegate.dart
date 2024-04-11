@@ -2,8 +2,8 @@ import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 
-class LoggingDelegate implements ModelDelegate {
-  LoggingDelegate(this.messageTypes);
+class LoggingModelDelegate implements ModelDelegate {
+  LoggingModelDelegate({this.messageTypes = const {}});
 
   @override
   Map<Uint32, Type> messageTypes;

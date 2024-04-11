@@ -19,6 +19,8 @@ extension IntegerHex on int {
     }
     return hex;
   }
+
+  String asString() => toHex(includePrefix: true);
 }
 
 extension DataHex on Data {

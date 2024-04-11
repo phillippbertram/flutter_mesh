@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart' hide Element;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
-import 'package:flutter_mesh/src/ui/section.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
+
+import '../element_config_page/element_config_page.dart';
 
 class NodeConfigPage extends StatelessWidget {
   const NodeConfigPage({
@@ -81,6 +82,12 @@ class NodeConfigPage extends StatelessWidget {
                     Text('Models: ${element.models.length}'),
                   ],
                 ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ElementConfigPage(element: element),
+                  ));
+                },
               ),
           ],
         ),
@@ -178,7 +185,7 @@ class NodeConfigPage extends StatelessWidget {
   }
 }
 
-extension on Element {
+extension on MeshElement {
   String get displayName {
     return name ?? 'Element $index';
   }

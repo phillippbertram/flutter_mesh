@@ -198,7 +198,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
         // node.companyIdentifier = 0x004C // Apple Inc.
         // node.minimumNumberOfReplayProtectionList = Address.maxUnicastAddress
       } else {
-        node.addElement(Element.primaryElement);
+        node.addElement(MeshElement.primaryElement);
       }
 
       final addNodeRes = addNode(node);

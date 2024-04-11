@@ -1,5 +1,5 @@
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
-import 'package:flutter_mesh/src/screens/network/configuration/node_config_page.dart';
+import 'package:flutter_mesh/src/screens/network/node_config/node_config_page.dart';
 import 'package:flutter_mesh/src/screens/network/provisioning/device_scanner_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';

@@ -1,4 +1,3 @@
-
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
@@ -85,13 +84,13 @@ class MeshNetworkManager with BearerDataDelegate {
   /// - important: This property has to be set even if no custom Models are
   ///              defined as the set operation initializes the mandatory Models.
   ///              It can be set to an empty array.
-  List<Element> get localElements =>
-      []; // TODO: meshNetwork?.localElements ?? [];
-  void setLocalElements(List<Element> elements) {
-    // TODO:
-    throw UnimplementedError("setLocalElements");
+  List<MeshElement> get localElements => meshNetwork?.localElements ?? const [];
+  void setLocalElements(List<MeshElement> elements) {
+    meshNetwork?.setLocalElements(elements);
 
-    // meshNetwork?.localElements = elements;
+    // TODO:
+    logger.f(
+        "MISSING IMPLEMENTATION: setLocalElements -> reinitializePublishers");
     // networkManager?.accessLayer.reinitializePublishers();
   }
 
