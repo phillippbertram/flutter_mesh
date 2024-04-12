@@ -1,4 +1,5 @@
 import 'package:async/async.dart';
+import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 
 import '../../provisioning/provisioning_pdu.dart';
@@ -127,6 +128,7 @@ extension BearerSupportsX on Bearer {
   /// - parameter type: The PDU type.
   /// - returns: `True` if the bearer supports the given PDU type, `false` otherwise.
   bool supports(PduType type) {
+    logger.f("MAYBE WRONG IMPLEMENTATION: supports(PduType type)");
     // TODO: original code uses "return supportedPduTypes.contains(PduTypes(rawValue: pduType.mask))"
     return supportedPduTypes.contains(type);
   }
