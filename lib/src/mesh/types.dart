@@ -8,6 +8,14 @@ typedef Uint8 = int;
 typedef Uint32 = int;
 typedef UUID = String;
 
+extension UUIDX on UUID {
+  List<int> get hex => List<int>.generate(
+        replaceAll('-', '').length ~/ 2,
+        (i) => int.parse(replaceAll('-', '').substring(i * 2, i * 2 + 2),
+            radix: 16),
+      );
+}
+
 /// Base Result class
 /// [S] represents the type of the success value
 // sealed class Result<S> {

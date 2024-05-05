@@ -3,7 +3,10 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
+import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh/models/models.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import '../provisioning/algorithms.dart' as algo;
 import 'package:pointycastle/export.dart' as pointy;
@@ -234,6 +237,32 @@ class Crypto {
     );
   }
 
+  /// Encrypts given data using the Encryption Key, Nonce and adds MIC
+  /// (Message Integrity Check) of given size to the end of the returned cipher text.
+  ///
+  /// - parameters:
+  ///   - data:  The data to be encrypted and authenticated, also known as plaintext.
+  ///   - key:   The 128-bit key.
+  ///   - nonce: A 104-bit nonce.
+  ///   - size:  Length of the MIC to be generated, in bytes.
+  ///   - aad:   Additional data to be authenticated.
+  /// - returns: Encrypted data concatenated with MIC of given size.
+  static Data encryptData(
+    Data data, {
+    required Data encryptionKey,
+    required Data nonce,
+    required Uint8 micSize,
+    Data? additionalData,
+  }) {
+    return calculateCCM(
+      data: data,
+      key: encryptionKey,
+      nonce: nonce,
+      micSize: micSize,
+      withAdditionalData: additionalData,
+    );
+  }
+
   /// This method calculates the Session Key, Session Nonce and the Device Key based
   /// on the Confirmation Inputs, 16 or 32-byte Provisioner Random and 16 or 32-byte
   /// device Random.
@@ -403,6 +432,50 @@ class Crypto {
       );
 
     return ccm.process(Uint8List.fromList(data));
+  }
+
+  // Calculate the 16-bit Virtual Address based on the 128-bit Label UUID.
+  ///
+  /// - parameter virtualLabel: The Virtual Label of a Virtual Group.
+  /// - returns: 16-bit hash, known as Virtual Address.
+  static Address calculateVirtualAddress(UUID virtualLabel) {
+    final vtad = utf8.encode("vtad");
+    final salt = calculateS1(vtad);
+    final virtualLabelData = Uint8List.fromList(virtualLabel.hex);
+    final hash = calculateCMAC(virtualLabelData, key: salt);
+
+    // Extracting specific bytes and interpreting them as a big-endian UInt16
+    var address = (hash[14] << 8) + hash[15];
+    address |= 0x8000; // Setting a specific bit high
+    address &= 0xBFFF; // Setting a specific bit low
+
+    return Address(address);
+  }
+
+  /// Generates the Application Key Identifier based on the key.
+  ///
+  /// - parameter key: The Application Key.
+  /// - returns: The generated AID.
+  static Uint8 calculateAid(Data key) {
+    return _calculateK4WithN(Uint8List.fromList(key));
+  }
+
+  /// The derivation function k4 us used to generate a public value of 6 bits
+  /// derived from a private key.
+  ///
+  /// The definition of this derivation function makes use of the MAC function
+  /// AES-CMAC(T) with 128-bit key T.
+  ///
+  /// - parameter N: 128-bit key.
+  /// - returns: UInt8 with 6 LSB bits of a public value derived from the key.
+  static Uint8 _calculateK4WithN(Uint8List N) {
+    final smk4 = Uint8List.fromList([0x73, 0x6D, 0x6B, 0x34]); // "smk4" as Data
+    final s1 = calculateS1(smk4);
+    final T = calculateCMAC(N, key: s1);
+    final id6_0x01 =
+        Uint8List.fromList([0x69, 0x64, 0x36, 0x01]); // "id6" || 0x01
+    final result = calculateCMAC(id6_0x01, key: T);
+    return result[15] & 0x3F;
   }
 }
 

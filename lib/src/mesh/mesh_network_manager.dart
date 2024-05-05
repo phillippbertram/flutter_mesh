@@ -150,3 +150,117 @@ extension MeshNetworkManagerProvisioning on MeshNetworkManager {
     return Result.value(manager);
   }
 }
+
+extension MeshNetworkManagerMessaging on MeshNetworkManager {
+  /// Sends a Configuration Message to the primary Element on the given ``Node``.
+  ///
+  /// An appropriate callback of the ``MeshNetworkDelegate`` will be called when
+  /// the message has been sent successfully or a problem occurred.
+  ///
+  /// - parameters:
+  ///   - message:    The message to be sent.
+  ///   - node:       The destination Node.
+  ///   - initialTtl: The initial TTL (Time To Live) value of the message.
+  ///                 If `nil`, the default Node TTL will be used.
+  /// - throws: This method throws when the mesh network has not been created,
+  ///           the local Node does not have configuration capabilities
+  ///           (no Unicast Address assigned), or the destination address
+  ///           is not a Unicast Address or it belongs to an unknown Node.
+  ///           Error ``AccessError/cannotDelete`` is sent when trying to
+  ///           delete the last Network Key on the device.
+  /// - returns: Message handle that can be used to cancel sending.
+  /// TODO: Response Type
+  Future<Result<void>> sendConfigMessageToNode(
+    AcknowledgedConfigMessage message, {
+    required Node node,
+    Uint8? initialTtl,
+  }) async {
+    return sendConfigMessageToDestination(
+      message,
+      destination: node.primaryUnicastAddress,
+      initialTtl: initialTtl,
+    );
+  }
+
+  /// Sends Configuration Message to the Node with given destination Address.
+  ///
+  /// The `destination` must be a Unicast Address, otherwise the method
+  /// throws an ``AccessError/invalidDestination`` error.
+  ///
+  /// An appropriate callback of the ``MeshNetworkDelegate`` will be called when
+  /// the message has been sent successfully or a problem occurred.
+  ///
+  /// - parameters:
+  ///   - message:     The message to be sent.
+  ///   - destination: The destination Unicast Address.
+  ///   - initialTtl:  The initial TTL (Time To Live) value of the message.
+  ///                  If `nil`, the default Node TTL will be used.
+  /// - throws: This method throws when the mesh network has not been created,
+  ///           the local Node does not have configuration capabilities
+  ///           (no Unicast Address assigned), or the destination address
+  ///           is not a Unicast Address or it belongs to an unknown Node.
+  ///           Error ``AccessError/cannotDelete`` is sent when trying to
+  ///           delete the last Network Key on the device.
+  /// - returns: The response associated with the message.
+  /// TODO: Response Type
+  Future<Result<void>> sendConfigMessageToDestination(
+    AcknowledgedConfigMessage message, {
+    required Address destination,
+    Uint8? initialTtl, // TODO:
+  }) async {
+    // TODO:
+    logger.f("INCOMPLETE IMPLEMENTATION: sendConfigMessageToDestination");
+
+    if (_networkManager == null) {
+      return Result.error("No network manager available");
+    }
+    if (meshNetwork == null) {
+      return Result.error("Mesh network has not been created");
+    }
+
+    final localProvisioner = meshNetwork!.localProvisioner;
+    if (localProvisioner == null) {
+      return Result.error("Local Provisioner has no Unicast Address assigned");
+    }
+    final element = localProvisioner.node?.primaryElement;
+    if (element == null) {
+      return Result.error("Local Provisioner has no Unicast Address assigned");
+    }
+
+    if (!destination.isUnicast) {
+      return Result.error(
+          "Address: ${destination.asString()} is not a Unicast Address");
+    }
+
+    final node = meshNetwork!.nodeWithAddress(destination);
+    if (node == null) {
+      return Result.error("Unknown destination Node");
+    }
+
+    if (node.networkKeys.isEmpty) {
+      return Result.error("The target Node does not have Network Key");
+    }
+
+    if (node.deviceKey == null) {
+      return Result.error("Node's Device Key is unknown");
+    }
+
+    // TODO: ConfigNetKeyDelete
+    // if (message is ConfigNetKeyDelete) {
+    //   if (node.networkKeys.length <= 1) {
+    //     return Result.error("Cannot remove last Network Key");
+    //   }
+    // }
+
+    if (initialTtl != null && initialTtl > 127) {
+      return Result.error("TTL value $initialTtl is invalid");
+    }
+
+    return await _networkManager!.sendConfigMessageToDestination(
+      message,
+      fromElement: element,
+      destination: destination,
+      initialTtl: initialTtl,
+    );
+  }
+}

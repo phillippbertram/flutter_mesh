@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_mesh/src/mesh/models/node.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data_keys.dart';
 import '../types.dart';
+import '../utils/crypto.dart';
 import 'key.dart';
 import 'mesh_network.dart';
 import 'network_key.dart'; // Import the Key interface
@@ -10,6 +11,7 @@ import 'network_key.dart'; // Import the Key interface
 part 'application_key.p.network.dart';
 
 // TODO: Equatable + Serializable
+// TODO: immutable
 // TODO: not complete
 
 class ApplicationKey extends Equatable implements MeshKey {
@@ -43,13 +45,23 @@ class ApplicationKey extends Equatable implements MeshKey {
   // TODO: internal set
   final Data? oldKey;
 
+  // TODO: internal
+  /// Application Key identifier.
+  late Uint8 aid;
+
+  // TODO: internal
+  /// Application Key identifier derived from the old key.
+  Uint8? oldAid;
+
   ApplicationKey._({
     required this.name,
     required this.index,
     required this.key,
     this.boundNetworkKeyIndex,
     this.oldKey,
-  });
+  }) {
+    regenerateKeyDerivatives();
+  }
 
   static Data randomKeyData() {
     return KeyUtils.random128BitKey();
@@ -90,10 +102,15 @@ class ApplicationKey extends Equatable implements MeshKey {
       oldKey: null,
     );
   }
+
+  void regenerateKeyDerivatives() {
+    aid = Crypto.calculateAid(key);
+    if (oldKey != null && oldAid == null) {
+      oldAid = Crypto.calculateAid(oldKey!);
+    }
+  }
 }
 
 extension ApplicationKeyDataValidation on Data {
-  bool get isValidApplicationKey {
-    return length == 16;
-  }
+  bool get isValidApplicationKey => length == 16;
 }

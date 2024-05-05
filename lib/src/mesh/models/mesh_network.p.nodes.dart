@@ -28,6 +28,18 @@ extension MeshNetworkNodes on MeshNetwork {
     return nodes.firstWhereOrNull((node) => node.uuid == uuid);
   }
 
+  /// Returns the Node with the given Unicast Address. The address may
+  /// be belong to any of the Node's Elements.
+  ///
+  /// - parameter address: A Unicast Address to look for.
+  /// - returns: The Node found, or `nil` if no such exists.
+  Node? nodeWithAddress(Address address) {
+    if (!address.isUnicast) {
+      return null;
+    }
+    return nodes.firstWhereOrNull((n) => n.containsElementWithAddress(address));
+  }
+
   /// Returns whether the given Node is in the mesh network.
   ///
   /// - parameter node: The Node to look for.

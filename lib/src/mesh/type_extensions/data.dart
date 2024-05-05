@@ -49,3 +49,21 @@ extension DataAccessX on Data {
     return sublist(from);
   }
 }
+
+abstract class DataUtils {
+  static Data? fromHex(String hex) {
+    if (hex.isEmpty) {
+      return null;
+    }
+    final bytes = <int>[];
+    for (var i = 0; i < hex.length; i += 2) {
+      final byte = hex.substring(i, i + 2);
+      final byteValue = int.tryParse(byte, radix: 16);
+      if (byteValue == null) {
+        return null;
+      }
+      bytes.add(byteValue);
+    }
+    return Data.from(bytes);
+  }
+}

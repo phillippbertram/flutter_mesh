@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Element;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 
 import '../element_config_page/element_config_page.dart';
@@ -152,8 +153,13 @@ class NodeConfigPage extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                    onPressed: () {
-                      // TODO:
+                    onPressed: () async {
+                      const message = ConfigNodeReset();
+                      await AppNetworkManager.instance.meshNetworkManager
+                          .sendConfigMessageToNode(
+                        message,
+                        node: node,
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       foregroundColor:
