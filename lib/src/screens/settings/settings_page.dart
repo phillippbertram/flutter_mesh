@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import 'network_keys/network_keys.dart';
+import 'shared_prefs_debug_page.dart';
 
 /// Displays the various settings that can be customized by the user.
 ///
@@ -59,7 +60,8 @@ class SettingsPage extends StatelessWidget {
               ),
             ],
           ),
-          _buildNetworkSettingsSection(context),
+          _networkSettingsSection(context),
+          _miscSection(context),
           const Section(
             child: AppVersion(),
           ),
@@ -68,7 +70,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Section _buildNetworkSettingsSection(BuildContext context) {
+  Section _networkSettingsSection(BuildContext context) {
     final network = AppNetworkManager.instance.meshNetworkManager.meshNetwork;
     if (network == null) {
       return Section.children(
@@ -153,6 +155,21 @@ class SettingsPage extends StatelessWidget {
               },
               child: const Text("Forget this Network")),
         )
+      ],
+    );
+  }
+
+  Section _miscSection(BuildContext context) {
+    return Section.children(
+      title: const Text("Misc"),
+      children: [
+        ListTile(
+            title: const Text("Shared Prefs"),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const SharedPrefsDebugPage()));
+            }),
       ],
     );
   }
