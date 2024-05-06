@@ -48,7 +48,25 @@ extension DataAccessX on Data {
   Data suffix({required int from}) {
     return sublist(from);
   }
+
+  Data combineWith(Data other) {
+    return [...this, ...other];
+  }
+
+  Uint8List toUint8List() {
+    if (this is Uint8List) {
+      return this as Uint8List;
+    }
+    return Uint8List.fromList(this);
+  }
 }
+
+// Extension on Uint8List for combining two Uint8List instances
+// extension Uint8ListExtension on Uint8List {
+//   Uint8List combineWith(Uint8List other) {
+//     return Uint8List.fromList([...this, ...other]);
+//   }
+// }
 
 abstract class DataUtils {
   static Data? fromHex(String hex) {
