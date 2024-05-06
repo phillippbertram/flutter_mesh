@@ -2,7 +2,6 @@ import 'package:flutter_mesh/src/mesh/models/address_range.dart';
 import 'package:flutter_mesh/src/mesh/models/mesh_network.dart';
 import 'package:flutter_mesh/src/mesh/models/scene_range.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
-import 'package:flutter_mesh/src/mesh/utils/utils.dart';
 
 import 'node.dart';
 
@@ -26,7 +25,7 @@ class Provisioner {
     List<SceneRange>? allocatedSceneRange,
   }) {
     return Provisioner._(
-        uuid: generateUuid(),
+        uuid: UUID(),
         name: name,
         allocatedUnicastRange:
             allocatedUnicastRange ?? [AddressRange.allUnicastAddresses],

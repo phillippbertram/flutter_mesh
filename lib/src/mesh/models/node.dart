@@ -21,7 +21,7 @@ class Node {
   });
 
   factory Node.create({
-    required String uuid,
+    required UUID uuid,
     String? name,
     required Address primaryUnicastAddress,
   }) {
@@ -74,7 +74,7 @@ class Node {
     required Address address,
   }) {
     final node = Node._create(
-      uuid: device.uuid.str,
+      uuid: device.uuid.toUUID(),
       name: device.name,
       deviceKey: deviceKey,
       security: security,
@@ -95,7 +95,7 @@ class Node {
   }
 
   factory Node._create({
-    required String uuid,
+    required UUID uuid,
     String? name,
     required Data deviceKey,
     required Security security,
@@ -136,6 +136,9 @@ class Node {
     return node;
   }
 
+  // TODO: internal
+  MeshNetwork? meshNetwork;
+
   final UUID uuid; // TODO: use the `Uuid` class
   final String? name;
 
@@ -162,5 +165,29 @@ class Node {
   void setApplicationKeys(List<ApplicationKey> applicationKeys) {
     logger.f("MISSING IMPLEMENTATION");
     // TODO
+  }
+
+  Uint8? _ttl;
+  Uint8? get ttl => _ttl;
+  set ttl(Uint8? ttl) {
+    _ttl = ttl;
+    meshNetwork?.networkDidChange();
+  }
+
+  /// The default Time To Live (TTL) value used when sending messages.
+  /// The TTL may only be set for a Provisioner's Node, or for a Node
+  /// that has not been added to a mesh network.
+  ///
+  /// Use ``ConfigDefaultTtlGet`` and ``ConfigDefaultTtlSet`` messages to
+  /// read or set the default TTL value of a remote Node.
+  Uint8? get defaultTtl => ttl;
+  set defaultTtl(Uint8? ttl) {
+    if (meshNetwork != null && !isProvisioner) {
+      logger.w(
+          "Default TTL may only be set for a Provisioner's Node. Use ConfigDefaultTtlSet(ttl) message to send new TTL value to a remote Node.");
+      return;
+    }
+
+    this.ttl = ttl;
   }
 }

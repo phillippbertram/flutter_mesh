@@ -1,5 +1,7 @@
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/Algorithm.swift#L78
 
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mesh/src/mesh/provisioning/provisioning_pdu.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';

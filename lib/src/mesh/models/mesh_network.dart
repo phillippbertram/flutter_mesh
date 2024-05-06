@@ -39,7 +39,7 @@ class MeshNetwork with ChangeNotifier {
     UUID? uuid,
   }) {
     return MeshNetwork._(
-      uuid: uuid ?? generateUuid(),
+      uuid: uuid ?? UUID(),
       meshName: meshName,
       timestamp: DateTime.now(),
       nodes: [],
@@ -122,7 +122,7 @@ class MeshNetwork with ChangeNotifier {
     // }
   }
 
-  void _networkDidChange() {
+  void networkDidChange() {
     timestamp = DateTime.now();
     notifyListeners();
   }

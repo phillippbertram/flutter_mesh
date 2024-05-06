@@ -7,23 +7,41 @@ import 'package:flutter_mesh/src/mesh/layers/upper_transport_layer/upper_transpo
 
 import '../mesh.dart';
 import '../models/mesh_address.dart';
+import 'network_parameters.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Layers/NetworkManager.swift
 
 // TODO: internal class
 class NetworkManager {
+  // TODO: proxyFiler, networkParametersProvider
+
+  NetworkManager(this.meshNetwork, this.transmitter) {
+    networkLayer = NetworkLayer(this);
+    lowerTransportLayer = LowerTransportLayer(this);
+    upperTransportLayer = UpperTransportLayer(this);
+    _accessLayer = AccessLayer(this);
+  }
+
+  NetworkManager.fromMeshNetworkManager(MeshNetworkManager manager)
+      : this(
+          manager.meshNetwork!,
+          manager.transmitter!,
+        );
+
   final MeshNetwork meshNetwork;
+  final Transmitter transmitter;
 
   late final NetworkLayer networkLayer;
   late final LowerTransportLayer lowerTransportLayer;
   late final UpperTransportLayer upperTransportLayer;
   late final AccessLayer _accessLayer;
 
-  NetworkManager(this.meshNetwork) {
-    networkLayer = NetworkLayer(this);
-    lowerTransportLayer = LowerTransportLayer(this);
-    upperTransportLayer = UpperTransportLayer(this);
-    _accessLayer = AccessLayer(this);
+  /// Network parameters, as given by the `networkParametersProvider`,
+  /// or ``NetworkParameters/default`` if not set.
+  NetworkParameters get networkParameters {
+    logger.f("INCOMPLETE implementation: networkParameters");
+    // TODO: return networkParametersProvider?.networkParameters ?? .default
+    return NetworkParameters.defaultNetworkParameters;
   }
 }
 
