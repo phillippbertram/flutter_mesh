@@ -73,14 +73,15 @@ class Crypto {
     // Privacy Plaintext = 0x0000000000 || IV Index || Privacy Random
     // PECB = e (PrivacyKey, Privacy Plaintext)
     // ObfuscatedData = (CTL || TTL || SEQ || SRC) ⊕ PECB[0–5]
-    final privacyRandom = random.sublist(0, 6);
+    final privacyRandom = random.sublist(0, 7);
 
     // Swift: let privacyPlaintext = Data(repeating: 0, count: 5) + ivIndex.bigEndian + privacyRandom
     final privacyPlaintext = Uint8List.fromList([
       0, 0, 0, 0, 0, // 5 bytes
     ])
-      ..addUint32(ivIndex, endian: Endian.big)
-      ..addAll(privacyRandom);
+        .addUint32(ivIndex, endian: Endian.big)
+        .combineWith(privacyRandom)
+        .toUint8List();
 
     final pecb = calculateECB(privacyPlaintext, key: privacyKey);
 
