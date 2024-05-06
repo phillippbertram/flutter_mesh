@@ -56,10 +56,10 @@ class UpperTransportPdu {
     final seq = sequenceBigEndian.dropFirst();
 
     final nonce = Data.from([type, aszmic << 7])
-      ..addAll(seq)
-      ..addUint16(source.value, endian: Endian.big)
-      ..addUint16(destination.address.value, endian: Endian.big)
-      ..addUint32(ivIndex.transmitIndex, endian: Endian.big);
+        .combineWith(seq)
+        .addUint16(source.value, endian: Endian.big)
+        .addUint16(destination.address.value, endian: Endian.big)
+        .addUint32(ivIndex.transmitIndex, endian: Endian.big);
 
     final transportMicSize = aszmic == 0 ? 4 : 8;
     final transportPdu = Crypto.encryptData(
@@ -67,7 +67,7 @@ class UpperTransportPdu {
       encryptionKey: keySet.accessKey,
       nonce: nonce,
       micSize: transportMicSize,
-      additionalData: pdu.destination.virtualLabel?.hex, // TODO: check this
+      additionalData: pdu.destination.virtualLabel?.data, // TODO: check this
     );
 
     return UpperTransportPdu._(
