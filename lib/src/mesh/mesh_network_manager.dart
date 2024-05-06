@@ -21,10 +21,13 @@ class MeshNetworkManager with BearerDataDelegate {
   // TODO: ProxyFilter proxyFilter;
 
   // NOTE: no WeakReference needed in dart?
-  Transmitter? _transmitter;
-  Transmitter? get transmitter => _transmitter;
-  void setTransmitter(Transmitter transmitter) {
-    _transmitter = transmitter;
+
+  set transmitter(Transmitter? transmitter) {
+    _networkManager?.transmitter = transmitter;
+  }
+
+  Transmitter? get transmitter {
+    return _networkManager?.transmitter;
   }
 
   // TODO: NetworkParameters networkParameters;
@@ -42,9 +45,9 @@ class MeshNetworkManager with BearerDataDelegate {
     required String name,
     required Provisioner provisioner,
   }) {
-    // TODO:
     final network = MeshNetwork(meshName: name);
 
+    // Add a new default provisioner.
     final res = network.addProvisioner(provisioner);
     if (res.isError) {
       return Result.error(res.asError!.error);
@@ -53,6 +56,9 @@ class MeshNetworkManager with BearerDataDelegate {
     _meshData = MeshData(
       meshNetwork: network,
     );
+
+    _networkManager = NetworkManager.fromMeshNetworkManager(this);
+
     return Result.value(network);
   }
 
@@ -208,8 +214,14 @@ extension MeshNetworkManagerMessaging on MeshNetworkManager {
     required Address destination,
     Uint8? initialTtl, // TODO:
   }) async {
+    logger.d("MeshNetworkManager.sendConfigMessageToDestination: ${{
+      "message": message,
+      "destination": destination,
+      "initialTtl": initialTtl,
+    }}");
     // TODO:
-    logger.f("INCOMPLETE IMPLEMENTATION: sendConfigMessageToDestination");
+    logger.f(
+        "INCOMPLETE IMPLEMENTATION: MeshNetworkManager.sendConfigMessageToDestination");
 
     if (_networkManager == null) {
       return Result.error("No network manager available");
@@ -224,7 +236,7 @@ extension MeshNetworkManagerMessaging on MeshNetworkManager {
     }
     final element = localProvisioner.node?.primaryElement;
     if (element == null) {
-      return Result.error("Local Provisioner has no Unicast Address assigned");
+      return Result.error("Local Provisioner has no primary Element");
     }
 
     if (!destination.isUnicast) {
