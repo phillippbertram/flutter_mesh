@@ -44,9 +44,3 @@ extension StringHex on String {
   /// The string is prefixed with `0x`.
   int toIntFromHex() => int.parse(this, radix: 16);
 }
-
-// ================
-// TODO: create own UUID type?
-const _uuid = Uuid();
-String generateUuid() => _uuid.v4().replaceAll("-", "");
-// ================

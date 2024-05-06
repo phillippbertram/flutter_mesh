@@ -2,18 +2,57 @@
 
 // TODO: make real types to prevent accidental misuse?
 
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:uuid/uuid.dart';
+
 typedef Data = List<int>; // typed_data.Uint8List;
 typedef Uint16 = int;
 typedef Uint8 = int;
 typedef Uint32 = int;
-typedef UUID = String;
 
-extension UUIDX on UUID {
-  List<int> get hex => List<int>.generate(
-        replaceAll('-', '').length ~/ 2,
-        (i) => int.parse(replaceAll('-', '').substring(i * 2, i * 2 + 2),
-            radix: 16),
-      );
+// TODO: use Guid instead?
+class UUID {
+  final String _uuidString;
+
+  // Constructor for creating a new UUID
+  UUID() : _uuidString = const Uuid().v4();
+
+  /// Constructor for creating a UUID from an existing string
+  /// TODO: validate the string
+  const UUID.fromString(String uuidString) : _uuidString = uuidString;
+
+  // Getter to retrieve the UUID string
+  String get uuidString => _uuidString;
+
+  @override
+  String toString() => _uuidString;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UUID &&
+          runtimeType == other.runtimeType &&
+          _uuidString == other._uuidString;
+
+  @override
+  int get hashCode => _uuidString.hashCode;
+
+  String get hex => _uuidString.replaceAll('-', '');
+
+  Data get data {
+    final hex = this.hex;
+    return List<int>.generate(
+      hex.length ~/ 2,
+      (i) => int.parse(
+        hex.substring(i * 2, i * 2 + 2),
+        radix: 16,
+      ),
+    );
+  }
+}
+
+extension GuidX on Guid {
+  UUID toUUID() => UUID.fromString(str);
 }
 
 /// Base Result class

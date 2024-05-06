@@ -67,7 +67,7 @@ void main() {
     group("virtual label", () {
       test("calculateVirtualLabel", () {
         const expected = Address(0xADD5);
-        const label = "12345678-1234-1234-1234-12345678ABCD";
+        const label = UUID.fromString("12345678-1234-1234-1234-12345678ABCD");
         final result = Crypto.calculateVirtualAddress(label);
         expect(result, expected);
       });

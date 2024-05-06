@@ -1,18 +1,17 @@
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_mesh/src/mesh/types.dart';
 
 // https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Utils/MeshConstants.swift
 
 /// A base protocol for mesh service objects.
 abstract class MeshService {
   /// Service UUID.
-  UUID get uuid;
+  String get uuid; // TODO: CBUUID instead of String
 
   /// Data In characteristic UUID.
-  UUID get dataInUuid;
+  String get dataInUuid; // TODO: CBUUID instead of String
 
   /// Data Out characteristic UUID.
-  UUID get dataOutUuid;
+  String get dataOutUuid; // TODO: CBUUID instead of String
 
   /// Returns whether the mesh service matches given Core Bluetooth service object.
   bool matches(BluetoothService service);
