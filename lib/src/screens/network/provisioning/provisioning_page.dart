@@ -283,10 +283,6 @@ class _ProvisioningPageState extends State<ProvisioningPage> {
     );
   }
 
-  void _connect() {
-    widget.device.bearer.open();
-  }
-
   void _showProvisioningError(Object? error) {
     showAdaptiveDialog(
         context: context,

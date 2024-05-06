@@ -65,7 +65,7 @@ class NetworkPage extends StatelessWidget {
                 TableRow(
                   children: [
                     const Text("UUID"),
-                    Text(node.uuid),
+                    Text(node.uuid.uuidString),
                   ],
                 ),
                 TableRow(

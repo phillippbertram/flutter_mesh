@@ -1,16 +1,14 @@
-// @see https://suragch.medium.com/working-with-bytes-in-dart-6ece83455721
-
-// TODO: make real types to prevent accidental misuse?
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:uuid/uuid.dart';
 
-typedef Data = List<int>; // typed_data.Uint8List;
-typedef Uint16 = int;
+// TODO: make real types to prevent accidental misuse?
+// @see https://suragch.medium.com/working-with-bytes-in-dart-6ece83455721
+typedef Data = List<int>; // TODO: use typed_data.Uint8List instead?
+typedef Uint16 = int; // TODO: create own types instead of `typedef
 typedef Uint8 = int;
 typedef Uint32 = int;
 
-// TODO: use Guid instead?
+// TODO: use Guid instead? But maybe Guid is too BLE specific?
 class UUID {
   final String _uuidString;
 
@@ -54,50 +52,6 @@ class UUID {
 extension GuidX on Guid {
   UUID toUUID() => UUID.fromString(str);
 }
-
-/// Base Result class
-/// [S] represents the type of the success value
-// sealed class Result<S> {
-//   const Result();
-// }
-
-// TODO use own result type
-
-// final class Success<S> extends Result<S> {
-//   const Success(this.value);
-//   final S value;
-// }
-
-// final class Failure<S> extends Result<S> {
-//   const Failure(this.error);
-//   final Object error;
-// }
-
-// // factory
-// Result<S> value<S>(S value) {
-//   return Success(value);
-// }
-
-// Result<S> error<S>(Object error) {
-//   return Failure(error);
-// }
-
-/// Base Result class
-/// [S] represents the type of the success value
-/// [E] should be [Exception] or a subclass of it
-// sealed class Result<S, E extends Exception> {
-//   const Result();
-// }
-
-// final class Success<S, E extends Exception> extends Result<S, E> {
-//   const Success(this.value);
-//   final S value;
-// }
-
-// final class Failure<S, E extends Exception> extends Result<S, E> {
-//   const Failure(this.exception);
-//   final E exception;
-// }
 
 class Range<T extends Comparable> {
   T start;

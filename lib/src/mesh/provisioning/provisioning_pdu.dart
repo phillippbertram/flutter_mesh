@@ -269,7 +269,7 @@ extension ProvisioningResponseX on ProvisioningResponse {
         ProvisioningPdu.fromPduType(ProvisioningPduType.random) + data,
       ProvisioningResponseComplete() =>
         ProvisioningPdu.fromPduType(ProvisioningPduType.complete),
-      ProvisioningResponseFailed(error: final error) =>
+      ProvisioningResponseFailed(error: _) =>
         ProvisioningPdu.fromPduType(ProvisioningPduType.failed) +
             Data.from([0]),
     };
