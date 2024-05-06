@@ -88,7 +88,18 @@ class SettingsPage extends StatelessWidget {
       );
     }
     return Section.children(
-      title: const Text("Mesh Network"),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text("Mesh Network"),
+          IconButton(
+              onPressed: () {
+                AppNetworkManager.instance.meshNetworkManager.meshNetwork
+                    ?.notifyListeners();
+              },
+              icon: const Icon(Icons.refresh)),
+        ],
+      ),
       children: [
         ListTile(
           title: const Text("Name"),

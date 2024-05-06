@@ -110,7 +110,7 @@ class AppNetworkManager {
     // create new connection
     final connection = NetworkConnection(meshNetwork: meshNetwork);
     connection.setDataDelegate(meshNetworkManager);
-    meshNetworkManager.setTransmitter(connection);
+    meshNetworkManager.transmitter = connection;
     connection.open();
     // TODO: connection.logger = self
     this.connection = connection;

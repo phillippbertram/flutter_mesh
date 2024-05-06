@@ -101,9 +101,22 @@ extension MeshNetworkProvisioner on MeshNetwork {
     provisioners.insert(toIndex, provisioner);
   }
 
+  /// Adds the Provisioner and assigns a Unicast Address to it.
+  ///
+  /// This method does nothing if the Provisioner is already added to the
+  /// mesh network.
+  ///
+  /// - note: To add a Provisioner object without assigning it a Unicast Address
+  ///         use ``add(provisioner:withAddress:)`` passing `nil` as
+  ///         the `address`.
+  ///
+  /// - parameter provisioner: The Provisioner to be added.
+  /// - throws: ``MeshNetworkError`` - if the ranges allocated to the Provisioner
+  ///           are invalid ranges or ranges overlapping with an existing Provisioner.
   Result<void> addProvisioner(Provisioner provisioner) {
     logger.t("adding provisioner: ${provisioner.name}");
 
+    // Find the Unicast Address to be assigned.
     final address = nextAvailableUnicastAddress(provisioner: provisioner);
     if (address == null) {
       return Result.error("No address available.");
@@ -129,9 +142,11 @@ extension MeshNetworkProvisioner on MeshNetwork {
     required Provisioner provisioner,
     Address? unicastAddress,
   }) {
-    logger.f("MISSING IMPLEMENTATION - addProvisionerWithAddress (incomplete)");
+    logger.d("addProvisionerWithAddress ${{
+      "provisioner": provisioner,
+      "unicastAddress": unicastAddress,
+    }}");
 
-    // TODO:
     if (provisioner.meshNetwork != null) {
       return Result.error("Provisioner already added to a mesh network.");
     }
@@ -184,8 +199,8 @@ extension MeshNetworkProvisioner on MeshNetwork {
 
       // The new Provisioner will be aware of all currently existing
       // Network and Application Keys.
-      node.setNetworkKeys(networkKeys);
-      node.setApplicationKeys(applicationKeys);
+      node.networkKeys = networkKeys;
+      node.applicationKeys = applicationKeys;
 
       // Set the Node's Elements.
       // TODO: is this what we want?
@@ -209,7 +224,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
 
     provisioner.meshNetwork = this;
     provisioners.add(provisioner);
-    _networkDidChange();
+    networkDidChange();
 
     // When the local provisioner has been added, save its UUID.
     if (provisioners.length == 1) {

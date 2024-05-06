@@ -86,7 +86,7 @@ extension MeshNetworkKeys on MeshNetwork {
     // TODO:
     // localProvisioner?.node?.add(applicationKey: key);
 
-    _networkDidChange();
+    networkDidChange();
   }
 
   Result<ApplicationKey?> removeApplicationKeyWithKeyIndex(KeyIndex keyIndex,
@@ -121,7 +121,7 @@ extension MeshNetworkKeys on MeshNetwork {
 
     key.setMeshNetwork(null);
     final removedKey = applicationKeys.removeAt(index);
-    _networkDidChange();
+    networkDidChange();
     return Result.value(removedKey);
   }
 }

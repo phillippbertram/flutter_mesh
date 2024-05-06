@@ -116,7 +116,7 @@ extension MeshNetworkNodes on MeshNetwork {
       return Result.error("Address is not available.");
     }
 
-    logger.e("MISSING IMPLEMENTATION - addNode");
+    logger.e("INCOMPLETE IMPLEMENTATION - addNode");
 
     // Ensure the Network Key exists.
     // TODO:
@@ -133,7 +133,7 @@ extension MeshNetworkNodes on MeshNetwork {
     // TODO:
     // node.meshNetwork = this;
     nodes.add(node);
-    _networkDidChange();
+    networkDidChange();
     return Result.value(null);
   }
 }
