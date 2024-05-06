@@ -1,11 +1,3 @@
-// This is an example unit test.
-//
-// A unit test tests a single function, method, or class. To learn more about
-// writing unit tests, visit
-// https://flutter.dev/docs/cookbook/testing/unit/introduction
-
-import 'dart:typed_data';
-
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:flutter_mesh/src/mesh/utils/crypto.dart';
@@ -56,42 +48,55 @@ void main() {
     });
 
     group("obfuscation", () {
-      test("obfuscate", () {
-        final source = DataUtils.fromHex("050102030001")!;
-        final random = DataUtils.fromHex("00112233445566")!;
-        final key = DataUtils.fromHex("0123456789ABCDEF0123456789ABCDEF")!;
-        const Uint32 ivIndex = 0x12345678;
+      final source = DataUtils.fromHex("050102030001")!;
+      final random = DataUtils.fromHex("00112233445566")!;
+      final key = DataUtils.fromHex("0123456789ABCDEF0123456789ABCDEF")!;
+      const Uint32 ivIndex = 0x12345678;
+
+      test("obfuscate and deobfuscate", () {
         final expected = DataUtils.fromHex("9C0DAE8BC512")!;
 
         final obfuscated = Crypto.obfuscateData(
-          Uint8List.fromList(source),
-          random: Uint8List.fromList(random),
+          source.toUint8List(),
+          random: random.toUint8List(),
           ivIndex: ivIndex,
-          privacyKey: Uint8List.fromList(key),
+          privacyKey: key.toUint8List(),
         );
         expect(obfuscated, expected);
 
-        // final deobfuscated = Crypto.deobfuscateData(
-        //   Uint8List.fromList(obfuscated),
-        //   random: Uint8List.fromList(random),
-        //   ivIndex: ivIndex,
-        //   privacyKey: Uint8List.fromList(key),
-        // );
-
-        // expect(deobfuscated, source);
+        final deobfuscated = Crypto.obfuscateData(
+          obfuscated,
+          random: random.toUint8List(),
+          ivIndex: ivIndex,
+          privacyKey: key.toUint8List(),
+        );
+        expect(deobfuscated, source);
       });
     });
 
-    group("Key Pair", () {
-      // TODO:
-      // test("generateKeyPair", () {
-      //   final keyPair = Crypto.generateKeyPair(
-      //     algorithm: Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM,
-      //   );
+    group("Key Derivatives", () {
+      final key = DataUtils.fromHex("f7a2a44f8e8a8029064f173ddc1e2b00")!;
+      const Uint8 expectedNID = 0x7F;
+      final expectedEncryptionKey =
+          DataUtils.fromHex("9f589181a0f50de73c8070c7a6d27f46");
+      final expectedPrivacyKey =
+          DataUtils.fromHex("4c715bd4a64b938f99b453351653124f");
+      final expectedIdentityKey =
+          DataUtils.fromHex("877DE1A131C87A8C6767E655061963A7");
+      final expectedBeaconKey =
+          DataUtils.fromHex("CCAE3C53A3BB6FAB728EE94A390DC91F");
+      final expectedPrivateBeaconKey =
+          DataUtils.fromHex("6be76842460b2d3a5850d4698409f1bb");
 
-      //   print(keyPair);
-      //   expect(keyPair, isNotNull);
-      // });
+      test("calculateKeyDerivatives", () {
+        final result = Crypto.calculateKeyDerivatives(key.toUint8List());
+        expect(result.nid, expectedNID);
+        expect(result.encryptionKey, expectedEncryptionKey);
+        expect(result.privacyKey, expectedPrivacyKey);
+        expect(result.identityKey, expectedIdentityKey);
+        expect(result.beaconKey, expectedBeaconKey);
+        expect(result.privateBeaconKey, expectedPrivateBeaconKey);
+      });
     });
 
     group("virtual label", () {
@@ -100,6 +105,16 @@ void main() {
         const label = UUID.fromString("12345678-1234-1234-1234-12345678ABCD");
         final result = Crypto.calculateVirtualAddress(label);
         expect(result, expected);
+      });
+    });
+
+    group("NetworkId", () {
+      test("calculateNetworkId", () {
+        final key = DataUtils.fromHex("f7a2a44f8e8a8029064f173ddc1e2b00")!;
+        final expected = DataUtils.fromHex("ff046958233db014")!;
+
+        final nid = Crypto.calculateNetworkId(key.toUint8List());
+        expect(nid, expected);
       });
     });
 
