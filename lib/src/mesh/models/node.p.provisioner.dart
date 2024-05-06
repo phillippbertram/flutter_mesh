@@ -5,4 +5,10 @@ extension NodeProvisionerX on Node {
   bool get isCompositionDataReceived {
     return companyIdentifier != null;
   }
+
+  /// Returns whether the Node belongs to one of the Provisioners
+  /// of the mesh network.
+  bool get isProvisioner {
+    return meshNetwork?.containsProvisionerWithUuid(uuid) ?? false;
+  }
 }

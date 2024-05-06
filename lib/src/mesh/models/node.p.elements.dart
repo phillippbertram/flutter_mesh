@@ -11,6 +11,22 @@ extension NodeElementsX on Node {
     return elements.first;
   }
 
+  /// Returns the Element that belongs to this Node with the given
+  /// Unicast Address, or `nil`, if such does not exist.
+  ///
+  /// - parameter address: The Unicast Address of an Element to get.
+  /// - returns: The Element found, or `nil`, if no such exist.
+  MeshElement? elementWithAddress(Address address) {
+    // TODO: `.toInt()` is only used here to make the Int type explicit.
+    final index = address.value.toInt() - primaryUnicastAddress.value.toInt();
+
+    if (index < 0 || index >= elements.length) {
+      return null;
+    }
+
+    return elements[index];
+  }
+
   // TODO: internal
   /// Adds given list of Elements to the Node.
   ///
