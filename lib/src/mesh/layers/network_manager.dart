@@ -25,11 +25,11 @@ class NetworkManager {
   NetworkManager.fromMeshNetworkManager(MeshNetworkManager manager)
       : this(
           manager.meshNetwork!,
-          manager.transmitter!,
+          manager.transmitter,
         );
 
   final MeshNetwork meshNetwork;
-  final Transmitter transmitter;
+  Transmitter? transmitter; // TODO: internal set
 
   late final NetworkLayer networkLayer;
   late final LowerTransportLayer lowerTransportLayer;
@@ -76,7 +76,8 @@ extension NetworkManagerMessaging on NetworkManager {
     required Address destination,
     Uint8? initialTtl, // TODO:
   }) async {
-    logger.f("INCOMPLETE implementation: sendConfigMessageToDestination");
+    logger.f(
+        "INCOMPLETE implementation: NetworkManager.sendConfigMessageToDestination");
 
     final meshAddress = MeshAddress.fromAddress(destination);
     // TODO: implement this

@@ -2,6 +2,7 @@ import 'package:flutter_mesh/src/mesh/layers/network_layer/network_layer.dart';
 
 import '../../../logger/logger.dart';
 import '../../models/mesh_network.dart';
+import '../../models/network_key.dart';
 import '../../types.dart';
 import '../access_layer/access_pdu.dart';
 import '../key_set.dart';
@@ -58,13 +59,35 @@ class UpperTransportLayer {
     if (isSegmented) {
       // Enqueue the PDU. If the queue was empty, the PDU will be sent
       // immediately.
-      enqueue(pdu: pdu, initialTtl: initialTtl, networkKey: keySet.networkKey);
+      enqueue(
+        pdu: pdu,
+        initialTtl: initialTtl,
+        networkKey: keySet.networkKey,
+      );
     } else {
       _networkManager.lowerTransportLayer.sendUnsegmentedUpperTransportPdu(
         pdu,
-        withTtl: initialTtl,
-        usingNetworkKey: keySet.networkKey,
+        initialTtl: initialTtl,
+        networkKey: keySet.networkKey,
       );
     }
+  }
+}
+
+extension on UpperTransportLayer {
+  /// Enqueues the PDU to be sent using the given Network Key.
+  ///
+  /// - parameters:
+  ///   - pdu: The Upper Transport PDU to be sent.
+  ///   - initialTtl: The initial TTL (Time To Live) value of the message.
+  ///                 If `nil`, the default Node TTL will be used.
+  ///   - networkKey: The Network Key to encrypt the PDU with.
+  void enqueue({
+    required UpperTransportPdu pdu,
+    Uint8? initialTtl,
+    required NetworkKey networkKey,
+  }) {
+    // TODO:
+    logger.f("INCOMPLETE implementation: enqueue");
   }
 }
