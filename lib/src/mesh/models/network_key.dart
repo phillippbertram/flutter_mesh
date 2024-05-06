@@ -133,7 +133,7 @@ class NetworkKey implements MeshKey {
   /// otherwise the value is set to ``Security/insecure`` and the subnet
   /// is considered less secure.
   /// TODO: private(set)
-  final Security minSecurity;
+  Security minSecurity;
 
   /// The Network ID derived from this Network Key. This identifier
   /// is public information.
@@ -186,5 +186,11 @@ class NetworkKey implements MeshKey {
       // Calculate other keys.
       oldKeys = NetworkKeyDerivatives.fromKey(oldKey!);
     }
+  }
+}
+
+extension NetworkKeySecurity on NetworkKey {
+  void lowerSecurity() {
+    minSecurity = Security.insecure;
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 
 import '../utils/crypto.dart';
+import 'node_features.dart';
 
 part 'node.p.keys.dart';
 part 'node.p.address.dart';
@@ -18,20 +19,30 @@ class Node {
     required this.name,
     required this.primaryUnicastAddress,
     required this.deviceKey,
-  });
+    required this.security,
+    required bool isConfigComplete,
+    required this.features,
+    required this.netKeys,
+    required this.appKeys,
+    required List<MeshElement> elements,
+    required this.minimumNumberOfReplayProtectionList,
+    required Uint8? ttl,
+  })  : _isConfigComplete = isConfigComplete,
+        _ttl = ttl,
+        _elements = elements;
 
-  factory Node.create({
-    required UUID uuid,
-    String? name,
-    required Address primaryUnicastAddress,
-  }) {
-    return Node._(
-      uuid: uuid,
-      name: name,
-      primaryUnicastAddress: primaryUnicastAddress,
-      deviceKey: Crypto.generateRandom128BitKey(),
-    );
-  }
+  // factory Node.create({
+  //   required UUID uuid,
+  //   String? name,
+  //   required Address primaryUnicastAddress,
+  // }) {
+  //   return Node._(
+  //     uuid: uuid,
+  //     name: name,
+  //     primaryUnicastAddress: primaryUnicastAddress,
+  //     deviceKey: Crypto.generateRandom128BitKey(),
+  //   );
+  // }
 
   /// Initializes the Provisioner's Node.
   ///
@@ -44,11 +55,21 @@ class Node {
     Provisioner provisioner, {
     required Address address,
   }) {
-    // TODO: set missing properties
-    return Node.create(
+    logger.f("MISSING IMPLEMENTATION: Node.forProvisioner");
+
+    return Node._(
       uuid: provisioner.uuid,
       name: provisioner.name,
       primaryUnicastAddress: address,
+      deviceKey: Crypto.generateRandom128BitKey(),
+      security: Security.secure,
+      ttl: null,
+      isConfigComplete: false,
+      features: const NodeFeaturesState.allNotSupported(),
+      minimumNumberOfReplayProtectionList: Address.maxUnicastAddress.value,
+      netKeys: [],
+      appKeys: [],
+      elements: [],
     );
   }
 
@@ -102,38 +123,31 @@ class Node {
     required NetworkKey networkKey,
     required Address primaryUnicastAddress,
   }) {
-    final node = Node._(
+    // If the Node as provisioned in an insecure way, lower the minimum security
+    // of the Network Key.
+    if (security == Security.insecure) {
+      networkKey.lowerSecurity();
+    }
+
+    // The updated flag is set to true if the Node was provisioned using
+    // a Network Key in Phase 2 (Using New Keys).
+    final updated = networkKey.phase == KeyRefreshPhase.usingNewKeys;
+    final netKeys = [NodeKey(index: networkKey.index, updated: updated)];
+
+    return Node._(
       uuid: uuid,
       name: name,
       primaryUnicastAddress: primaryUnicastAddress,
       deviceKey: deviceKey,
+      isConfigComplete: false,
+      security: security,
+      netKeys: netKeys,
+      appKeys: [],
+      elements: [],
+      features: null,
+      minimumNumberOfReplayProtectionList: null,
+      ttl: null,
     );
-
-    logger.f("MISSING IMPLEMENTATION");
-    // TODO: set missing properties
-
-    // self.uuid = uuid
-    // self.name = name
-    // self.primaryUnicastAddress = address
-    // this.deviceKey = deviceKey
-    // self.security  = security
-    // // Composition Data were not obtained.
-    // self.isConfigComplete = false
-
-    // // The updated flag is set to true if the Node was provisioned using
-    // // a Network Key in Phase 2 (Using New Keys).
-    // let updated = networkKey.phase == .usingNewKeys
-    // self.netKeys  = [NodeKey(index: networkKey.index, updated: updated)]
-    // self.appKeys  = []
-    // self.elements = []
-
-    // // If the Node as provisioned in an insecure way, lower the minimum security
-    // // of the Network Key.
-    // if security == .insecure {
-    //     networkKey.lowerSecurity()
-    // }
-
-    return node;
   }
 
   // TODO: internal
@@ -147,24 +161,86 @@ class Node {
   /// TODO: internal set
   Uint16? companyIdentifier;
 
-  final List<MeshElement> elements = []; // TODO:
+  /// The 16-bit vendor-assigned Product Identifier (PID).
+  /// The value of this property is obtained from node composition data.
+  /// TODO: internal(set)
+  Uint16? productIdentifier;
 
+  /// The 16-bit vendor-assigned Version Identifier (VID).
+  /// The value of this property is obtained from node composition data.
+  Uint16? versionIdentifier;
+
+  /// The minimum number of Replay Protection List (RPL) entries for this
+  /// node. The value of this property is obtained from node composition
+  /// data.
+  final Uint16? minimumNumberOfReplayProtectionList;
+
+  /// Node's features.
+  NodeFeaturesState? features;
+
+  /// Primary Unicast Address of the Node.
   Address primaryUnicastAddress;
 
   /// 128-bit device key for this Node.
   final Data? deviceKey;
 
-  final List<ApplicationKey> appKeys = []; // TODO:
+  /// The level of security for the subnet on which the node has been
+  /// originally provisioner.
+  final Security security;
 
-  final List<NetworkKey> networkKeys = []; // TODO:
-  void setNetworkKeys(List<NetworkKey> networkKeys) {
-    logger.f("MISSING IMPLEMENTATION");
-    // TODO
+  /// An array of Node Network Key objects that include information
+  /// about the Network Keys known to this node.
+  final List<NodeKey> netKeys;
+
+  /// An array of Node Application Key objects that include information
+  /// about the Application Keys known to this node.
+  final List<NodeKey> appKeys;
+
+  List<MeshElement> _elements = [];
+
+  /// An array of node's elements.
+  List<MeshElement> get elements => _elements;
+
+  /// Returns list of Network Keys known to this Node.
+  ///
+  /// - note: If the Node has been removed from the mesh network this
+  ///         property returns an empty array.
+  List<NetworkKey> get networkKeys => [];
+
+  /// Sets the Network Keys to the Node.
+  ///
+  /// This method overwrites previous keys.
+  ///
+  /// - parameter networkKeys: The Network Keys to set.
+  set networkKeys(List<NetworkKey> networkKeys) {
+    logger.f("MISSING IMPLEMENTATION: Node.networkKeys setter");
+    // TODO: set(networkKeysWithIndexes: networkKeys.map { $0.index })
   }
 
-  void setApplicationKeys(List<ApplicationKey> applicationKeys) {
-    logger.f("MISSING IMPLEMENTATION");
-    // TODO
+  /// Returns list of Application Keys known to this Node.
+  ///
+  /// - note: If the Node has been removed from the mesh network this
+  ///         property returns an empty array.
+  List<ApplicationKey> get applicationKeys => [];
+
+  /// Sets the Application Keys to the Node.
+  /// This will overwrite the previous keys.
+  ///
+  /// - parameter applicationKeys: The Application Keys to set.
+  set applicationKeys(List<ApplicationKey> applicationKeys) {
+    logger.f("MISSING IMPLEMENTATION: Node.applicationKeys setter");
+    // TODO: set(applicationKeysWithIndexes: applicationKeys.map { $0.index })
+  }
+
+  /// The boolean value represents whether the Mesh Manager
+  /// has finished configuring this Node. The property is set to `true`
+  /// once a Mesh Manager is done completing this node's
+  /// configuration, otherwise it is set to `false`.
+  bool _isConfigComplete = false;
+  bool get isConfigComplete => _isConfigComplete;
+  set isConfigComplete(bool isConfigComplete) {
+    _isConfigComplete = isConfigComplete;
+    meshNetwork?.networkDidChange();
   }
 
   Uint8? _ttl;
@@ -191,3 +267,35 @@ class Node {
     this.ttl = ttl;
   }
 }
+
+// TODO: Codable
+class NodeKey {
+  NodeKey({
+    required this.index,
+    required this.updated,
+  });
+
+  final KeyIndex index;
+  final bool updated;
+}
+
+/// The state of a network or application key distributed to a mesh
+/// node by a Mesh Manager.
+// struct NodeKey: Codable {
+//     /// The Key index for this network key.
+//     public internal(set) var index: KeyIndex
+//     /// This flag contains value set to `false`, unless a Key Refresh
+//     /// procedure is in progress and the network has been successfully
+//     /// updated.
+//     public internal(set) var updated: Bool
+
+//     internal init(index: KeyIndex, updated: Bool) {
+//         self.index   = index
+//         self.updated = updated
+//     }
+
+//     internal init(of key: Key) {
+//         self.index   = key.index
+//         self.updated = false
+//     }
+// }

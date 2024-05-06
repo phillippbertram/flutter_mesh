@@ -6,6 +6,7 @@ extension NodeElementsX on Node {
   /// `nil` is returned if Composition Data has not been received yet
   MeshElement? get primaryElement {
     if (!isCompositionDataReceived) {
+      logger.w("Composition Data has not been received. ${{"node": this}}");
       return null;
     }
     return elements.first;

@@ -19,7 +19,27 @@ extension NodeKeysX on Node {
   /// - returns: `True` if the Node has knowledge about the Application Key
   ///            index, `false` otherwise.
   bool knowsApplicationKeyIndex(KeyIndex keyIndex) {
-    return appKeys.any((element) => element.index == keyIndex);
+    return appKeys.any((ak) => ak.index == keyIndex);
+  }
+
+  /// Returns whether the Node has knowledge about the given Network Key.
+  /// The Network Key comparison bases only on the Key Index.
+  ///
+  /// - parameter networkKey: The Network Key to look for.
+  /// - returns: `True` if the Node has knowledge about the Network Key
+  ///            with the same Key Index as given key, `false` otherwise.
+  bool knowsNetworkKey(NetworkKey key) {
+    return knowsNetworkKeyIndex(key.index);
+  }
+
+  /// Returns whether the Node has knowledge about Network Key with the
+  /// given index.
+  ///
+  /// - parameter networkKeyIndex: The Network Key Index to look for.
+  /// - returns: `True` if the Node has knowledge about the Network Key
+  ///            index, `false` otherwise.
+  bool knowsNetworkKeyIndex(KeyIndex keyIndex) {
+    return netKeys.any((nk) => nk.index == keyIndex);
   }
 }
 
