@@ -99,6 +99,49 @@ void main() {
       });
     });
 
+    group("encryption", () {
+      final data = DataUtils.fromHex("00112233445566778899AABBCCDDEEFF")!;
+      final key = DataUtils.fromHex("0123456789ABCDEF0123456789ABCDEF")!;
+      final nonce = DataUtils.fromHex("00112233445566778899AABBCC")!;
+
+      test("mic4", () {
+        final expected =
+            DataUtils.fromHex("6C7854C1E573CD62155BFA987C70673D273AB343");
+
+        final result = Crypto.encryptData(
+          data,
+          encryptionKey: key,
+          nonce: nonce,
+          micSize: 4,
+        );
+
+        expect(result, expected);
+
+        // final encrypted = result.sublist(0, data.length);
+        // final mic = result.sublist(data.length, result.length);
+        // final text = Crypto.decryptData(
+        //   encrypted,
+        //   encryptionKey: key,
+        //   nonce: nonce,
+        //   mic: mic,
+        // );
+      });
+
+      test("mic8", () {
+        final expected = DataUtils.fromHex(
+            "6C7854C1E573CD62155BFA987C70673D5CFCB5AC7E3CEA62");
+
+        final result = Crypto.encryptData(
+          data,
+          encryptionKey: key,
+          nonce: nonce,
+          micSize: 8,
+        );
+
+        expect(result, expected);
+      });
+    });
+
     group("virtual label", () {
       test("calculateVirtualLabel", () {
         const expected = Address(0xADD5);
