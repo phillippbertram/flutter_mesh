@@ -19,15 +19,14 @@ class ConfigCompositionDataGet extends AcknowledgedConfigMessage {
   }
 
   @override
-  // TODO: implement isSegmented
-  bool get isSegmented => throw UnimplementedError();
+  bool get isSegmented => false; // TODO: implement isSegmented
 
   @override
   Uint32 get opCode => 0x8008;
 
+// TODO: implement security
   @override
-  // TODO: implement security
-  MeshMessageSecurity get security => throw UnimplementedError();
+  MeshMessageSecurity get security => MeshMessageSecurity.low;
 }
 
 class ConfigCompositionDataStatus {}

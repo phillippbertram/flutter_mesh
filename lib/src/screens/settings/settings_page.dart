@@ -94,8 +94,7 @@ class SettingsPage extends StatelessWidget {
           const Text("Mesh Network"),
           IconButton(
               onPressed: () {
-                AppNetworkManager.instance.meshNetworkManager.meshNetwork
-                    ?.notifyListeners();
+                AppNetworkManager.instance.reload();
               },
               icon: const Icon(Icons.refresh)),
         ],

@@ -1,7 +1,7 @@
-// TODO: JSON Serialization + Equatable
-
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 
@@ -12,6 +12,8 @@ part 'node.p.keys.dart';
 part 'node.p.address.dart';
 part 'node.p.elements.dart';
 part 'node.p.provisioner.dart';
+
+// TODO: JSON Serialization + Equatable + Immutable(?)
 
 class Node {
   Node._({
@@ -30,19 +32,6 @@ class Node {
   })  : _isConfigComplete = isConfigComplete,
         _ttl = ttl,
         _elements = elements;
-
-  // factory Node.create({
-  //   required UUID uuid,
-  //   String? name,
-  //   required Address primaryUnicastAddress,
-  // }) {
-  //   return Node._(
-  //     uuid: uuid,
-  //     name: name,
-  //     primaryUnicastAddress: primaryUnicastAddress,
-  //     deviceKey: Crypto.generateRandom128BitKey(),
-  //   );
-  // }
 
   /// Initializes the Provisioner's Node.
   ///
@@ -173,7 +162,7 @@ class Node {
   /// The minimum number of Replay Protection List (RPL) entries for this
   /// node. The value of this property is obtained from node composition
   /// data.
-  final Uint16? minimumNumberOfReplayProtectionList;
+  Uint16? minimumNumberOfReplayProtectionList;
 
   /// Node's features.
   NodeFeaturesState? features;
@@ -190,7 +179,7 @@ class Node {
 
   /// An array of Node Network Key objects that include information
   /// about the Network Keys known to this node.
-  final List<NodeKey> netKeys;
+  List<NodeKey> netKeys; // TODO: internal set
 
   /// An array of Node Application Key objects that include information
   /// about the Application Keys known to this node.
@@ -205,16 +194,27 @@ class Node {
   ///
   /// - note: If the Node has been removed from the mesh network this
   ///         property returns an empty array.
-  List<NetworkKey> get networkKeys => [];
+  List<NetworkKey> get networkKeys {
+    return meshNetwork?.networkKeys.knownToNode(this) ?? [];
+  }
 
   /// Sets the Network Keys to the Node.
   ///
   /// This method overwrites previous keys.
   ///
   /// - parameter networkKeys: The Network Keys to set.
-  set networkKeys(List<NetworkKey> networkKeys) {
-    logger.f("MISSING IMPLEMENTATION: Node.networkKeys setter");
-    // TODO: set(networkKeysWithIndexes: networkKeys.map { $0.index })
+  void setNetworkKeys(List<NetworkKey> networkKeys) {
+    setNetworkKeysWithIndexes(networkKeys.map((key) => key.index).toList());
+  }
+
+  /// Sets the Network Keys with given indexes to the Node.
+  ///
+  /// This method overwrites previous keys.
+  ///
+  /// - parameter networkKeyIndexes: The Network Key indexes to set.
+  void setNetworkKeysWithIndexes(List<KeyIndex> indexes) {
+    netKeys =
+        indexes.map((index) => NodeKey(index: index, updated: false)).sorted();
   }
 
   /// Returns list of Application Keys known to this Node.
@@ -269,7 +269,7 @@ class Node {
 }
 
 // TODO: Codable
-class NodeKey {
+class NodeKey with EquatableMixin implements Comparable<NodeKey> {
   NodeKey({
     required this.index,
     required this.updated,
@@ -277,6 +277,14 @@ class NodeKey {
 
   final KeyIndex index;
   final bool updated;
+
+  @override
+  int compareTo(NodeKey other) {
+    return index.compareTo(other.index);
+  }
+
+  @override
+  List<Object?> get props => [index];
 }
 
 /// The state of a network or application key distributed to a mesh

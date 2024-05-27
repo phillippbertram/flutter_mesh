@@ -1,13 +1,18 @@
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_mesh/src/mesh/models/key.dart';
 import 'package:flutter_mesh/src/mesh/models/key_refresh_phase.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data_keys.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 
 import '../utils/crypto.dart';
+import 'node.dart';
 import 'security.dart';
+
+part 'network_key.p.meshnetwork.dart';
+part 'network_key.p.list.dart';
 
 // TODO: JSONSerialization + Equatable
 

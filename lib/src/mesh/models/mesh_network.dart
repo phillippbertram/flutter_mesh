@@ -109,8 +109,11 @@ class MeshNetwork with ChangeNotifier {
 
   /// The IV Index of the mesh network.
   IvIndex get ivIndex => _ivIndex;
-  IvIndex _ivIndex =
-      const IvIndex(index: 0, updateActive: false); // TODO: Implement
+  IvIndex _ivIndex = const IvIndex(
+    index: 0,
+    updateActive: false,
+  ); // TODO: Implement
+
   void setIvIndex(IvIndex ivIndex) {
     _ivIndex = ivIndex;
 
@@ -125,5 +128,35 @@ class MeshNetwork with ChangeNotifier {
   void networkDidChange() {
     timestamp = DateTime.now();
     notifyListeners();
+  }
+
+  /// Removes the Node with given UUID from the mesh network.
+  ///
+  /// - parameter uuid: The UUID of a Node to remove.
+  Node? removeNodeWithUuid(UUID uuid) {
+    final index = nodes.indexWhere((node) => node.uuid == uuid);
+    if (index == -1) {
+      return null;
+    }
+
+    final node = nodes.removeAt(index);
+
+    // TODO (NRF): Verify that no Node is publishing to this Node.
+    //       If such Node is found, this method should throw, as
+    //       the Node is in use.
+
+    // TODO: Remove Unicast Addresses of all Node's Elements from Scenes.
+    logger.e(
+        "MISSING IMPLEMENTATION: Remove Unicast Addresses of all Node's Elements from Scenes.");
+    // scenes.forEach { scene in
+    //     scene.remove(node: node);
+    // }
+
+    // As the Node is no longer part of the mesh network, remove
+    // the reference to it.
+    node.meshNetwork = null;
+
+    networkDidChange();
+    return node;
   }
 }

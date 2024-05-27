@@ -45,7 +45,12 @@ class AppNetworkManager {
     }
   }
 
-// TODO:
+  void reload() {
+    // TODO:
+    meshNetworkManager.meshNetwork?.notifyListeners();
+  }
+
+  // TODO:
   void createNewMeshNetwork() {
     final localProvisioner = Provisioner.create(
       name: 'Local Provisioner',

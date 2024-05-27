@@ -119,19 +119,19 @@ extension MeshNetworkNodes on MeshNetwork {
     logger.e("INCOMPLETE IMPLEMENTATION - addNode");
 
     // Ensure the Network Key exists.
-    // TODO:
-    //      guard let netKeyIndex = node.netKeys.first?.index else {
-    //     throw MeshNetworkError.noNetworkKey
-    // }
+    final netKeyIndex = node.netKeys.firstOrNull?.index;
+    if (netKeyIndex == null) {
+      return Result.error("Node does not have a Network Key.");
+    }
 
     // Make sure the network contains a Network Key with the same Key Index.
-    // TODO:
-    // guard networkKeys.contains(where: { $0.index == netKeyIndex }) else {
-    //       throw MeshNetworkError.invalidKey
-    //   }
+    final netKey =
+        networkKeys.firstWhereOrNull((key) => key.index == netKeyIndex);
+    if (netKey == null) {
+      return Result.error("Network Key does not belong to the mesh network.");
+    }
 
-    // TODO:
-    // node.meshNetwork = this;
+    node.meshNetwork = this;
     nodes.add(node);
     networkDidChange();
     return Result.value(null);

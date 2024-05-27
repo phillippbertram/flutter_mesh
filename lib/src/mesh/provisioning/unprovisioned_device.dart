@@ -14,7 +14,10 @@ class UnprovisionedDevice with _$UnprovisionedDevice {
     required OobInformation oobInformation,
   }) = _UnprovisionedDevice;
 
-  static UnprovisionedDevice? fromAdvertisementData(AdvertisementData data) {
+  static UnprovisionedDevice? fromAdvertisementData(
+    AdvertisementData data, {
+    BluetoothDevice? device,
+  }) {
     final uuid = data.unprovisionedDeviceUUID;
     if (uuid == null) {
       return null;
@@ -25,8 +28,13 @@ class UnprovisionedDevice with _$UnprovisionedDevice {
       return null;
     }
 
+    String deviceName = data.advName;
+    if (deviceName.isEmpty && device != null) {
+      deviceName = device.platformName;
+    }
+
     return UnprovisionedDevice._(
-      name: data.advName,
+      name: deviceName,
       uuid: uuid,
       oobInformation: oob,
     );

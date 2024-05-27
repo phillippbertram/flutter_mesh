@@ -199,7 +199,7 @@ extension MeshNetworkProvisioner on MeshNetwork {
 
       // The new Provisioner will be aware of all currently existing
       // Network and Application Keys.
-      node.networkKeys = networkKeys;
+      node.setNetworkKeys(networkKeys);
       node.applicationKeys = applicationKeys;
 
       // Set the Node's Elements.
@@ -207,11 +207,12 @@ extension MeshNetworkProvisioner on MeshNetwork {
       if (provisioners.isEmpty) {
         node.addElements(localElements);
 
-        // TODO: implement this
-        logger.f(
-            "MISSING IMPLEMENTATION - not setting all values for provisioner node");
-        // node.companyIdentifier = 0x004C // Apple Inc.
-        // node.minimumNumberOfReplayProtectionList = Address.maxUnicastAddress
+        // setting the company identifier is currently needed because
+        // otherwise we cannot send the composition data, because it will check
+        // for the primary element when sending config messages.
+        node.companyIdentifier = 0x004C; // Apple Inc.
+        node.minimumNumberOfReplayProtectionList =
+            Address.maxUnicastAddress.value;
       } else {
         node.addElement(MeshElement.primaryElement);
       }

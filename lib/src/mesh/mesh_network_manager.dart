@@ -258,6 +258,7 @@ extension MeshNetworkManagerMessaging on MeshNetworkManager {
     }
 
     // TODO: ConfigNetKeyDelete
+    logger.e("MISSING IMPLEMENTATION: ConfigNetKeyDelete");
     // if (message is ConfigNetKeyDelete) {
     //   if (node.networkKeys.length <= 1) {
     //     return Result.error("Cannot remove last Network Key");

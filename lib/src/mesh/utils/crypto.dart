@@ -5,12 +5,13 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
+import 'package:cryptography_flutter/cryptography_flutter.dart' as cryptoF;
+import 'package:pointycastle/export.dart' as pointy;
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import '../models/address.dart';
 import '../models/network_key.dart';
 import '../provisioning/algorithms.dart' as algo;
-import 'package:pointycastle/export.dart' as pointy;
 
 import '../types.dart';
 
@@ -24,7 +25,6 @@ import '../types.dart';
 class Crypto {
   const Crypto._();
 
-  // TODO: test this
   /// Generates a random number of bytes.
   /// - parameter length: The length of the random bytes.
   /// - returns: The random bytes.
@@ -111,11 +111,27 @@ class Crypto {
     switch (algorithm) {
       case algo.Algorithm.BTM_ECDH_P256_CMAC_AES128_AES_CCM:
       case algo.Algorithm.BTM_ECDH_P256_HMAC_SHA256_AES_CCM:
+
         // TODO: this is the implementation for shared generating shared secreet
         try {
           // Elliptic Curve Diffie-Hellman (ECDH) with P-256 curve
-          final algo = crypto.Ecdh.p256(length: 32); // 32 bytes == 256 bits
+
+          // TODO: there are a few adjustments relevant to make this work:
+          // - add android dependencies:
+          //      - com.madgag.spongycastle:core
+          //      - com.madgag.spongycastle:prov
+          // - cryptography_flutter:
+          //    - has an issue https://github.com/dint-dev/cryptography/issues/170
+          //    - CryptographyFlutterPlugin.kt adjustments
+          //        `ecNewKeyPair` -> KeyPairGenerator.getInstance("ECDH", provider)
+          final algo = cryptoF.FlutterEcdh.p256(
+            length: 32, // 32 bytes == 256 bits
+            // "SC" is a provider for Spongy Castle
+            // make sure, "com.madgag.spongycastle:prov" is installed as dependency
+            androidCryptoProvider: "SC",
+          );
           final keyPair = await algo.newKeyPair();
+
           return Result.value(keyPair);
         } catch (e) {
           logger.e("Error generating key pair: $e");
@@ -176,7 +192,8 @@ class Crypto {
       final devicePublicKeyData = publicKey.uncompressedRepresentation();
 
       // Create an algorithm instance
-      final algorithm = crypto.Ecdh.p256(length: 32); // 32 bytes == 256 bits
+      final algorithm =
+          cryptoF.FlutterEcdh.p256(length: 32); // 32 bytes == 256 bits
 
       final devicePublicKey = crypto.EcPublicKey(
         type: crypto.KeyPairType.p256,

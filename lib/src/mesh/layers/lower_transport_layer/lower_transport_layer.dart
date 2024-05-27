@@ -6,7 +6,6 @@ import '../../models/mesh_network.dart';
 import '../../models/provisioner.dart';
 import '../../models/node.dart';
 import '../../types.dart';
-import '../bearer_layer/bearer_layer.dart';
 import '../network_manager.dart';
 import 'access_message.dart';
 
@@ -53,7 +52,9 @@ class LowerTransportLayer {
       networkKey: networkKey,
     );
 
-    logger.i("Lower Transport Layer: Sending message: $message");
+    // TODO:
+    logger.f(
+        "NOT IMPLEMENTED - Lower Transport Layer: Sending message: $message");
     // final res = _networkManager.networkLayer.sendLowerTransportPdu(
     //   message,
     //   type: PduType.networkPdu,

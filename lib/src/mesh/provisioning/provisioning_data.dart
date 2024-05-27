@@ -221,8 +221,6 @@ extension ProvisioningDataX on ProvisioningData {
         ? networkKey!.oldKey!
         : networkKey!.key;
 
-    // final bytes = BytesBuilder();
-
     final data = Data.from(key)
         .addUint16(
           networkKey!.index,

@@ -89,5 +89,6 @@ extension on UpperTransportLayer {
   }) {
     // TODO:
     logger.f("INCOMPLETE implementation: enqueue");
+    throw UnimplementedError();
   }
 }

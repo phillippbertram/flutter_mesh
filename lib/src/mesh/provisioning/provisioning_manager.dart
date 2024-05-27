@@ -636,7 +636,6 @@ class ProvisioningManager implements BearerDataDelegate {
         final numberOfElements = _provisioningCapabilities!.numberOfElements;
         final networkKey = _provisioningData!.networkKey;
 
-        logger.f("IMPLEMENTATION MISSING - Create node and add to network");
         // ignore: unnecessary_this
         final unprovisionedDevice = this.unprovisionedDevice.copyWith(
               name: deviceName,
@@ -649,6 +648,10 @@ class ProvisioningManager implements BearerDataDelegate {
           security: security,
           elementCount: numberOfElements,
         );
+
+        // If the node was reprovisioned, remove the old one.
+        meshNetwork.removeNodeWithUuid(node.uuid);
+
         final addRes = meshNetwork.addNode(node);
         if (addRes.isError) {
           logger.e("Failed to add node to network: ${addRes.asError!.error}");
