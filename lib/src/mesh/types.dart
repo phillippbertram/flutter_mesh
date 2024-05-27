@@ -3,7 +3,9 @@ import 'package:uuid/uuid.dart';
 
 // TODO: make real types to prevent accidental misuse?
 // @see https://suragch.medium.com/working-with-bytes-in-dart-6ece83455721
-typedef Data = List<int>; // TODO: use typed_data.Uint8List instead?
+
+// TODO: use typed_data.Uint8List instead? or `ByteData` directly?
+typedef Data = List<int>;
 typedef Uint16 = int; // TODO: create own types instead of `typedef
 typedef Uint8 = int;
 typedef Uint32 = int;

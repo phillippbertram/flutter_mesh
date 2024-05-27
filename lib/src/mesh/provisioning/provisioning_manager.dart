@@ -246,10 +246,10 @@ class ProvisioningManager implements BearerDataDelegate {
 
     // Try generating Private and Public Keys. This may fail if the given
     // algorithm is not supported.
-    final keysKes = await _provisioningData!.generateKeys(algorithm: algorithm);
-    if (keysKes.isError) {
-      logger.e("Failed to generate keys: ${keysKes.asError!.error}");
-      return Result.error("Failed to generate keys: ${keysKes.asError!.error}");
+    final keysRes = await _provisioningData!.generateKeys(algorithm: algorithm);
+    if (keysRes.isError) {
+      logger.e("Failed to generate keys: ${keysRes.asError!.error}");
+      return Result.error("Failed to generate keys: ${keysRes.asError!.error}");
     }
 
     // If the device's Public Key was obtained OOB, we are now ready to

@@ -23,9 +23,13 @@ dependencies:
   uuid: ^4.3.3
   collection: ^1.18.0
   rxdart: ^0.27.7
-  pointycastle: ^3.7.4 # TODO: nut supported anymore?
+
+  # crypto stuff
+  pointycastle: ^3.7.4 # TODO: not supported anymore?
   cryptography: ^2.7.0
-  cryptography_flutter: ^2.3.2
+  cryptography_flutter: ^2.3.2 # TODO: not working on android?
+  # TODO: use https://pub.dev/packages/sodium_libs?
+  # webcrypto: ^0.5.6 # https://getstream.io/chat/docs/sdk/flutter/v5/guides/end_to_end_chat_encryption/
 
   # app deps
   flutter_hooks: ^0.20.5 # 0.21.0 has a bug!!!

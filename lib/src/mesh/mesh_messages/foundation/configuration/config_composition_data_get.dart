@@ -6,6 +6,7 @@ import 'package:flutter_mesh/src/mesh/mesh_messages/mesh_message.dart';
 import '../../../types.dart';
 
 class ConfigCompositionDataGet extends AcknowledgedConfigMessage {
+  // TODO
   // static const Uint32 opCode = 0x8008;
   // static ConfigCompositionDataStatus.type responseType;
 
@@ -22,7 +23,6 @@ class ConfigCompositionDataGet extends AcknowledgedConfigMessage {
   bool get isSegmented => throw UnimplementedError();
 
   @override
-  // TODO: implement opCode
   Uint32 get opCode => 0x8008;
 
   @override

@@ -239,8 +239,8 @@ sealed class ProvisioningResponse with _$ProvisioningResponse {
       ProvisioningPduType.random =>
         ProvisioningResponseRandom(key: pdu.data.suffix(from: 1)),
       ProvisioningPduType.complete => const ProvisioningResponseComplete(),
-      ProvisioningPduType.failed =>
-        const ProvisioningResponseFailed(error: "Provisioning failed."),
+      ProvisioningPduType.failed => const ProvisioningResponseFailed(
+          error: "PduType.failed - Provisioning failed"),
       _ => null,
     };
 
