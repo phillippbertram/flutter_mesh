@@ -58,7 +58,7 @@ class NodeConfigPage extends StatelessWidget {
               ),
               const ListTile(
                 title: Text('Network Keys'),
-                trailing: Text("TBS"), // TODO:
+                trailing: Text("TBD"), // TODO:
               ),
             ],
           ),

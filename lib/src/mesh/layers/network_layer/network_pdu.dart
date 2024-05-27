@@ -101,8 +101,9 @@ class NetworkPdu {
     // Data to be obfuscated: CTL/TTL, Sequence Number, Source Address.
     final seq = Uint8List.fromList([])
         .addUint32(sequence, endian: Endian.big)
-        .combineWith(transportPdu)
+        .dropFirst()
         .toUint8List();
+
     final deobfuscatedData = Uint8List.fromList([])
         .addUint8(ctlTtl)
         .combineWith(seq)
@@ -116,7 +117,7 @@ class NetworkPdu {
         .toUint8List();
 
     final nonce = Uint8List.fromList([pduType.nonceId])
-        .combineWith(decryptedData)
+        .combineWith(deobfuscatedData)
         .combineWith(Uint8List.fromList([0x00, 0x00]))
         .addUint32(ivIndex, endian: Endian.big)
         .toUint8List();

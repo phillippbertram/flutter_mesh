@@ -36,9 +36,9 @@ class NetworkLayer {
   }) async {
     logger.f("INCOMPLETE implementation: sendLowerTransportPdu");
     final transmitter = _networkManager.transmitter;
-    // if (transmitter == null) {
-    //   return Result.error("Bearer closed");
-    // }
+    if (transmitter == null) {
+      return Result.error("Bearer closed");
+    }
 
     // TODO:
     final Uint32 sequence = (pdu is AccessMessage ? pdu.sequence : null) ??
@@ -50,7 +50,6 @@ class NetworkLayer {
       ttl: ttl,
     );
     logger.i("Network Layer: Sending Network PDU: $networkPdu");
-    logger.f("Network Layer: not sending anything yet"); // TODO:
 
     // TODO:
     // Loopback interface.
@@ -98,7 +97,10 @@ class NetworkLayer {
     //     }
     // }
 
-    return Result.value(null);
+    final transmitRes =
+        await transmitter.sendData(data: networkPdu.pdu, type: type);
+
+    return transmitRes;
   }
 }
 

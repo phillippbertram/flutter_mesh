@@ -29,8 +29,8 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
   // NOTE: no WeakReference needed in dart?
   final MeshNetwork _meshNetwork;
 
-  final _scanResultsController = StreamController<List<ScanResult>>.broadcast();
-  Stream<List<ScanResult>> get scanResults => _scanResultsController.stream;
+  final _scanResultsSubject = BehaviorSubject.seeded(<ScanResult>[]);
+  Stream<List<ScanResult>> get scanResults => _scanResultsSubject.stream;
 
   bool _isScanning = false;
   bool get isScanning => _isScanning;
@@ -117,9 +117,16 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
   @override
   Future<Result<void>> sendData(
       {required Data data, required PduType type}) async {
-    logger.d('Sending ${data.length} of type $type');
-    // TODO: implement sendData
-    throw UnimplementedError();
+    logger.d('Sending ${data.toHex()} (${data.length}) of type $type');
+
+    // TODO: use proxy implementation
+    final firstBearer = _scanResultsSubject.value.firstOrNull;
+    if (firstBearer == null) {
+      return Result.error("No connected proxy found");
+    }
+
+    final proxy = GattBearer.fromPeripheral(basePeripheral: firstBearer.device);
+    return await proxy.sendData(data: data, type: type);
   }
 
   void _handleScanResults(List<ScanResult> results) {
@@ -140,7 +147,7 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
       return false;
     });
 
-    _scanResultsController.add(filtered.toList());
+    _scanResultsSubject.add(filtered.toList());
   }
 
   // TODO: GattBearerDelegate
@@ -149,6 +156,7 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
 
   @override
   void bearerDidDeliverData(Data data, PduType type) {
+    logger.d('Received ${data.toHex()} (${data.length}) of type $type');
     _dataDelegate?.bearerDidDeliverData(data, type);
   }
 }

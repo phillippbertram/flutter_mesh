@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:flutter_mesh/src/mesh/layers/upper_transport_layer/upper_transport_pdu.dart';
 import 'package:flutter_mesh/src/mesh/models/network_key.dart';
 
@@ -6,6 +7,7 @@ import '../../models/mesh_network.dart';
 import '../../models/provisioner.dart';
 import '../../models/node.dart';
 import '../../types.dart';
+import '../bearer_layer/bearer_layer.dart';
 import '../network_manager.dart';
 import 'access_message.dart';
 
@@ -27,20 +29,20 @@ class LowerTransportLayer {
   ///                 If `nil`, the default Node TTL will be used.
   ///   - networkKey: The Network Key to be used to encrypt the message on
   ///                 on Network Layer.
-  void sendUnsegmentedUpperTransportPdu(
+  Future<Result<void>> sendUnsegmentedUpperTransportPdu(
     UpperTransportPdu pdu, {
     required NetworkKey networkKey,
     Uint8? initialTtl,
-  }) {
+  }) async {
     logger.f("INCOMPLETE implementation: sendUnsegmentedUpperTransportPdu");
     final provisionerNode = _meshNetwork.localProvisioner?.node;
     if (provisionerNode == null) {
-      return;
+      return Result.error("Local Provisioner Node not found.");
     }
 
     final localElement = provisionerNode.elementWithAddress(pdu.source);
     if (localElement == null) {
-      return;
+      return Result.error("Local Element not found.");
     }
 
     final ttl = initialTtl ??
@@ -55,10 +57,12 @@ class LowerTransportLayer {
     // TODO:
     logger.f(
         "NOT IMPLEMENTED - Lower Transport Layer: Sending message: $message");
-    // final res = _networkManager.networkLayer.sendLowerTransportPdu(
-    //   message,
-    //   type: PduType.networkPdu,
-    //   ttl: ttl,
-    // );
+    final res = _networkManager.networkLayer.sendLowerTransportPdu(
+      message,
+      type: PduType.networkPdu,
+      ttl: ttl,
+    );
+
+    return res;
   }
 }
