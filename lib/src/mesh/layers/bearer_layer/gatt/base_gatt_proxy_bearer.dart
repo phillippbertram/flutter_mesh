@@ -21,6 +21,7 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   BluetoothCharacteristic? _dataInCharacteristic;
   BluetoothCharacteristic? _dataOutCharacteristic;
 
+  // segments and reassembles data
   final _protocolHandler = ProxyProtocolHandler();
 
   // hold stream subscriptions that need to be cancelled when done
@@ -38,7 +39,6 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
 
   @override
   BearerDataDelegate? get dataDelegate => _dataDelegate;
-  // NOTE: no WeakReference needed in dart?
   BearerDataDelegate? _dataDelegate;
   @override
   void setDataDelegate(BearerDataDelegate delegate) {
