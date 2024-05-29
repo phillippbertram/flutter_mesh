@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_mesh/src/mesh/utils/service_uuid_mapping.dart';
+import 'package:flutter_mesh/src/mesh/utils/bt_uuids_lookup.dart';
 
 class ScanResultTile extends StatefulWidget {
   const ScanResultTile({super.key, required this.result, this.onTap});
@@ -57,7 +57,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   String getNiceServiceUuids(List<Guid> serviceUuids) {
     return serviceUuids.map((u) {
-      final service = BluetoothServicesLookup.findService(u.str).name;
+      final service = BluetoothIDLookup.service(u.str).name;
       return "$service (0x${u.str.toUpperCase()})";
     }).join(', ');
   }
@@ -92,7 +92,6 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   Widget _buildConnectButton(BuildContext context) {
     return ElevatedButton(
-      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         textStyle: const TextStyle(fontSize: 12),
@@ -101,6 +100,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
       ),
       onPressed:
           (widget.result.advertisementData.connectable) ? widget.onTap : null,
+      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
     );
   }
 

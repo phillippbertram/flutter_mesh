@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_mesh/src/mesh/utils/service_uuid_mapping.dart';
+import 'package:flutter_mesh/src/mesh/utils/bt_uuids_lookup.dart';
 
 import "characteristic_tile.dart";
 
@@ -13,8 +13,7 @@ class ServiceTile extends StatelessWidget {
 
   Widget buildUuid(BuildContext context) {
     final uuid = '0x${this.service.serviceUuid.str.toUpperCase()}';
-    final service =
-        BluetoothServicesLookup.findService(this.service.serviceUuid.str);
+    final service = BluetoothIDLookup.service(this.service.serviceUuid.str);
     final full = "${service.name} ($uuid)";
     return Text(full, style: const TextStyle(fontSize: 13));
   }

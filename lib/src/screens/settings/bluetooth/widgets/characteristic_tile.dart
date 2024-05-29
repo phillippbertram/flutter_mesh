@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_mesh/src/mesh/utils/service_uuid_mapping.dart';
+import 'package:flutter_mesh/src/mesh/utils/bt_uuids_lookup.dart';
 
 import "descriptor_tile.dart";
 import 'snackbar.dart';
@@ -96,9 +96,8 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
 
   Widget buildUuid(BuildContext context) {
     final uuid = '0x${widget.characteristic.uuid.str.toUpperCase()}';
-    final name = BluetoothServicesLookup.findCharacteristic(
-            widget.characteristic.uuid.str)
-        .name;
+    final name =
+        BluetoothIDLookup.characteristic(widget.characteristic.uuid.str).name;
     final full = "$name ($uuid)";
     return Text(full, style: const TextStyle(fontSize: 13));
   }
