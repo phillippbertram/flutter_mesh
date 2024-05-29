@@ -12,7 +12,7 @@ import 'proxy_protocol_handler.dart';
 class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
   BaseGattProxyBearer.fromPeripheral(
     this.service,
-    this.basePeripheral,
+    this.basePeripheral, // TODO: obtain peripheral manually from FlutterBlue by using uuid?
   );
 
   final Service service;
@@ -36,6 +36,14 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
         PduType.provisioningPdu,
         PduType.meshBeacon,
       ];
+
+  /// The name of the peripheral.
+  ///
+  /// This returns `nil` if the peripheral hasn't been yet retrieved (Bluetooth is off)
+  /// or the device does not have a name.
+  String? get name {
+    return basePeripheral.platformName;
+  }
 
   @override
   BearerDataDelegate? get dataDelegate => _dataDelegate;
@@ -96,7 +104,10 @@ class BaseGattProxyBearer<Service extends MeshService> implements Bearer {
     // TODO:
     // basePeripheral.cancelWhenDisconnected(_subscriptions);
 
-    await basePeripheral.connect();
+    await basePeripheral.connect(
+      timeout: const Duration(seconds: 10),
+      // autoConnect: true,
+    );
 
     return Result.value(null);
   }
