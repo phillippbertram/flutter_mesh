@@ -26,7 +26,7 @@ class _SharedPrefsDebugPageState extends State<SharedPrefsDebugPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Shared Preferences"),
+        title: const Text("Shared Preferences"),
       ),
       body: _sharedPrefsContent(context),
     );
@@ -74,8 +74,8 @@ class _SharedPrefsDebugPageState extends State<SharedPrefsDebugPage> {
     final keys = keysSet.toList()..sort();
 
     return keys.map((key) {
-      final value = _sharedPrefs?.getString(key);
-      return _sharedPrefsEntry(context, key, value ?? "");
+      final value = _sharedPrefs?.get(key);
+      return _sharedPrefsEntry(context, key, "$value");
     }).toList();
   }
 

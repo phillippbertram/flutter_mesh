@@ -7,7 +7,6 @@ import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/screens/settings/app_keys/app_keys.dart';
 import 'package:flutter_mesh/src/screens/settings/bluetooth/device_page.dart';
 import 'package:flutter_mesh/src/screens/settings/bluetooth/scan_results_page.dart';
-import 'package:flutter_mesh/src/screens/settings/bluetooth/widgets/extra.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -185,8 +184,11 @@ class SettingsPage extends StatelessWidget {
             title: const Text("Shared Prefs"),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const SharedPrefsDebugPage()));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SharedPrefsDebugPage(),
+                ),
+              );
             }),
       ],
     );
