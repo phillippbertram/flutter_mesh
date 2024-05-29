@@ -14,6 +14,7 @@ class ConfigCompositionDataGet extends AcknowledgedConfigMessage {
 
   final Uint8 page;
 
+  @override
   Data? get parameters {
     return Uint8List.fromList([page]);
   }

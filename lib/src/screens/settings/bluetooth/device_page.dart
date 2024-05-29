@@ -211,8 +211,8 @@ class _DevicePageState extends State<DevicePage> {
       index: (_isDiscoveringServices) ? 1 : 0,
       children: <Widget>[
         TextButton(
-          child: const Text("Get Services"),
           onPressed: onDiscoverServicesPressed,
+          child: const Text("Get Services"),
         ),
         const IconButton(
           icon: SizedBox(

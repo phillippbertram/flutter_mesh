@@ -14,17 +14,18 @@ class ConfigNodeReset implements AcknowledgedConfigMessage {
     return const ConfigNodeReset();
   }
 
+  @override
   Data? get parameters => null;
 
   @override
   // TODO: implement isSegmented
-  bool get isSegmented => throw UnimplementedError();
+  bool get isSegmented => false;
 
   @override
   // TODO: implement opCode
-  Uint32 get opCode => throw UnimplementedError();
+  Uint32 get opCode => ConfigNodeReset.opcode;
 
   @override
   // TODO: implement security
-  MeshMessageSecurity get security => throw UnimplementedError();
+  MeshMessageSecurity get security => MeshMessageSecurity.low;
 }

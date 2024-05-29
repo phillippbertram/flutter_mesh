@@ -1,4 +1,3 @@
-import 'package:flutter_mesh/src/mesh/models/node.dart';
 
 import '../types.dart';
 
@@ -44,6 +43,31 @@ class NodeFeaturesState {
     this.friend,
     this.lowPower,
   });
+
+  factory NodeFeaturesState.fromMask(Uint16 mask) {
+    // The state of the following features is unknown until the corresponding
+    // Config ... Get message is sent.
+    // self.relay    = mask & 0x01 == 0 ? .notSupported : nil
+    // self.proxy    = mask & 0x02 == 0 ? .notSupported : nil
+    // self.friend   = mask & 0x04 == 0 ? .notSupported : nil
+    // The Low Power feature if supported is enabled and cannot be disabled.
+    // self.lowPower = mask & 0x08 == 0 ? .notSupported : .enabled
+
+    final relay = mask & 0x01 == 0 ? NodeFeatureState.notSupported : null;
+    final proxy = mask & 0x02 == 0 ? NodeFeatureState.notSupported : null;
+    final friend = mask & 0x04 == 0 ? NodeFeatureState.notSupported : null;
+    // The Low Power feature if supported is enabled and cannot be disabled.
+    final lowPower = mask & 0x08 == 0
+        ? NodeFeatureState.notSupported
+        : NodeFeatureState.enabled;
+
+    return NodeFeaturesState(
+      relay: relay,
+      proxy: proxy,
+      friend: friend,
+      lowPower: lowPower,
+    );
+  }
 
   const NodeFeaturesState.allNotSupported()
       : relay = NodeFeatureState.notSupported,

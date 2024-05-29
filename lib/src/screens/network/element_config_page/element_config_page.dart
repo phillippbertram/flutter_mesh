@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
-import 'package:flutter_mesh/src/mesh/utils/company_identifier.dart';
 import 'package:flutter_mesh/src/mesh_app/mesh_extensions.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 

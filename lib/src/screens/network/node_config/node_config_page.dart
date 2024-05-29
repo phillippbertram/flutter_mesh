@@ -159,7 +159,6 @@ class NodeConfigPage extends StatelessWidget {
                         duration: Durations.medium3,
                       ),
                     );
-                    ;
                   },
                   title: const Text('Excluded'),
                 );

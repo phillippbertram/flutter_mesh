@@ -12,8 +12,8 @@ class SystemDeviceTile extends StatefulWidget {
     required this.device,
     required this.onOpen,
     required this.onConnect,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<SystemDeviceTile> createState() => _SystemDeviceTileState();
@@ -56,7 +56,7 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
       subtitle: Text(widget.device.remoteId.str),
       trailing: ElevatedButton(
         onPressed: isConnected ? widget.onOpen : widget.onConnect,
-        child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
+        child: isConnected ? const Text('SHOW') : const Text('CONNECT'),
       ),
     );
   }

@@ -62,7 +62,7 @@ class StreamControllerReemit<T> {
 
   Stream<T> get stream {
     return _latestValue != null
-        ? _controller.stream.newStreamWithInitialValue(_latestValue!)
+        ? _controller.stream.newStreamWithInitialValue(_latestValue as T)
         : _controller.stream;
   }
 
