@@ -50,20 +50,28 @@ class Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (header != null)
-          DefaultTextStyle(
-            style: Theme.of(context).textTheme.titleSmall!,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16)
-                  .copyWith(bottom: 8),
-              child: header,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (header != null)
+            DefaultTextStyle(
+              style: Theme.of(context).textTheme.titleSmall!,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16)
+                    .copyWith(bottom: 8),
+                child: header,
+              ),
             ),
-          ),
-        child,
-      ],
+          child,
+        ],
+      ),
     );
   }
 }
