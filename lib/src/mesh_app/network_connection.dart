@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
@@ -21,23 +22,37 @@ import 'package:rxdart/rxdart.dart';
 /// notified about messages received from any of the connected proxies.
 ///
 /// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Example/Source/Mesh%20Network/NetworkConnection.swift
-class NetworkConnection with BearerDataDelegate implements Bearer {
+class NetworkConnection
+    with BearerDataDelegate
+    implements Bearer /* TODO:, GattBearerDelegate */ {
   NetworkConnection({
     required MeshNetwork meshNetwork,
   }) : _meshNetwork = meshNetwork;
 
-  // NOTE: no WeakReference needed in dart?
+  /// The maximum number of simultaneous connections.
+  static const maxConnections = 1;
+
+  /// The mesh network.
   final MeshNetwork _meshNetwork;
 
-  final _scanResultsSubject = BehaviorSubject.seeded(<ScanResult>[]);
-  Stream<List<ScanResult>> get scanResults => _scanResultsSubject.stream;
+  /// The connected proxies.
+  final List<GattBearer> _proxies = [];
+  List<GattBearer> get _openProxies => _proxies.where((p) => p.isOpen).toList();
+
+  // final _scanResultsSubject = BehaviorSubject.seeded(<ScanResult>[]);
+  // Stream<List<ScanResult>> get scanResults => _scanResultsSubject.stream;
 
   bool _isScanning = false;
   bool get isScanning => _isScanning;
 
+  /// Returns the name of the first connected Proxy.
+  String? get name {
+    return _openProxies.firstOrNull?.name;
+  }
+
   @override
   BearerDataDelegate? get dataDelegate => _dataDelegate;
-  BearerDataDelegate? _dataDelegate; // NOTE: no WeakReference needed in dart?
+  BearerDataDelegate? _dataDelegate;
   @override
   void setDataDelegate(BearerDataDelegate delegate) {
     _dataDelegate = delegate;
@@ -57,6 +72,10 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
   @override
   Stream<bool> get isOpenStream => _isOpenSubject.stream;
   final _isOpenSubject = BehaviorSubject.seeded(false);
+
+  /// Returns true if at least one proxy is connected.
+  Stream<bool> get isConnectedStream => _isConnectedSubject.stream;
+  final _isConnectedSubject = BehaviorSubject.seeded(false);
 
   @override
   Future<Result<void>> close() async {
@@ -104,7 +123,8 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
     //   of the specified names.
     await FlutterBluePlus.startScan(
       withServices: [Guid(MeshProxyService().uuid)],
-      timeout: const Duration(seconds: 30),
+      continuousUpdates: false,
+      // timeout: const Duration(seconds: 30),
     );
 
     // wait for scanning to stop
@@ -119,17 +139,21 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
       {required Data data, required PduType type}) async {
     logger.d('Sending ${data.toHex()} (${data.length}) of type $type');
 
-    // TODO: use proxy implementation
-    final firstBearer = _scanResultsSubject.value.firstOrNull;
-    if (firstBearer == null) {
-      return Result.error("No connected proxy found");
+    Result<void>? sendResult;
+    for (final proxy in _openProxies) {
+      final res = await proxy.sendData(data: data, type: type);
+      if (res.isError) {
+        logger.d('Failed to send data to proxy: $proxy');
+        sendResult = res;
+      }
     }
 
-    final proxy = GattBearer.fromPeripheral(basePeripheral: firstBearer.device);
-    return await proxy.sendData(data: data, type: type);
+    return sendResult ?? Result.value(null);
   }
 
   void _handleScanResults(List<ScanResult> results) {
+    // logger.t("_handleScanResults: ${results.length} results");
+
     // @see JungHome SpecificMeshNetworkViaArbitraryProxyNodeStrategy
     final filtered = results.where((r) {
       final networkIdentity = r.advertisementData.networkIdentity;
@@ -147,7 +171,50 @@ class NetworkConnection with BearerDataDelegate implements Bearer {
       return false;
     });
 
-    _scanResultsSubject.add(filtered.toList());
+    if (filtered.isEmpty) {
+      return;
+    }
+
+    for (final result in filtered) {
+      final bearer = GattBearer.targetPeripheral(result.device);
+      useProxy(bearer);
+    }
+  }
+
+  /// Switches connection to the given GATT Bearer.
+  /// If the maximum number of connections is reached, the last one is closed.
+  Future<void> useProxy(GattBearer proxy) async {
+    logger.d('Connecting to proxy: $proxy');
+
+    // make sure the proxy is not already in the list
+    if (_proxies.firstWhereOrNull((p) =>
+            p.basePeripheral.remoteId == proxy.basePeripheral.remoteId) !=
+        null) {
+      return;
+    }
+
+    // if the maximum number of connections is reached, close the last one
+    if (_proxies.length >= maxConnections) {
+      _proxies.lastOrNull?.close();
+    }
+
+    // add new proxy
+    logger.e("MISSING IMPLEMENTATION: not all delegates are set");
+    // TODO: proxy.setDelegate(this);
+    // TODO: proxy.setLogger(logger);
+    proxy.setDataDelegate(this);
+    _proxies.add(proxy);
+
+    if (proxy.isOpen) {
+      logger.e("MISSING IMPLEMENTATION: beaderDidOpen");
+      // TODO: beaderDidOpen(this);
+    } else {
+      proxy.open();
+    }
+
+    if (_proxies.length > maxConnections) {
+      await FlutterBluePlus.stopScan();
+    }
   }
 
   // TODO: GattBearerDelegate
