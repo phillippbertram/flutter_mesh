@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_mesh/src/mesh/utils/service_uuid_mapping.dart';
 
 import "descriptor_tile.dart";
 import 'snackbar.dart';
@@ -94,18 +95,22 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
   }
 
   Widget buildUuid(BuildContext context) {
-    String uuid = '0x${widget.characteristic.uuid.str.toUpperCase()}';
-    return Text(uuid, style: TextStyle(fontSize: 13));
+    final uuid = '0x${widget.characteristic.uuid.str.toUpperCase()}';
+    final name = BluetoothServicesLookup.findCharacteristic(
+            widget.characteristic.uuid.str)
+        .name;
+    final full = "$name ($uuid)";
+    return Text(full, style: const TextStyle(fontSize: 13));
   }
 
   Widget buildValue(BuildContext context) {
-    String data = _value.toString();
-    return Text(data, style: TextStyle(fontSize: 13, color: Colors.grey));
+    final data = _value.toString();
+    return Text(data, style: const TextStyle(fontSize: 13, color: Colors.grey));
   }
 
   Widget buildReadButton(BuildContext context) {
     return TextButton(
-        child: Text("Read"),
+        child: const Text("Read"),
         onPressed: () async {
           await onReadPressed();
           if (mounted) {

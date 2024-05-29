@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_mesh/src/mesh/utils/service_uuid_mapping.dart';
 
 class ScanResultTile extends StatefulWidget {
   const ScanResultTile({super.key, required this.result, this.onTap});
@@ -55,7 +56,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   String getNiceServiceUuids(List<Guid> serviceUuids) {
-    return serviceUuids.join(', ').toUpperCase();
+    return serviceUuids.map((u) {
+      final service = BluetoothServicesLookup.findService(u.str).name;
+      return "$service (0x${u.str.toUpperCase()})";
+    }).join(', ');
   }
 
   bool get isConnected {
