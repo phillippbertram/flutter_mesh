@@ -17,7 +17,7 @@ dependencies:
 
   # mesh deps
   async: ^2.11.0
-  flutter_blue_plus: ^1.31.16
+  flutter_blue_plus: ^1.32.7
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
   uuid: ^4.3.3
