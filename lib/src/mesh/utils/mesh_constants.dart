@@ -17,7 +17,7 @@ abstract class MeshService {
   bool matches(BluetoothService service);
 }
 
-/// A structore defining Mesh Proxy service, which shall be present on
+/// A structure defining Mesh Proxy service, which shall be present on
 /// provisioned Nodes.
 ///
 /// The Mesh Proxy service is used to send mesh messages over GATT.

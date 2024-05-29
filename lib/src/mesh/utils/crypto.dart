@@ -218,7 +218,7 @@ class Crypto {
   }
 
   // Function to calculate the shared secret
-  Future<Data> calculateSharedSecretPointy({
+  static Future<Data> calculateSharedSecretPointy({
     required pointy.ECPrivateKey privateKey,
     // required pointy.ECPublicKey publicKey,
     required Data publicKey,
@@ -230,6 +230,21 @@ class Crypto {
     final rawRes = keyAgree
         .calculateAgreement(decodePublicKey(Uint8List.fromList(publicKey)));
     return _bigIntToUint8List(rawRes);
+  }
+
+  /// Generates Node Identity hash using the given Identity Key.
+  ///
+  /// - Parameters:
+  ///   - data: 48 bits padding of 0s, 65-bit random value and the Unicast Address
+  ///           of the Node.
+  ///   - key: The Identity Key.
+  /// - Returns: Function of the included random number and identity information.
+  static Data calculateHash({
+    required Data from,
+    required Data usingIdentityKey,
+  }) {
+    return calculateECB(from.toUint8List(), key: usingIdentityKey.toUint8List())
+        .dropFirst(8);
   }
 
   /// Calculates key derivatives from the given Network Key.

@@ -32,16 +32,13 @@ class PublicNetworkIdentity implements NetworkIdentity {
       return null;
     }
 
-    return PublicNetworkIdentity(networkId: data.sublist(1));
+    return PublicNetworkIdentity(networkId: data.sublist(1, 9));
   }
 
   @override
   bool matches(NetworkKey networkKey) {
-    // TODO: Implement matching logic.
-    // This is a placeholder implementation.
-    return false;
-    // return networkId == networkKey.networkId ||
-    //     networkId == networkKey.oldNetworkId;
+    return networkId == networkKey.networkId ||
+        networkId == networkKey.oldNetworkId;
   }
 
   @override
