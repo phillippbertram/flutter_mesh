@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 
-class ProxyPage extends StatelessWidget {
+import 'proxy_selection_page.dart';
+
+class ProxyPage extends StatefulWidget {
   const ProxyPage({super.key});
+
+  @override
+  State<ProxyPage> createState() => _ProxyPageState();
+}
+
+class _ProxyPageState extends State<ProxyPage> {
+  var _isConnectionModeAutomatic = false;
 
   @override
   Widget build(BuildContext context) {
@@ -19,22 +28,30 @@ class ProxyPage extends StatelessWidget {
           Section.children(
             children: [
               ListTile(
-                title: Text('Open NetworkConnection'),
-                trailing: TextButton(
-                  onPressed: () {
-                    connection?.open();
-                  },
-                  child: const Text("Open"),
+                title: const Text('Automatic Connection'),
+                trailing: Switch(
+                  value: _isConnectionModeAutomatic,
+                  onChanged: (value) => setState(() {
+                    _isConnectionModeAutomatic = value;
+                  }),
                 ),
               ),
-              // TODO:
-              const ListTile(
-                title: Text('Automatic Connection'),
-                trailing: Switch(value: false, onChanged: null),
-              ),
               ListTile(
-                title: Text('Proxy'),
-                trailing: Text(connection?.name ?? 'Unknown'),
+                title: const Text("Proxy"),
+                subtitle: Text(connection?.name ?? 'Unknown'),
+                trailing: _isConnectionModeAutomatic
+                    ? const Icon(Icons.chevron_right)
+                    : null,
+                onTap: !_isConnectionModeAutomatic
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => const ProxySelectionPage(),
+                          ),
+                        );
+                      },
               ),
               ListTile(
                 trailing: TextButton(

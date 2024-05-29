@@ -232,10 +232,20 @@ class SettingsPage extends StatelessWidget {
           trailing: StreamBuilder<bool>(
             stream: FlutterBluePlus.isScanning,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Text(snapshot.data! ? "Yes" : "No");
-              }
-              return const SizedBox();
+              final isScanning = snapshot.data ?? false;
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      AppNetworkManager.instance.connection?.open();
+                    },
+                    child: Text(isScanning ? "Stop" : "Start"),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(isScanning ? "Yes" : "No"),
+                ],
+              );
             },
           ),
         ),
