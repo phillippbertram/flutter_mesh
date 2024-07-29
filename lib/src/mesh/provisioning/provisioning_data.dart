@@ -9,7 +9,7 @@ import 'package:flutter_mesh/src/mesh/utils/crypto.dart';
 
 import '../models/iv_index.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningData.swift#L33
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/ProvisioningData.swift#L33
 class ProvisioningData {
   ProvisioningData();
 
@@ -220,8 +220,6 @@ extension ProvisioningDataX on ProvisioningData {
     final key = networkKey!.phase == KeyRefreshPhase.keyDistribution
         ? networkKey!.oldKey!
         : networkKey!.key;
-
-    // final bytes = BytesBuilder();
 
     final data = Data.from(key)
         .addUint16(

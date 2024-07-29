@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
 import 'package:flutter_mesh/src/screens/settings/app_keys/app_keys.dart';
+import 'package:flutter_mesh/src/screens/settings/bluetooth/device_page.dart';
+import 'package:flutter_mesh/src/screens/settings/bluetooth/scan_results_page.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
+import 'bluetooth/widgets/widgets.dart';
 import 'network_keys/network_keys.dart';
+import 'shared_prefs_debug_page.dart';
 
 /// Displays the various settings that can be customized by the user.
 ///
@@ -26,7 +33,7 @@ class SettingsPage extends StatelessWidget {
       body: SectionedListView(
         children: [
           Section.children(
-            header: const Text("UI"),
+            title: const Text("UI"),
             children: [
               ListTile(
                 title: const Text("Appearance"),
@@ -59,7 +66,9 @@ class SettingsPage extends StatelessWidget {
               ),
             ],
           ),
-          _buildNetworkSettingsSection(context),
+          _bluetoothSection(context),
+          _networkSettingsSection(context),
+          _miscSection(context),
           const Section(
             child: AppVersion(),
           ),
@@ -68,11 +77,11 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Section _buildNetworkSettingsSection(BuildContext context) {
+  Section _networkSettingsSection(BuildContext context) {
     final network = AppNetworkManager.instance.meshNetworkManager.meshNetwork;
     if (network == null) {
       return Section.children(
-        header: const Text("Mesh Network"),
+        title: const Text("Mesh Network"),
         children: [
           ListTile(
               title: const Text("No network"),
@@ -86,7 +95,17 @@ class SettingsPage extends StatelessWidget {
       );
     }
     return Section.children(
-      header: const Text("Mesh Network"),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text("Mesh Network"),
+          IconButton(
+              onPressed: () {
+                AppNetworkManager.instance.reload();
+              },
+              icon: const Icon(Icons.refresh)),
+        ],
+      ),
       children: [
         ListTile(
           title: const Text("Name"),
@@ -156,6 +175,113 @@ class SettingsPage extends StatelessWidget {
       ],
     );
   }
+
+  Section _miscSection(BuildContext context) {
+    return Section.children(
+      title: const Text("Misc"),
+      children: [
+        ListTile(
+            title: const Text("Shared Prefs"),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SharedPrefsDebugPage(),
+                ),
+              );
+            }),
+      ],
+    );
+  }
+
+  Section _bluetoothSection(BuildContext context) {
+    return Section.children(
+      title: const Text("Bluetooth"),
+      children: [
+        ListTile(
+          dense: true,
+          title: const Text("Status"),
+          trailing: StreamBuilder<BluetoothAdapterState>(
+            stream: FlutterBluePlus.adapterState,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                switch (snapshot.data!) {
+                  case BluetoothAdapterState.on:
+                    return const Text("On");
+                  case BluetoothAdapterState.off:
+                    return const Text("Off");
+                  case BluetoothAdapterState.turningOn:
+                    return const Text("Turning On");
+                  case BluetoothAdapterState.turningOff:
+                    return const Text("Turning Off");
+                  case BluetoothAdapterState.unknown:
+                    return const Text("Unknown");
+                  case BluetoothAdapterState.unavailable:
+                    return const Text("Unavailable");
+                  case BluetoothAdapterState.unauthorized:
+                    return const Text("Unauthorized");
+                }
+              }
+              return const SizedBox();
+            },
+          ),
+        ),
+        ListTile(
+          dense: true,
+          title: const Text("Scanning"),
+          trailing: StreamBuilder<bool>(
+            stream: FlutterBluePlus.isScanning,
+            builder: (context, snapshot) {
+              final isScanning = snapshot.data ?? false;
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      AppNetworkManager.instance.connection?.open();
+                    },
+                    child: Text(isScanning ? "Stop" : "Start"),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(isScanning ? "Yes" : "No"),
+                ],
+              );
+            },
+          ),
+        ),
+        ListTile(
+          dense: true,
+          title: const Text("Scan Results"),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return const ScanResultsPage();
+            }));
+          },
+        ),
+        ListTile(
+          dense: true,
+          title: const Text("Connected Devices"),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return const BluetoothConnectedDevicesPage();
+            }));
+          },
+        ),
+        ListTile(
+          dense: true,
+          title: const Text("Events"),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return const BluetoothEventsPage();
+            }));
+          },
+        ),
+      ],
+    );
+  }
 }
 
 Future<bool> _showForgetNetworkPrompt(BuildContext context) async {
@@ -209,5 +335,86 @@ class AppVersion extends HookWidget {
             title: const Text("App Version"),
             trailing: Text(appInfo.value!.version),
           );
+  }
+}
+
+class BluetoothEventsPage extends StatelessWidget {
+  const BluetoothEventsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final events = FlutterBluePlus.events;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Bluetooth Events"),
+      ),
+      body: ListView(
+        children: [
+          StreamBuilder(
+            stream: events.onConnectionStateChanged,
+            builder: (context, snapshot) {
+              return ListTile(
+                title: const Text("Connection State Changed"),
+                subtitle: Text(snapshot.data?.connectionState.toString() ??
+                    "No connection state"),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BluetoothConnectedDevicesPage extends StatefulWidget {
+  const BluetoothConnectedDevicesPage({super.key});
+
+  @override
+  State<BluetoothConnectedDevicesPage> createState() =>
+      _BluetoothConnectedDevicesPageState();
+}
+
+class _BluetoothConnectedDevicesPageState
+    extends State<BluetoothConnectedDevicesPage> {
+  List<BluetoothDevice> _connectedDevices = FlutterBluePlus.connectedDevices;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Connected Devices"),
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          _connectedDevices = FlutterBluePlus.connectedDevices;
+        },
+        child: _connectedDevices.isEmpty ? _buildEmpty() : _buildDeviceList(),
+      ),
+    );
+  }
+
+  Widget _buildEmpty() {
+    return const Center(
+      child: Text("No connected devices"),
+    );
+  }
+
+  Widget _buildDeviceList() {
+    return ListView(
+      children: _connectedDevices
+          .map(
+            (device) => SystemDeviceTile(
+                device: device,
+                onOpen: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => DevicePage(device: device),
+                      ),
+                    ),
+                onConnect: () {
+                  // TODO:
+                }),
+          )
+          .toList(),
+    );
   }
 }

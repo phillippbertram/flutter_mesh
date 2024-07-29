@@ -1,6 +1,7 @@
 import 'package:flutter_mesh/src/screens/network/network_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_mesh/src/ui/ui.dart';
 
 import '../groups/groups_page.dart';
 import '../local_node/local_node_page.dart';
@@ -18,33 +19,40 @@ class HomePage extends HookWidget {
   Widget build(BuildContext context) {
     final currentPageIndex = useState(0);
     return Scaffold(
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          currentPageIndex.value = index;
-        },
-        selectedIndex: currentPageIndex.value,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.lightbulb),
-            icon: Icon(Icons.lightbulb_outline),
-            label: 'Local Node',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.cell_tower),
-            label: 'Network',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.group),
-            icon: Icon(Icons.group_outlined),
-            label: 'Groups',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.wifi_rounded),
-            label: 'Proxy',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const BluetoothStatusBanner(),
+          NavigationBar(
+            onDestinationSelected: (int index) {
+              currentPageIndex.value = index;
+            },
+            selectedIndex: currentPageIndex.value,
+            destinations: const <Widget>[
+              NavigationDestination(
+                selectedIcon: Icon(Icons.lightbulb),
+                icon: Icon(Icons.lightbulb_outline),
+                label: 'Local Node',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.cell_tower),
+                label: 'Network',
+              ),
+              NavigationDestination(
+                selectedIcon: Icon(Icons.group),
+                icon: Icon(Icons.group_outlined),
+                label: 'Groups',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.wifi_rounded),
+                label: 'Proxy',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
           ),
         ],
       ),

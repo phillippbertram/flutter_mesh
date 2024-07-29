@@ -1,5 +1,4 @@
-
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Example/Source/Mesh%20Network/GenericOnOffClientDelegate.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Example/Source/Mesh%20Network/GenericOnOffClientDelegate.swift
 
 // abstract class BaseMeshMessage {
 //   List<int>? get parameters;

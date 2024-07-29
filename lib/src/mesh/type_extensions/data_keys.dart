@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Type%20Extensions/Data%2BKeys.swift#L36
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Type%20Extensions/Data%2BKeys.swift
 
 import 'dart:math';
 

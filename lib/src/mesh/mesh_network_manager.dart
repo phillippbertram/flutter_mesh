@@ -1,4 +1,3 @@
-
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
@@ -8,7 +7,7 @@ import 'layers/network_manager.dart';
 // STATUS: IN PROGRESS
 
 // TODO: implements NetworkParametersProvider
-// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/MeshNetworkManager.swift
+// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/MeshNetworkManager.swift
 class MeshNetworkManager with BearerDataDelegate {
   MeshNetworkManager() : _meshData = MeshData(meshNetwork: null);
 
@@ -22,10 +21,13 @@ class MeshNetworkManager with BearerDataDelegate {
   // TODO: ProxyFilter proxyFilter;
 
   // NOTE: no WeakReference needed in dart?
-  Transmitter? _transmitter;
-  Transmitter? get transmitter => _transmitter;
-  void setTransmitter(Transmitter transmitter) {
-    _transmitter = transmitter;
+
+  set transmitter(Transmitter? transmitter) {
+    _networkManager?.transmitter = transmitter;
+  }
+
+  Transmitter? get transmitter {
+    return _networkManager?.transmitter;
   }
 
   // TODO: NetworkParameters networkParameters;
@@ -43,9 +45,9 @@ class MeshNetworkManager with BearerDataDelegate {
     required String name,
     required Provisioner provisioner,
   }) {
-    // TODO:
     final network = MeshNetwork(meshName: name);
 
+    // Add a new default provisioner.
     final res = network.addProvisioner(provisioner);
     if (res.isError) {
       return Result.error(res.asError!.error);
@@ -54,6 +56,9 @@ class MeshNetworkManager with BearerDataDelegate {
     _meshData = MeshData(
       meshNetwork: network,
     );
+
+    _networkManager = NetworkManager.fromMeshNetworkManager(this);
+
     return Result.value(network);
   }
 
@@ -85,13 +90,13 @@ class MeshNetworkManager with BearerDataDelegate {
   /// - important: This property has to be set even if no custom Models are
   ///              defined as the set operation initializes the mandatory Models.
   ///              It can be set to an empty array.
-  List<Element> get localElements =>
-      []; // TODO: meshNetwork?.localElements ?? [];
-  void setLocalElements(List<Element> elements) {
-    // TODO:
-    throw UnimplementedError("setLocalElements");
+  List<MeshElement> get localElements => meshNetwork?.localElements ?? const [];
+  void setLocalElements(List<MeshElement> elements) {
+    meshNetwork?.setLocalElements(elements);
 
-    // meshNetwork?.localElements = elements;
+    // TODO:
+    logger.f(
+        "MISSING IMPLEMENTATION: setLocalElements -> reinitializePublishers");
     // networkManager?.accessLayer.reinitializePublishers();
   }
 
@@ -149,5 +154,126 @@ extension MeshNetworkManagerProvisioning on MeshNetworkManager {
       meshNetwork: meshNetwork!,
     );
     return Result.value(manager);
+  }
+}
+
+extension MeshNetworkManagerMessaging on MeshNetworkManager {
+  /// Sends a Configuration Message to the primary Element on the given ``Node``.
+  ///
+  /// An appropriate callback of the ``MeshNetworkDelegate`` will be called when
+  /// the message has been sent successfully or a problem occurred.
+  ///
+  /// - parameters:
+  ///   - message:    The message to be sent.
+  ///   - node:       The destination Node.
+  ///   - initialTtl: The initial TTL (Time To Live) value of the message.
+  ///                 If `nil`, the default Node TTL will be used.
+  /// - throws: This method throws when the mesh network has not been created,
+  ///           the local Node does not have configuration capabilities
+  ///           (no Unicast Address assigned), or the destination address
+  ///           is not a Unicast Address or it belongs to an unknown Node.
+  ///           Error ``AccessError/cannotDelete`` is sent when trying to
+  ///           delete the last Network Key on the device.
+  /// - returns: Message handle that can be used to cancel sending.
+  /// TODO: Response Type
+  Future<Result<void>> sendConfigMessageToNode(
+    AcknowledgedConfigMessage message, {
+    required Node node,
+    Uint8? initialTtl,
+  }) async {
+    return sendConfigMessageToDestination(
+      message,
+      destination: node.primaryUnicastAddress,
+      initialTtl: initialTtl,
+    );
+  }
+
+  /// Sends Configuration Message to the Node with given destination Address.
+  ///
+  /// The `destination` must be a Unicast Address, otherwise the method
+  /// throws an ``AccessError/invalidDestination`` error.
+  ///
+  /// An appropriate callback of the ``MeshNetworkDelegate`` will be called when
+  /// the message has been sent successfully or a problem occurred.
+  ///
+  /// - parameters:
+  ///   - message:     The message to be sent.
+  ///   - destination: The destination Unicast Address.
+  ///   - initialTtl:  The initial TTL (Time To Live) value of the message.
+  ///                  If `nil`, the default Node TTL will be used.
+  /// - throws: This method throws when the mesh network has not been created,
+  ///           the local Node does not have configuration capabilities
+  ///           (no Unicast Address assigned), or the destination address
+  ///           is not a Unicast Address or it belongs to an unknown Node.
+  ///           Error ``AccessError/cannotDelete`` is sent when trying to
+  ///           delete the last Network Key on the device.
+  /// - returns: The response associated with the message.
+  /// TODO: Response Type
+  Future<Result<void>> sendConfigMessageToDestination(
+    AcknowledgedConfigMessage message, {
+    required Address destination,
+    Uint8? initialTtl, // TODO:
+  }) async {
+    logger.d("MeshNetworkManager.sendConfigMessageToDestination: ${{
+      "message": message,
+      "destination": destination,
+      "initialTtl": initialTtl,
+    }}");
+    // TODO:
+    logger.f(
+        "INCOMPLETE IMPLEMENTATION: MeshNetworkManager.sendConfigMessageToDestination");
+
+    if (_networkManager == null) {
+      return Result.error("No network manager available");
+    }
+    if (meshNetwork == null) {
+      return Result.error("Mesh network has not been created");
+    }
+
+    final localProvisioner = meshNetwork!.localProvisioner;
+    if (localProvisioner == null) {
+      return Result.error("Local Provisioner has no Unicast Address assigned");
+    }
+    final element = localProvisioner.node?.primaryElement;
+    if (element == null) {
+      return Result.error("Local Provisioner has no primary Element");
+    }
+
+    if (!destination.isUnicast) {
+      return Result.error(
+          "Address: ${destination.asString()} is not a Unicast Address");
+    }
+
+    final node = meshNetwork!.nodeWithAddress(destination);
+    if (node == null) {
+      return Result.error("Unknown destination Node");
+    }
+
+    if (node.networkKeys.isEmpty) {
+      return Result.error("The target Node does not have Network Key");
+    }
+
+    if (node.deviceKey == null) {
+      return Result.error("Node's Device Key is unknown");
+    }
+
+    // TODO: ConfigNetKeyDelete
+    logger.e("MISSING IMPLEMENTATION: ConfigNetKeyDelete");
+    // if (message is ConfigNetKeyDelete) {
+    //   if (node.networkKeys.length <= 1) {
+    //     return Result.error("Cannot remove last Network Key");
+    //   }
+    // }
+
+    if (initialTtl != null && initialTtl > 127) {
+      return Result.error("TTL value $initialTtl is invalid");
+    }
+
+    return await _networkManager!.sendConfigMessageToDestination(
+      message,
+      fromElement: element,
+      destination: destination,
+      initialTtl: initialTtl,
+    );
   }
 }

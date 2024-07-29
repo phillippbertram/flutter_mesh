@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'unprovisioned_device.freezed.dart';
 
 /// A class representing an unprovisioned device.
-/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/UnprovisionedDevice.swift#L34
+/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/UnprovisionedDevice.swift
 @freezed
 class UnprovisionedDevice with _$UnprovisionedDevice {
   const factory UnprovisionedDevice._({
@@ -14,7 +14,10 @@ class UnprovisionedDevice with _$UnprovisionedDevice {
     required OobInformation oobInformation,
   }) = _UnprovisionedDevice;
 
-  static UnprovisionedDevice? fromAdvertisementData(AdvertisementData data) {
+  static UnprovisionedDevice? fromAdvertisementData(
+    AdvertisementData data, {
+    BluetoothDevice? device,
+  }) {
     final uuid = data.unprovisionedDeviceUUID;
     if (uuid == null) {
       return null;
@@ -25,8 +28,13 @@ class UnprovisionedDevice with _$UnprovisionedDevice {
       return null;
     }
 
+    String deviceName = data.advName;
+    if (deviceName.isEmpty && device != null) {
+      deviceName = device.platformName;
+    }
+
     return UnprovisionedDevice._(
-      name: data.advName,
+      name: deviceName,
       uuid: uuid,
       oobInformation: oob,
     );

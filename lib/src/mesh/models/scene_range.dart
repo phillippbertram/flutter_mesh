@@ -1,7 +1,7 @@
 import 'package:flutter_mesh/src/mesh/models/range_object.dart';
 import 'package:flutter_mesh/src/mesh/models/scene_number.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/SceneRange.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/SceneRange.swift
 
 class SceneRange extends RangeObject {
   SceneRange({
@@ -22,7 +22,7 @@ class SceneRange extends RangeObject {
   SceneNumber get lastScene => SceneNumber(upperBound);
 }
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20API/Ranges.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/Ranges.swift
 extension SceneRangeX on SceneRange {
   /// Returns `true` if the scene range is valid.
   ///

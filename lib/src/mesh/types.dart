@@ -1,56 +1,59 @@
-// @see https://suragch.medium.com/working-with-bytes-in-dart-6ece83455721
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:uuid/uuid.dart';
 
 // TODO: make real types to prevent accidental misuse?
+// @see https://suragch.medium.com/working-with-bytes-in-dart-6ece83455721
 
-typedef Data = List<int>; // typed_data.Uint8List;
-typedef Uint16 = int;
+// TODO: use typed_data.Uint8List instead? or `ByteData` directly?
+typedef Data = List<int>;
+typedef Uint16 = int; // TODO: create own types instead of `typedef
 typedef Uint8 = int;
 typedef Uint32 = int;
-typedef UUID = String;
 
-/// Base Result class
-/// [S] represents the type of the success value
-// sealed class Result<S> {
-//   const Result();
-// }
+// TODO: use Guid instead? But maybe Guid is too BLE specific?
+class UUID {
+  final String _uuidString;
 
-// TODO use own result type
+  // Constructor for creating a new UUID
+  UUID() : _uuidString = const Uuid().v4();
 
-// final class Success<S> extends Result<S> {
-//   const Success(this.value);
-//   final S value;
-// }
+  /// Constructor for creating a UUID from an existing string
+  /// TODO: validate the string
+  const UUID.fromString(String uuidString) : _uuidString = uuidString;
 
-// final class Failure<S> extends Result<S> {
-//   const Failure(this.error);
-//   final Object error;
-// }
+  // Getter to retrieve the UUID string
+  String get uuidString => _uuidString;
 
-// // factory
-// Result<S> value<S>(S value) {
-//   return Success(value);
-// }
+  @override
+  String toString() => _uuidString;
 
-// Result<S> error<S>(Object error) {
-//   return Failure(error);
-// }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UUID &&
+          runtimeType == other.runtimeType &&
+          _uuidString == other._uuidString;
 
-/// Base Result class
-/// [S] represents the type of the success value
-/// [E] should be [Exception] or a subclass of it
-// sealed class Result<S, E extends Exception> {
-//   const Result();
-// }
+  @override
+  int get hashCode => _uuidString.hashCode;
 
-// final class Success<S, E extends Exception> extends Result<S, E> {
-//   const Success(this.value);
-//   final S value;
-// }
+  String get hex => _uuidString.replaceAll('-', '');
 
-// final class Failure<S, E extends Exception> extends Result<S, E> {
-//   const Failure(this.exception);
-//   final E exception;
-// }
+  Data get data {
+    final hex = this.hex;
+    return List<int>.generate(
+      hex.length ~/ 2,
+      (i) => int.parse(
+        hex.substring(i * 2, i * 2 + 2),
+        radix: 16,
+      ),
+    );
+  }
+}
+
+extension GuidX on Guid {
+  UUID toUUID() => UUID.fromString(str);
+}
 
 class Range<T extends Comparable> {
   T start;

@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/ModelDelegate.swift#L58
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/ModelDelegate.swift#L58
 
 import 'package:async/async.dart';
 

@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:flutter_mesh/src/mesh/types.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../../logger/logger.dart';
+import '../utils/crypto.dart';
 import '../utils/mesh_constants.dart';
 import 'node.dart';
 
@@ -10,7 +14,7 @@ import 'node.dart';
 /// It can be used to match advertising device to a specific ``Node`` in the network.
 ///
 /// - since: 4.0.0
-/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/NodeIdentity.swift
+/// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/NodeIdentity.swift
 abstract class NodeIdentity {
   /// Returns whether the identity matches given ``Node``.
   ///
@@ -42,7 +46,6 @@ class PublicNodeIdentity implements NodeIdentity {
     if (data == null || data.length != 17 || data[0] != 0x01) {
       return null;
     }
-
     return PublicNodeIdentity(
       hash: Data.from(data.sublist(1, 9)),
       random: Data.from(data.sublist(9, 17)),
@@ -59,7 +62,39 @@ class PublicNodeIdentity implements NodeIdentity {
 
   @override
   bool matchesNode(Node node) {
-    // TODO:
-    throw UnimplementedError();
+    logger.w("UNTESTED IMPLEMENTATION: matchesNode: ${node.name}");
+
+    // Data are: 48 bits of Padding (0s), 64 bit Random and Unicast Address.
+    final data = Data.from([
+      ...List.filled(6, 0),
+      ...random,
+    ]).addUint16(node.primaryUnicastAddress.value, endian: Endian.big);
+
+    for (var networkKey in node.networkKeys) {
+      final calculatedHash = Crypto.calculateHash(
+        from: data,
+        usingIdentityKey: networkKey.keys.identityKey,
+      );
+
+      if (calculatedHash == hash) {
+        return true;
+      }
+
+      // If the Key Refresh Procedure is in place, the identity might have been
+      // generated with the old key.
+      final olfIdentityKey = networkKey.oldKeys?.identityKey;
+      if (olfIdentityKey != null) {
+        final oldHash = Crypto.calculateHash(
+          from: data,
+          usingIdentityKey: olfIdentityKey,
+        );
+
+        if (oldHash == hash) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

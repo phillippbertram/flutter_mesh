@@ -1,14 +1,17 @@
-// application_key.dart
-
 import 'package:async/async.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_mesh/src/mesh/models/node.dart';
 import 'package:flutter_mesh/src/mesh/type_extensions/data_keys.dart';
 import '../types.dart';
+import '../utils/crypto.dart';
 import 'key.dart';
 import 'mesh_network.dart';
 import 'network_key.dart'; // Import the Key interface
 
+part 'application_key.p.network.dart';
+
 // TODO: Equatable + Serializable
+// TODO: immutable
 // TODO: not complete
 
 class ApplicationKey extends Equatable implements MeshKey {
@@ -20,7 +23,7 @@ class ApplicationKey extends Equatable implements MeshKey {
   MeshNetwork? _meshNetwork;
 
   // TODO: internal
-  void setMeshNetwork(MeshNetwork meshNetwork) {
+  void setMeshNetwork(MeshNetwork? meshNetwork) {
     _meshNetwork = meshNetwork;
   }
 
@@ -42,13 +45,23 @@ class ApplicationKey extends Equatable implements MeshKey {
   // TODO: internal set
   final Data? oldKey;
 
+  // TODO: internal
+  /// Application Key identifier.
+  late Uint8 aid;
+
+  // TODO: internal
+  /// Application Key identifier derived from the old key.
+  Uint8? oldAid;
+
   ApplicationKey._({
     required this.name,
     required this.index,
     required this.key,
     this.boundNetworkKeyIndex,
     this.oldKey,
-  });
+  }) {
+    regenerateKeyDerivatives();
+  }
 
   static Data randomKeyData() {
     return KeyUtils.random128BitKey();
@@ -89,67 +102,15 @@ class ApplicationKey extends Equatable implements MeshKey {
       oldKey: null,
     );
   }
+
+  void regenerateKeyDerivatives() {
+    aid = Crypto.calculateAid(key);
+    if (oldKey != null && oldAid == null) {
+      oldAid = Crypto.calculateAid(oldKey!);
+    }
+  }
 }
 
 extension ApplicationKeyDataValidation on Data {
-  bool get isValidApplicationKey {
-    return length == 16;
-  }
+  bool get isValidApplicationKey => length == 16;
 }
-
-extension ApplicationKeyNetworkKey on ApplicationKey {
-  /// Return whether the Application Key is used in the given mesh network.
-  ///
-  /// A Application Key must be added to Application Keys array of the network
-  /// and be known to at least one node to be used by it.
-  ///
-  /// An used Application Key may not be removed from the network.
-  ///
-  /// - parameter meshNetwork: The mesh network to look the key in.
-  /// - returns: `True` if the key is used in the given network,
-  ///            `false` otherwise.
-  bool isUsedInNetwork(MeshNetwork meshNetwork) {
-    // TODO:
-    // final localProvisioner = meshNetwork.localProvisioner
-    // return meshNetwork.applicationKeys.contains(self) &&
-    //        // Application Key known by at least one node.
-    //        meshNetwork.nodes
-    //             .filter { $0.uuid != localProvisioner?.uuid }
-    //             .knows(applicationKey: self)
-    return false;
-  }
-
-  /// Bounds the Application Key to the given Network Key.
-  /// The Application Key must not be in use. If any of the network Nodes
-  /// already knows this key, this method throws an error.
-  ///
-  /// - parameter networkKey: The Network Key to bound the Application Key to.
-  Result<void> bindToNetworkKey(NetworkKey networkKey) {
-    if (meshNetwork == null) {
-      return Result.error("Mesh Network is not set");
-    }
-
-    if (isUsedInNetwork(meshNetwork!)) {
-      return Result.error("Application Key is already used in the network");
-    }
-
-    boundNetworkKeyIndex = networkKey.index;
-    return Result.value(null);
-  }
-
-  /// The Network Key bound to this Application Key.
-  NetworkKey? get boundNetworkKey {
-    if (boundNetworkKeyIndex == null) {
-      return null;
-    }
-
-    return meshNetwork?.networkKeys[boundNetworkKeyIndex!];
-  }
-}
-
-// TODO:
-// extension ListApplicationKeyExtension on List<ApplicationKey> {
-//   List<ApplicationKey> knownToNode(Node node) {
-//     return where((element) => false)
-//   }
-// }

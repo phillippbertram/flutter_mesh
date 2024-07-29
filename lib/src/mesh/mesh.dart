@@ -6,3 +6,4 @@ export 'utils/utils.dart';
 export 'model_delegate.dart';
 export 'mesh_messages/mesh_message.dart';
 export 'provisioning/provisioning.dart';
+export 'mesh_messages/mesh_messages.dart';

@@ -1,12 +1,15 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_mesh/src/logger/logger.dart';
 
 import '../model_delegate.dart';
 import '../types.dart';
 import 'element.dart';
 
+part 'model.g.name.dart';
+
 // TODO: JSON Serialization + Equatable + Hashable
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Mesh%20Model/Model.swift#L45
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/Model.swift#L45
 class Model extends Equatable {
   Model._({
     required this.modelId,
@@ -18,7 +21,9 @@ class Model extends Equatable {
   });
 
   factory Model.createWithSigModelId(
-      Uint16 sigModelId, {required ModelDelegate delegate,}) {
+    Uint16 sigModelId, {
+    required ModelDelegate delegate,
+  }) {
     return Model._(modelId: sigModelId, delegate: delegate);
   }
 
@@ -62,9 +67,9 @@ class Model extends Equatable {
   // TODO:
   // final List<String> subscribe;
 
-  Element? get parentElement => _parentElement;
-  Element? _parentElement; // NOTE: no WeakReference needed in dart?
-  void setParentElement(Element parentElement) {
+  MeshElement? get parentElement => _parentElement;
+  MeshElement? _parentElement; // NOTE: no WeakReference needed in dart?
+  void setParentElement(MeshElement parentElement) {
     _parentElement = parentElement;
   }
 
@@ -72,6 +77,13 @@ class Model extends Equatable {
   /// and `nil` for Models of remote Nodes.
   final ModelDelegate? delegate;
 
+  /// Returns `true` for Models with identifiers assigned by Bluetooth SIG,
+  /// `false` otherwise.
+  bool get isBluetoothSIGAssigned {
+    return modelId <= 0xFFFF;
+  }
+
+  // EQUATABLE
   @override
   List<Object?> get props => [
         modelId, parentElement,
@@ -80,7 +92,7 @@ class Model extends Equatable {
       ];
 }
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Models.swift#L536
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20API/Models.swift#L536
 
 // The following are the Bluetooth SIG Model Identifiers.
 // These are used to identify the models defined by the Bluetooth SIG.
@@ -97,9 +109,10 @@ class ModelIdentifier {
 
   // Generic
   static const genericOnOffServer = 0x1000;
+  static const genericOnOffClient = 0x1001;
 }
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20Model/Model.swift#L232
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/Model.swift#L232
 extension ModelExtensions on Model {
   bool get isConfigurationServer =>
       modelIdentifier == ModelIdentifier.configurationServer;
@@ -110,4 +123,21 @@ extension ModelExtensions on Model {
   bool get isHealthClient => modelIdentifier == ModelIdentifier.healthClient;
 
   // TODO: add the remaining models
+}
+
+// internal
+
+extension ModelInternalExtensions on Model {
+  /// Copies the properties from the given Model.
+  ///
+  /// - parameter model: The Model to copy from.
+  // NOTE: renamed from `copy(from:)`
+  void applyFrom(Model model) {
+    logger.f("MISSING IMPLEMENTATION: applyFrom");
+
+    // TODO:
+    // bind = model.bind;
+    // subscribe = model.subscribe;
+    // publish = model.publish;
+  }
 }

@@ -1,8 +1,8 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Bearer/GATT/PBGattBearer.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Bearer/GATT/PBGattBearer.swift
 
 import 'package:flutter_mesh/src/mesh/mesh.dart';
 
-import 'base_pb_gatt_proxy_bearer.dart';
+import 'base_gatt_proxy_bearer.dart';
 
 /// The PB GATT bearer is responsible for sending and receiving mesh
 /// provisioning messages to and from the GATT Proxy Node.

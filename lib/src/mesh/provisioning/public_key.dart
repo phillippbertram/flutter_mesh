@@ -6,7 +6,7 @@ import 'provisioning_pdu.dart';
 
 part 'public_key.freezed.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/PublicKey.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/PublicKey.swift
 
 /// The type of Device Public key to be used.
 ///

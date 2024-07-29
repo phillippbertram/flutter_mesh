@@ -121,6 +121,7 @@ class DeviceProvisioningScanService {
         .map((result) {
           final device = UnprovisionedDevice.fromAdvertisementData(
             result.advertisementData,
+            device: result.device,
           );
 
           if (device == null) {

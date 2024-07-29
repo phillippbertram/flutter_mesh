@@ -1,9 +1,9 @@
-import 'package:uuid/uuid.dart';
-
 import '../types.dart';
 
 export 'beacon.dart';
 export 'mesh_constants.dart';
+export 'company_identifier.dart';
+export 'shared_prefs.dart';
 
 extension IntegerHex on int {
   /// Returns a string representation of the integer as a hexadecimal number.
@@ -19,6 +19,8 @@ extension IntegerHex on int {
     }
     return hex;
   }
+
+  String asString() => toHex(includePrefix: true);
 }
 
 extension DataHex on Data {
@@ -41,9 +43,3 @@ extension StringHex on String {
   /// The string is prefixed with `0x`.
   int toIntFromHex() => int.parse(this, radix: 16);
 }
-
-// ================
-// TODO: create own UUID type?
-const _uuid = Uuid();
-String generateUuid() => _uuid.v4().replaceAll("-", "");
-// ================

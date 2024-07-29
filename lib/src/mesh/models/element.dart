@@ -5,20 +5,20 @@ import 'model.dart'; // Assuming you have a Model class defined somewhere
 import 'location.dart'; // Assuming you have a Location enum or class defined
 
 // TODO: JSON Serialization + Equatable
-class Element {
-  Element._({
+class MeshElement {
+  MeshElement._({
     this.name,
     required this.location,
     required this.models,
     required this.index,
   });
 
-  static Element create({
+  static MeshElement create({
     String? name,
     required Location location,
     List<Model> models = const [],
   }) {
-    final element = Element._(
+    final element = MeshElement._(
       name: name,
       location: location,
       models: models,
@@ -35,7 +35,7 @@ class Element {
     return element;
   }
 
-  final String? name;
+  String? name; // internal set
   int index; // TODO: indernal set
   final Location location;
   final List<Model> models;
@@ -56,17 +56,18 @@ class Element {
 
   Node? get parentNode => _parentNode;
   Node? _parentNode; // NOTE: no WeakReference needed in dart?
-  void setParentNode(Node parentNode) {
+  void setParentNode(Node? parentNode) {
+    // TODO: use `set` keyword
     _parentNode = parentNode;
   }
 
-  static Element get primaryElement {
-    logger.f("MISSING Implementation - Element.primaryElement");
+  static MeshElement get primaryElement {
+    logger.f("MISSING IMPLEMENTATION - Element.primaryElement (INCOMPLETE)");
 
     // The Provisioner will always have a first Element with obligatory
     // Models (Configuration Server and Health Server) and supported clients
     //(Configuration Client and Health Client).
-    final element = Element.create(
+    final element = MeshElement.create(
       name: 'Primary Element',
       location: Location.unknown,
       models: [
@@ -83,7 +84,7 @@ class Element {
 }
 
 // TODO:
-extension ElementX on Element {
+extension ElementX on MeshElement {
   //  /// Adds given model to the Element.
   //   ///
   //   /// - parameter model: The model to be added.

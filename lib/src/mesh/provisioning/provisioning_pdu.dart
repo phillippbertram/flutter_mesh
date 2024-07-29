@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningPdu.swift#
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/ProvisioningPdu.swift#
 
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
@@ -239,8 +239,8 @@ sealed class ProvisioningResponse with _$ProvisioningResponse {
       ProvisioningPduType.random =>
         ProvisioningResponseRandom(key: pdu.data.suffix(from: 1)),
       ProvisioningPduType.complete => const ProvisioningResponseComplete(),
-      ProvisioningPduType.failed =>
-        const ProvisioningResponseFailed(error: "Provisioning failed."),
+      ProvisioningPduType.failed => const ProvisioningResponseFailed(
+          error: "PduType.failed - Provisioning failed"),
       _ => null,
     };
 
@@ -269,7 +269,7 @@ extension ProvisioningResponseX on ProvisioningResponse {
         ProvisioningPdu.fromPduType(ProvisioningPduType.random) + data,
       ProvisioningResponseComplete() =>
         ProvisioningPdu.fromPduType(ProvisioningPduType.complete),
-      ProvisioningResponseFailed(error: final error) =>
+      ProvisioningResponseFailed(error: _) =>
         ProvisioningPdu.fromPduType(ProvisioningPduType.failed) +
             Data.from([0]),
     };

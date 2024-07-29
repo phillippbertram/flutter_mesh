@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Oob.swift#L36
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/Oob.swift#L36
 
 // TODO: sealed class?
 
@@ -10,7 +10,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'oob.freezed.dart';
 
-// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/Oob.swift
+// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/Oob.swift
 
 class OobInformation {
   final Uint16 rawValue;

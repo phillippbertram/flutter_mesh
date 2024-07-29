@@ -1,26 +1,37 @@
-// TODO: JSON Serialization + Equatable
+import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
+
+import '../utils/crypto.dart';
+import 'node_features.dart';
+
+part 'node.p.keys.dart';
+part 'node.p.address.dart';
+part 'node.p.elements.dart';
+part 'node.p.provisioner.dart';
+
+// TODO: JSON Serialization + Equatable + Immutable(?)
 
 class Node {
   Node._({
     required this.uuid,
     required this.name,
     required this.primaryUnicastAddress,
-  });
-
-  factory Node.create({
-    required String uuid,
-    String? name,
-    required Address primaryUnicastAddress,
-  }) {
-    return Node._(
-      uuid: uuid,
-      name: name,
-      primaryUnicastAddress: primaryUnicastAddress,
-    );
-  }
+    required this.deviceKey,
+    required this.security,
+    required bool isConfigComplete,
+    required this.features,
+    required this.netKeys,
+    required this.appKeys,
+    required List<MeshElement> elements,
+    required this.minimumNumberOfReplayProtectionList,
+    required Uint8? ttl,
+  })  : _isConfigComplete = isConfigComplete,
+        _ttl = ttl,
+        _elements = elements;
 
   /// Initializes the Provisioner's Node.
   ///
@@ -28,16 +39,26 @@ class Node {
   ///
   /// - parameter provisioner: The Provisioner for which the node is added.
   /// - parameter address:     The unicast address to be assigned to the Node.
-  /// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20Model/Node.swift#L282
+  /// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Mesh%20Model/Node.swift#L282
   factory Node.forProvisioner(
     Provisioner provisioner, {
     required Address address,
   }) {
-    // TODO: set missing properties
-    return Node.create(
+    logger.f("MISSING IMPLEMENTATION: Node.forProvisioner");
+
+    return Node._(
       uuid: provisioner.uuid,
       name: provisioner.name,
       primaryUnicastAddress: address,
+      deviceKey: Crypto.generateRandom128BitKey(),
+      security: Security.secure,
+      ttl: null,
+      isConfigComplete: false,
+      features: const NodeFeaturesState.allNotSupported(),
+      minimumNumberOfReplayProtectionList: Address.maxUnicastAddress.value,
+      netKeys: [],
+      appKeys: [],
+      elements: [],
     );
   }
 
@@ -63,7 +84,7 @@ class Node {
     required Address address,
   }) {
     final node = Node._create(
-      uuid: device.uuid.str,
+      uuid: device.uuid.toUUID(),
       name: device.name,
       deviceKey: deviceKey,
       security: security,
@@ -76,7 +97,7 @@ class Node {
       elementCount,
       (index) => {
         node._addElement(
-          Element.create(location: Location.unknown),
+          MeshElement.create(location: Location.unknown),
         ),
       },
     );
@@ -84,114 +105,205 @@ class Node {
   }
 
   factory Node._create({
-    required String uuid,
+    required UUID uuid,
     String? name,
     required Data deviceKey,
     required Security security,
     required NetworkKey networkKey,
     required Address primaryUnicastAddress,
   }) {
-    final node = Node.create(
+    // If the Node as provisioned in an insecure way, lower the minimum security
+    // of the Network Key.
+    if (security == Security.insecure) {
+      networkKey.lowerSecurity();
+    }
+
+    // The updated flag is set to true if the Node was provisioned using
+    // a Network Key in Phase 2 (Using New Keys).
+    final updated = networkKey.phase == KeyRefreshPhase.usingNewKeys;
+    final netKeys = [NodeKey(index: networkKey.index, updated: updated)];
+
+    return Node._(
       uuid: uuid,
       name: name,
       primaryUnicastAddress: primaryUnicastAddress,
+      deviceKey: deviceKey,
+      isConfigComplete: false,
+      security: security,
+      netKeys: netKeys,
+      appKeys: [],
+      elements: [],
+      features: null,
+      minimumNumberOfReplayProtectionList: null,
+      ttl: null,
     );
-
-    logger.f("MISSING IMPLEMENTATION");
-    // TODO: set missing properties
-
-    // self.uuid = uuid
-    // self.name = name
-    // self.primaryUnicastAddress = address
-    // self.deviceKey = deviceKey
-    // self.security  = security
-    // // Composition Data were not obtained.
-    // self.isConfigComplete = false
-
-    // // The updated flag is set to true if the Node was provisioned using
-    // // a Network Key in Phase 2 (Using New Keys).
-    // let updated = networkKey.phase == .usingNewKeys
-    // self.netKeys  = [NodeKey(index: networkKey.index, updated: updated)]
-    // self.appKeys  = []
-    // self.elements = []
-
-    // // If the Node as provisioned in an insecure way, lower the minimum security
-    // // of the Network Key.
-    // if security == .insecure {
-    //     networkKey.lowerSecurity()
-    // }
-
-    return node;
   }
+
+  // TODO: internal
+  MeshNetwork? meshNetwork;
 
   final UUID uuid; // TODO: use the `Uuid` class
   final String? name;
 
-  final List<Element> elements = []; // TODO:
+  /// The 16-bit Company Identifier (CID) assigned by the Bluetooth SIG.
+  /// The value of this property is obtained from node composition data.
+  /// TODO: internal set
+  Uint16? companyIdentifier;
 
+  /// The 16-bit vendor-assigned Product Identifier (PID).
+  /// The value of this property is obtained from node composition data.
+  /// TODO: internal(set)
+  Uint16? productIdentifier;
+
+  /// The 16-bit vendor-assigned Version Identifier (VID).
+  /// The value of this property is obtained from node composition data.
+  Uint16? versionIdentifier;
+
+  /// The minimum number of Replay Protection List (RPL) entries for this
+  /// node. The value of this property is obtained from node composition
+  /// data.
+  Uint16? minimumNumberOfReplayProtectionList;
+
+  /// Node's features.
+  NodeFeaturesState? features;
+
+  /// Primary Unicast Address of the Node.
   Address primaryUnicastAddress;
 
+  /// 128-bit device key for this Node.
+  final Data? deviceKey;
+
+  /// The level of security for the subnet on which the node has been
+  /// originally provisioner.
+  final Security security;
+
+  /// An array of Node Network Key objects that include information
+  /// about the Network Keys known to this node.
+  List<NodeKey> netKeys; // TODO: internal set
+
+  /// An array of Node Application Key objects that include information
+  /// about the Application Keys known to this node.
+  final List<NodeKey> appKeys;
+
+  List<MeshElement> _elements = [];
+
+  /// An array of node's elements.
+  List<MeshElement> get elements => _elements;
+
+  /// Returns list of Network Keys known to this Node.
+  ///
+  /// - note: If the Node has been removed from the mesh network this
+  ///         property returns an empty array.
+  List<NetworkKey> get networkKeys {
+    return meshNetwork?.networkKeys.knownToNode(this) ?? [];
+  }
+
+  /// Sets the Network Keys to the Node.
+  ///
+  /// This method overwrites previous keys.
+  ///
+  /// - parameter networkKeys: The Network Keys to set.
   void setNetworkKeys(List<NetworkKey> networkKeys) {
-    logger.f("MISSING IMPLEMENTATION");
-    // TODO
+    setNetworkKeysWithIndexes(networkKeys.map((key) => key.index).toList());
   }
 
-  void setApplicationKeys(List<ApplicationKey> applicationKeys) {
-    logger.f("MISSING IMPLEMENTATION");
-    // TODO
-  }
-
-  // TODO: internal
-  /// Adds given list of Elements to the Node.
+  /// Sets the Network Keys with given indexes to the Node.
   ///
-  /// - parameter element: The list of Elements to be added.
-  void addElements(List<Element> elements) {
-    for (var element in elements) {
-      _addElement(element);
+  /// This method overwrites previous keys.
+  ///
+  /// - parameter networkKeyIndexes: The Network Key indexes to set.
+  void setNetworkKeysWithIndexes(List<KeyIndex> indexes) {
+    netKeys =
+        indexes.map((index) => NodeKey(index: index, updated: false)).sorted();
+  }
+
+  /// Returns list of Application Keys known to this Node.
+  ///
+  /// - note: If the Node has been removed from the mesh network this
+  ///         property returns an empty array.
+  List<ApplicationKey> get applicationKeys => [];
+
+  /// Sets the Application Keys to the Node.
+  /// This will overwrite the previous keys.
+  ///
+  /// - parameter applicationKeys: The Application Keys to set.
+  set applicationKeys(List<ApplicationKey> applicationKeys) {
+    logger.f("MISSING IMPLEMENTATION: Node.applicationKeys setter");
+    // TODO: set(applicationKeysWithIndexes: applicationKeys.map { $0.index })
+  }
+
+  /// The boolean value represents whether the Mesh Manager
+  /// has finished configuring this Node. The property is set to `true`
+  /// once a Mesh Manager is done completing this node's
+  /// configuration, otherwise it is set to `false`.
+  bool _isConfigComplete = false;
+  bool get isConfigComplete => _isConfigComplete;
+  set isConfigComplete(bool isConfigComplete) {
+    _isConfigComplete = isConfigComplete;
+    meshNetwork?.networkDidChange();
+  }
+
+  Uint8? _ttl;
+  Uint8? get ttl => _ttl;
+  set ttl(Uint8? ttl) {
+    _ttl = ttl;
+    meshNetwork?.networkDidChange();
+  }
+
+  /// The default Time To Live (TTL) value used when sending messages.
+  /// The TTL may only be set for a Provisioner's Node, or for a Node
+  /// that has not been added to a mesh network.
+  ///
+  /// Use ``ConfigDefaultTtlGet`` and ``ConfigDefaultTtlSet`` messages to
+  /// read or set the default TTL value of a remote Node.
+  Uint8? get defaultTtl => ttl;
+  set defaultTtl(Uint8? ttl) {
+    if (meshNetwork != null && !isProvisioner) {
+      logger.w(
+          "Default TTL may only be set for a Provisioner's Node. Use ConfigDefaultTtlSet(ttl) message to send new TTL value to a remote Node.");
+      return;
     }
-  }
 
-  // TODO: internal
-  /// Adds the given Element to the Node.
-  ///
-  /// - parameter element: The Element to be added.
-  void addElement(Element element) {
-    logger.f("MISSING IMPLEMENTATION");
-  }
-
-  void _addElement(Element element) {
-    final index = elements.length;
-    elements.add(element);
-    element.setParentNode(this);
-    element.index = index;
+    this.ttl = ttl;
   }
 }
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/267216832aaa19ba6ffa1b49720a34fd3c2f8072/Library/Mesh%20API/Node%2BAddress.swift
-extension NodeAddressX on Node {
-  /// Number of Node's Elements.
-  Uint8 get elementsCount {
-    return elements.length;
+// TODO: Codable
+class NodeKey with EquatableMixin implements Comparable<NodeKey> {
+  NodeKey({
+    required this.index,
+    required this.updated,
+  });
+
+  final KeyIndex index;
+  final bool updated;
+
+  @override
+  int compareTo(NodeKey other) {
+    return index.compareTo(other.index);
   }
 
-  /// The Unicast Address range assigned to all Elements of the Node.
-  ///
-  /// The address range is continous and starts with ``primaryUnicastAddress``
-  /// and ends with ``lastUnicastAddress``.
-  AddressRange get unicastAddressRange {
-    return AddressRange.fromAddress(
-      address: primaryUnicastAddress,
-      elementsCount: elementsCount,
-    );
-  }
-
-  /// Returns whether the Node has the given Unicast Address assigned to one
-  /// of its Elements.
-  ///
-  /// - parameter address: Address to check.
-  /// - returns: `True` if any of node's elements (or the node itself) was assigned
-  ///            the given address, `false` otherwise.
-  bool containsElementWithAddress(Address address) {
-    return unicastAddressRange.contains(address);
-  }
+  @override
+  List<Object?> get props => [index];
 }
+
+/// The state of a network or application key distributed to a mesh
+/// node by a Mesh Manager.
+// struct NodeKey: Codable {
+//     /// The Key index for this network key.
+//     public internal(set) var index: KeyIndex
+//     /// This flag contains value set to `false`, unless a Key Refresh
+//     /// procedure is in progress and the network has been successfully
+//     /// updated.
+//     public internal(set) var updated: Bool
+
+//     internal init(index: KeyIndex, updated: Bool) {
+//         self.index   = index
+//         self.updated = updated
+//     }
+
+//     internal init(of key: Key) {
+//         self.index   = key.index
+//         self.updated = false
+//     }
+// }

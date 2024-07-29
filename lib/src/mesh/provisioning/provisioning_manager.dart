@@ -1,4 +1,4 @@
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/ProvisioningManager.swift
 
 import 'package:async/async.dart';
 import 'package:flutter_mesh/src/logger/logger.dart';
@@ -7,13 +7,12 @@ import 'package:flutter_mesh/src/mesh/provisioning/provisioning_capabilities.dar
 import 'package:flutter_mesh/src/mesh/type_extensions/data.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../models/node.dart';
 import 'algorithms.dart';
 import 'provisioning_data.dart';
 
 // TODO: implement ChangeNotifier?
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningManager.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/ProvisioningManager.swift
 
 /// @see https://www.bluetooth.com/blog/provisioning-a-bluetooth-mesh-network-part-1/
 ///
@@ -247,10 +246,10 @@ class ProvisioningManager implements BearerDataDelegate {
 
     // Try generating Private and Public Keys. This may fail if the given
     // algorithm is not supported.
-    final keysKes = await _provisioningData!.generateKeys(algorithm: algorithm);
-    if (keysKes.isError) {
-      logger.e("Failed to generate keys: ${keysKes.asError!.error}");
-      return Result.error("Failed to generate keys: ${keysKes.asError!.error}");
+    final keysRes = await _provisioningData!.generateKeys(algorithm: algorithm);
+    if (keysRes.isError) {
+      logger.e("Failed to generate keys: ${keysRes.asError!.error}");
+      return Result.error("Failed to generate keys: ${keysRes.asError!.error}");
     }
 
     // If the device's Public Key was obtained OOB, we are now ready to
@@ -637,7 +636,6 @@ class ProvisioningManager implements BearerDataDelegate {
         final numberOfElements = _provisioningCapabilities!.numberOfElements;
         final networkKey = _provisioningData!.networkKey;
 
-        logger.f("IMPLEMENTATION MISSING - Create node and add to network");
         // ignore: unnecessary_this
         final unprovisionedDevice = this.unprovisionedDevice.copyWith(
               name: deviceName,
@@ -650,6 +648,10 @@ class ProvisioningManager implements BearerDataDelegate {
           security: security,
           elementCount: numberOfElements,
         );
+
+        // If the node was reprovisioned, remove the old one.
+        meshNetwork.removeNodeWithUuid(node.uuid);
+
         final addRes = meshNetwork.addNode(node);
         if (addRes.isError) {
           logger.e("Failed to add node to network: ${addRes.asError!.error}");

@@ -4,7 +4,7 @@ import 'provisioning_capabilities.dart';
 
 part 'provisioning_state.freezed.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Provisioning/ProvisioningState.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Provisioning/ProvisioningState.swift
 
 // TODO: use the described 5 phases from the documentation?
 // 1. Beaconing

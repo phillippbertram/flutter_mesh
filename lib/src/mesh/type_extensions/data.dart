@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import '../types.dart';
 
-// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Type%20Extensions/Data.swift
+// https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Type%20Extensions/Data.swift
 
 extension DataAccessX on Data {
   /// Converts the required number of bytes, starting from `offset`
@@ -47,5 +47,41 @@ extension DataAccessX on Data {
 
   Data suffix({required int from}) {
     return sublist(from);
+  }
+
+  Data combineWith(Data other) {
+    return [...this, ...other];
+  }
+
+  Uint8List toUint8List() {
+    if (this is Uint8List) {
+      return this as Uint8List;
+    }
+    return Uint8List.fromList(this);
+  }
+}
+
+// Extension on Uint8List for combining two Uint8List instances
+// extension Uint8ListExtension on Uint8List {
+//   Uint8List combineWith(Uint8List other) {
+//     return Uint8List.fromList([...this, ...other]);
+//   }
+// }
+
+abstract class DataUtils {
+  static Data? fromHex(String hex) {
+    if (hex.isEmpty) {
+      return null;
+    }
+    final bytes = <int>[];
+    for (var i = 0; i < hex.length; i += 2) {
+      final byte = hex.substring(i, i + 2);
+      final byteValue = int.tryParse(byte, radix: 16);
+      if (byteValue == null) {
+        return null;
+      }
+      bytes.add(byteValue);
+    }
+    return Data.from(bytes);
   }
 }

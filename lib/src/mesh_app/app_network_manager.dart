@@ -2,12 +2,13 @@
 
 import 'package:flutter_mesh/src/logger/logger.dart';
 import 'package:flutter_mesh/src/mesh/mesh.dart';
+import 'package:flutter_mesh/src/mesh_app/model_delegates/model_delegates.dart';
 import 'package:flutter_mesh/src/mesh_app/network_connection.dart';
 
 // TODO: implement ChangeNotifier?
 // TODO: provide via AppMeshNetworkManager.of(context)
 
-// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Example/Source/AppDelegate.swift
+// @see https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Example/Source/AppDelegate.swift
 class AppNetworkManager {
   AppNetworkManager._() {
     _initializeNetwork();
@@ -34,13 +35,7 @@ class AppNetworkManager {
 
     // }
 
-    final localProvisioner = Provisioner.create(
-      name: 'Local Provisioner',
-    );
-    meshNetworkManager.createNewMeshNetwork(
-      name: "Mesh Network",
-      provisioner: localProvisioner,
-    );
+    createNewMeshNetwork();
   }
 
   void save() {
@@ -50,7 +45,12 @@ class AppNetworkManager {
     }
   }
 
-// TODO:
+  void reload() {
+    // TODO:
+    meshNetworkManager.meshNetwork?.notifyListeners();
+  }
+
+  // TODO:
   void createNewMeshNetwork() {
     final localProvisioner = Provisioner.create(
       name: 'Local Provisioner',
@@ -90,13 +90,18 @@ class AppNetworkManager {
     //     let sceneSetupServer = SceneSetupServerDelegate(server: sceneServer)
 
     // TODO: create elements and models for this phone
-    final element0 = Element.create(
+    final element0 = MeshElement.create(
       name: "Primary Element",
       location: Location.first,
       models: [
-        // Model.createWithSigModelId(ModelIdentifier.genericOnOffServer,
-        //     delegate: GenericOnOffServerDelegate()),
-        // Model(sigModelId: .genericOnOffClientModelId, delegate: GenericOnOffClientDelegate()),
+        Model.createWithSigModelId(
+          ModelIdentifier.genericOnOffServer,
+          delegate: LoggingModelDelegate(),
+        ),
+        Model.createWithSigModelId(
+          ModelIdentifier.genericOnOffClient,
+          delegate: LoggingModelDelegate(),
+        ),
       ],
     );
 
@@ -110,7 +115,7 @@ class AppNetworkManager {
     // create new connection
     final connection = NetworkConnection(meshNetwork: meshNetwork);
     connection.setDataDelegate(meshNetworkManager);
-    meshNetworkManager.setTransmitter(connection);
+    meshNetworkManager.transmitter = connection;
     connection.open();
     // TODO: connection.logger = self
     this.connection = connection;

@@ -5,7 +5,7 @@ import '../bearer.dart';
 
 // TODO: @freezed?
 
-// TODO: https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/main/Library/Bearer/GATT/ProxyProtocolHandler.swift
+// TODO: https://github.com/NordicSemiconductor/IOS-nRF-Mesh-Library/blob/4.2.0/Library/Bearer/GATT/ProxyProtocolHandler.swift
 
 //  Segmentation and Reassembly (SAR)
 // @see https://www.bluetooth.com/mesh-feature-enhancements-summary/

@@ -1,5 +1,5 @@
 import 'package:flutter_mesh/src/mesh_app/app_network_manager.dart';
-import 'package:flutter_mesh/src/screens/network/configuration/node_config_page.dart';
+import 'package:flutter_mesh/src/screens/network/node_config/node_config_page.dart';
 import 'package:flutter_mesh/src/screens/network/provisioning/device_scanner_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mesh/src/ui/ui.dart';
@@ -35,62 +35,78 @@ class NetworkPage extends StatelessWidget {
 
     // TODO: group nodes?
 
-    return ListView.builder(
-      itemCount: nodes.length,
-      itemBuilder: (context, index) {
-        final node = network.nodes[index];
-        final elements = node.elements.length;
-        final models = node.elements.fold<int>(
-          0,
-          (previousValue, element) => previousValue + element.models.length,
-        );
-        return ListTile(
-          tileColor: Theme.of(context).hoverColor,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => NodeConfigPage(node: node),
-              ),
-            );
-          },
-          title: Text(
-            node.name ?? "Node ${node.uuid}",
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Table(
-              defaultColumnWidth: const IntrinsicColumnWidth(),
-              children: [
-                TableRow(
-                  children: [
-                    const Text("UUID"),
-                    Text(node.uuid),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    const Text("Address"),
-                    Text("${node.primaryUnicastAddress}"),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    const Text("Elements"),
-                    Text("$elements"),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    const Text("Models"),
-                    Text("$models"),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
+    return RefreshIndicator(
+      onRefresh: () async {
+        appNetworkManager.reload();
       },
+      child: ListenableBuilder(
+          listenable: appNetworkManager.meshNetworkManager.meshNetwork!,
+          builder: (context, snapshot) {
+            return ListView.builder(
+              itemCount: nodes.length,
+              itemBuilder: (context, index) {
+                final node = network.nodes[index];
+                final elements = node.elements.length;
+                final models = node.elements.fold<int>(
+                  0,
+                  (previousValue, element) =>
+                      previousValue + element.models.length,
+                );
+                return ListTile(
+                  tileColor: Theme.of(context).hoverColor,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => NodeConfigPage(node: node),
+                      ),
+                    );
+                  },
+                  title: Text(
+                    node.name ?? "Node ${node.uuid}",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Table(
+                      defaultColumnWidth: const IntrinsicColumnWidth(),
+                      children: [
+                        TableRow(
+                          children: [
+                            const Text("Name"),
+                            Text(node.name ?? "n/a"),
+                          ],
+                        ),
+                        TableRow(
+                          children: [
+                            const Text("UUID"),
+                            Text(node.uuid.uuidString),
+                          ],
+                        ),
+                        TableRow(
+                          children: [
+                            const Text("Address"),
+                            Text("${node.primaryUnicastAddress}"),
+                          ],
+                        ),
+                        TableRow(
+                          children: [
+                            const Text("Elements"),
+                            Text("$elements"),
+                          ],
+                        ),
+                        TableRow(
+                          children: [
+                            const Text("Models"),
+                            Text("$models"),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
     );
   }
 
